@@ -7,7 +7,10 @@
 // Idempoten: akun yang sudah ada tidak dibuat ulang dan passwordnya TIDAK diubah
 // (kecuali memakai --reset-password). Peran selalu dipastikan sesuai.
 
+import { loadEnv } from "./load-env.mjs";
 import { createClient } from "@supabase/supabase-js";
+
+loadEnv();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

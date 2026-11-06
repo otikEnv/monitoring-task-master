@@ -287,7 +287,7 @@
         "id": "6",
         "title": "Adapter penyedia repo (GitHub, GitLab, Bitbucket)",
         "description": "Satu adapter per penyedia dengan kontrak sama: ambil file mentah dari URL, branch, dan path.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1",
@@ -300,52 +300,58 @@
             "id": 1,
             "title": "Definisikan kontrak adapter dan tipe galat",
             "description": "Registry adapter berdasarkan penyedia.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "6"
+            "parentId": "6",
+            "updatedAt": "2026-11-06T16:38:59.852Z"
           },
           {
             "id": 2,
             "title": "Adapter GitHub",
             "description": "Contents API, ETag, waktu commit terakhir.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "6"
+            "parentId": "6",
+            "updatedAt": "2026-11-06T16:39:18.603Z"
           },
           {
             "id": 3,
             "title": "Adapter GitLab",
             "description": "Raw file endpoint; dukung base URL self-hosted.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "6"
+            "parentId": "6",
+            "updatedAt": "2026-11-06T16:39:37.182Z"
           },
           {
             "id": 4,
             "title": "Adapter Bitbucket",
             "description": "Endpoint src dengan branch dan path.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "6"
+            "parentId": "6",
+            "updatedAt": "2026-11-06T16:39:56.035Z"
           },
           {
             "id": 5,
             "title": "Parser URL repo per penyedia",
             "description": "Ekstrak owner/repo, workspace/repo, atau path proyek.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "6"
+            "parentId": "6",
+            "updatedAt": "2026-11-06T16:40:14.890Z"
           },
           {
             "id": 6,
             "title": "Uji adapter",
             "description": "Respons tiruan dan pemetaan galat.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "6"
+            "parentId": "6",
+            "updatedAt": "2026-11-06T16:40:33.562Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T16:40:33.562Z"
       },
       {
         "id": "7",
@@ -888,9 +894,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T16:31:01.315Z",
+      "lastModified": "2026-11-06T16:40:33.563Z",
       "taskCount": 21,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]

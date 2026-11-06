@@ -8,8 +8,11 @@
 // Token: dibaca dari .env.local lewat nama variabel di "tokenEnv". Token tidak pernah dicetak.
 // Keluaran penuh (mentah): .aggregate-out/ (tidak di-commit).
 
+import { loadEnv } from "./load-env.mjs";
 import fs from "node:fs";
 import path from "node:path";
+
+loadEnv();
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const CONFIG = process.env.AGG_CONFIG ?? path.join(ROOT, "scripts", "aggregate.sources.json");
