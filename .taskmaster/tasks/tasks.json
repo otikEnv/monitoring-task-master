@@ -3,449 +3,440 @@
     "tasks": [
       {
         "id": "1",
-        "title": "Project setup: Next.js, Supabase client, env, Taskmaster",
-        "description": "Scaffold the Next.js app, wire Supabase client helpers, prepare environment variables and install Taskmaster.",
-        "status": "in-progress",
+        "title": "Fase 0: Validasi data - script agregator tasks.json",
+        "description": "Script yang menarik tasks.json dari semua repo yang dipantau ke satu file untuk memvalidasi sumber data.",
+        "status": "pending",
         "priority": "high",
         "dependencies": [],
-        "details": "Foundation for everything else. Stack: Next.js (App Router, TypeScript, Tailwind, src dir) deployed on Vercel, Supabase for database and Auth. Supabase helpers live in src/lib/supabase (client.ts for browser with anon key, server.ts for Server Components/Route Handlers with user session, admin.ts with service role and `server-only`). Env vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, TOKEN_ENCRYPTION_KEY (AES-256-GCM, 32 byte base64). Only .env.example is committed.",
-        "testStrategy": "`npm run dev` returns HTTP 200; `tsc --noEmit` passes; Supabase REST (service role) and Auth health return 200; .env.local is git-ignored.",
+        "details": "PRD Rencana rilis, Fase 0. Script Node (scripts/aggregate.mjs) membaca daftar sumber (penyedia, URL repo, branch, path, token dari env), mengambil file lewat API penyedia, mengenali dua bentuk file ({ master: { tasks } } dan { tasks }), lalu mencetak jumlah task per aplikasi, per tag, dan per status. Bukti awal: tasks.json repo echoapp (branch stg) terbaca lewat GitHub API dengan 200 OK, sekitar 660 KB. Galat harus jelas, bukan dianggap 0 task. Hasilnya juga dipakai sebagai fixture uji normalizer.",
+        "testStrategy": "Dianggap selesai bila semua repo yang didaftarkan terbaca dan jumlah task per aplikasi sesuai harapan.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Scaffold Next.js app",
-            "description": "create-next-app with TypeScript, Tailwind, ESLint, App Router, src dir, Turbopack.",
-            "status": "done",
+            "title": "Tentukan daftar sumber untuk script",
+            "description": "File konfigurasi lokal: penyedia, URL repo, branch, path file, nama env untuk token. Token tidak ditulis di file.",
+            "status": "pending",
             "details": "",
             "parentId": 1
           },
           {
             "id": 2,
-            "title": "Install Supabase packages and client helpers",
-            "description": "@supabase/supabase-js, @supabase/ssr, server-only; create client/server/admin helpers.",
-            "status": "done",
+            "title": "Ambil dan parse file tiap repo",
+            "description": "GitHub dulu (GET /repos/{owner}/{repo}/contents/{path}?ref={branch} dengan Accept: application/vnd.github.raw+json), lalu GitLab dan Bitbucket.",
+            "status": "pending",
             "details": "",
             "parentId": 1
           },
           {
             "id": 3,
-            "title": "Create env template and local env",
-            "description": "Add .env.example, .env.local with generated TOKEN_ENCRYPTION_KEY; keep .env* ignored except the example.",
-            "status": "done",
-            "details": "",
-            "parentId": 1
-          },
-          {
-            "id": 4,
-            "title": "Verify Supabase connectivity",
-            "description": "Check URL, anon key, service role key and Auth health without printing secrets.",
-            "status": "done",
-            "details": "",
-            "parentId": 1
-          },
-          {
-            "id": 5,
-            "title": "Install Taskmaster in the project",
-            "description": "npm install -D task-master-ai (v0.43.1); run via npx task-master.",
-            "status": "done",
-            "details": "",
-            "parentId": 1
-          },
-          {
-            "id": 6,
-            "title": "Connect GitHub remote and push",
-            "description": "Remote origin https://github.com/otikEnv/monitoring-task-master.git, branch main.",
-            "status": "done",
-            "details": "",
-            "parentId": 1
-          },
-          {
-            "id": 7,
-            "title": "Disable public sign-up in Supabase Auth",
-            "description": "Dashboard > Authentication > Sign In / Providers > turn off 'Allow new users to sign up'. Currently disable_signup=false, which violates the PRD.",
-            "status": "pending",
-            "details": "",
-            "parentId": 1
-          },
-          {
-            "id": 8,
-            "title": "Upgrade local Node to 22 LTS",
-            "description": "Node 20 is deprecated for @supabase/supabase-js; set engines in package.json.",
+            "title": "Cetak ringkasan dan simpan fixture",
+            "description": "Jumlah task per aplikasi, tag, dan status; simpan contoh yang sudah disanitasi ke tests/fixtures.",
             "status": "pending",
             "details": "",
             "parentId": 1
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "2",
-        "title": "Phase 0: validation script to pull tasks.json from all repos",
-        "description": "Standalone aggregator script that fetches tasks.json from every monitored repo into one file to validate data shapes and counts.",
-        "status": "pending",
-        "priority": "medium",
-        "dependencies": [
-          "1"
-        ],
-        "details": "Node script (scripts/aggregate.mjs) reading a local list of sources (provider, repo URL, branch, path, token from env). Fetches via provider API, parses both shapes ({ master: { tasks } } and { tasks }), prints task count per app and per status. Proven so far: echoapp branch stg returns 200 OK, about 660 KB. Output is also the fixture set for normalizer tests.",
-        "testStrategy": "Run against all registered repos: every repo is read and per-app task counts match expectations; failures print a clear error, never 0 tasks.",
+        "title": "Setup proyek: Next.js, Supabase, environment, Taskmaster",
+        "description": "Fondasi MVP: aplikasi Next.js, klien Supabase, variabel environment, dan repo.",
+        "status": "in-progress",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD Stack: Next.js, database Supabase, deploy di Vercel. Helper Supabase di src/lib/supabase (client.ts untuk browser dengan anon key, server.ts untuk Server Component dan Route Handler dengan sesi pengguna, admin.ts dengan service role dan server-only). Env: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, TOKEN_ENCRYPTION_KEY (AES-256-GCM, 32 byte base64). Hanya .env.example yang di-commit.",
+        "testStrategy": "npm run dev menjawab HTTP 200; tsc --noEmit lolos; REST dan Auth Supabase menjawab 200; .env.local tidak ikut git.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Define sources config for the script",
-            "description": "Local JSON/ENV list with provider, URL, branch, path, token env name.",
-            "status": "pending",
+            "title": "Scaffold aplikasi Next.js",
+            "description": "TypeScript, Tailwind, ESLint, App Router, folder src, Turbopack.",
+            "status": "done",
             "details": "",
             "parentId": 2
           },
           {
             "id": 2,
-            "title": "Fetch and parse each file",
-            "description": "Support GitHub first, then GitLab and Bitbucket; handle both tasks.json shapes.",
-            "status": "pending",
+            "title": "Pasang paket Supabase dan helper klien",
+            "description": "@supabase/supabase-js, @supabase/ssr, server-only; buat client, server, dan admin helper.",
+            "status": "done",
             "details": "",
             "parentId": 2
           },
           {
             "id": 3,
-            "title": "Print summary and save fixtures",
-            "description": "Counts per app/tag/status; store sanitized samples under tests/fixtures.",
+            "title": "Siapkan template env dan env lokal",
+            "description": ".env.example, .env.local dengan TOKEN_ENCRYPTION_KEY hasil generate.",
+            "status": "done",
+            "details": "",
+            "parentId": 2
+          },
+          {
+            "id": 4,
+            "title": "Uji koneksi ke Supabase",
+            "description": "URL, anon key, service role key, dan Auth health, tanpa mencetak rahasia.",
+            "status": "done",
+            "details": "",
+            "parentId": 2
+          },
+          {
+            "id": 5,
+            "title": "Pasang Taskmaster dan hubungkan repo GitHub",
+            "description": "task-master-ai sebagai devDependency; remote origin dan branch main.",
+            "status": "done",
+            "details": "",
+            "parentId": 2
+          },
+          {
+            "id": 6,
+            "title": "Matikan pendaftaran publik di Supabase Auth",
+            "description": "Dashboard > Authentication > Sign In / Providers > matikan 'Allow new users to sign up'. Saat ini disable_signup masih false, bertentangan dengan PRD.",
+            "status": "pending",
+            "details": "",
+            "parentId": 2
+          },
+          {
+            "id": 7,
+            "title": "Buat proyek Vercel dan isi environment",
+            "description": "Hubungkan repo GitHub, isi semua env di Vercel (tidak di-commit).",
             "status": "pending",
             "details": "",
             "parentId": 2
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "3",
-        "title": "Database schema, migrations, and Row Level Security",
-        "description": "Create Supabase migrations for sources, tasks, snapshots, and profiles with RLS.",
+        "title": "Skema database dan Row Level Security",
+        "description": "Migrasi SQL untuk empat entitas (sumber, task, snapshot, pengguna) beserta RLS.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
-          "1"
+          "2"
         ],
-        "details": "Tables: sources (id, name, provider, repo_url, branch, file_path, token_encrypted, is_active, last_sync_status, last_synced_at, last_error, etag, last_commit_at), tasks (source_id, tag, task_id, title, description, status, priority, dependencies jsonb, details, test_strategy, subtasks jsonb; primary key (source_id, tag, task_id)), snapshots (id, source_id, tag, taken_at, counts per status, total, percent_done), profiles (user_id, role admin|viewer). Task IDs are only unique per (source, tag). RLS: authenticated users can read tasks, snapshots, and sources EXCEPT token column; only admin can write sources; sync writes through service role. Never expose token_encrypted to clients (column privileges or a view without that column).",
-        "testStrategy": "SQL tests: viewer cannot insert/update sources, no client role can select token_encrypted, anon reads nothing, composite key allows same task_id under different tags/sources.",
+        "details": "PRD Model data. Sumber: nama aplikasi, penyedia, URL repo, branch, path file, token terenkripsi, aktif atau tidak, status dan waktu sinkron terakhir, pesan galat (tambahan: etag, waktu commit terakhir file, tanggal kedaluwarsa token). Task: sumber, tag, ID task, judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status; kunci gabungan (sumber, tag, ID) karena ID hanya unik dalam satu kombinasi sumber dan tag. Snapshot: waktu, sumber, tag, jumlah task per status (pending, in-progress, review, done, deferred, cancelled). Pengguna: Supabase Auth dengan peran admin atau viewer (tabel profiles). RLS: pengguna login boleh membaca task dan snapshot; hanya admin yang menulis sumber; kolom token tidak terbaca dari klien; penulisan hasil sinkron lewat service role.",
+        "testStrategy": "Uji SQL: viewer tidak bisa menulis sumber; tidak ada peran klien yang bisa membaca token; anon tidak membaca apa pun; ID task yang sama boleh ada di tag atau sumber berbeda.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Write migration for sources and profiles",
-            "description": "Include role enum and provider enum.",
+            "title": "Migrasi tabel sources dan profiles",
+            "description": "Enum penyedia dan peran.",
             "status": "pending",
             "details": "",
             "parentId": 3
           },
           {
             "id": 2,
-            "title": "Write migration for tasks and snapshots",
-            "description": "Composite primary key, indexes for filters (status, priority, tag, source).",
+            "title": "Migrasi tabel tasks dan snapshots",
+            "description": "Kunci gabungan dan indeks untuk filter aplikasi, tag, status, prioritas.",
             "status": "pending",
             "details": "",
             "parentId": 3
           },
           {
             "id": 3,
-            "title": "Write RLS policies",
-            "description": "Authenticated read, admin-only source writes, hide token column.",
+            "title": "Tulis kebijakan RLS",
+            "description": "Baca untuk pengguna login, tulis sumber hanya admin.",
             "status": "pending",
             "details": "",
             "parentId": 3
           },
           {
             "id": 4,
-            "title": "Create a public view or column grants for sources without the token",
-            "description": "Used by the client for source lists.",
+            "title": "Sembunyikan kolom token dari klien",
+            "description": "View atau column privileges untuk daftar sumber tanpa token.",
             "status": "pending",
             "details": "",
             "parentId": 3
           },
           {
             "id": 5,
-            "title": "Apply migrations to the Supabase project",
-            "description": "Via Supabase CLI or SQL editor; document the process.",
+            "title": "Terapkan migrasi ke proyek Supabase",
+            "description": "Lewat Supabase CLI atau SQL editor; dokumentasikan caranya.",
             "status": "pending",
             "details": "",
             "parentId": 3
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "4",
-        "title": "Authentication: login, seeder, and route protection",
-        "description": "Email/password login with Supabase Auth, seeded accounts, no public registration, and protected routes.",
+        "title": "Login, seeder akun, dan peran admin/viewer",
+        "description": "Login email dan password lewat Supabase Auth tanpa pendaftaran publik; akun dibuat lewat seeder.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
           "3"
         ],
-        "details": "Login page with email and password via Supabase Auth. No sign-up page. A seeder script (service role) creates the initial admin and viewer accounts with default passwords and inserts their profiles rows; users should change the default password after first login. Protect all routes except /login using the Next.js request interception convention of this Next version (check node_modules/next/dist/docs, middleware may be renamed to proxy). Enforce admin role server-side as well as in the UI.",
-        "testStrategy": "E2E: unauthenticated visit redirects to /login; wrong password shows an error; viewer cannot open source settings or call admin endpoints (403); admin can.",
+        "details": "PRD halaman Login dan bagian Keamanan. Tidak ada halaman pendaftaran. Seeder (service role) membuat admin awal dan akun lain dengan email dan password default serta baris profiles dengan peran; password awal sebaiknya diganti setelah login pertama. Semua halaman kecuali /login memerlukan login; periksa konvensi intersepsi request di versi Next.js ini (middleware bisa bernama proxy, lihat node_modules/next/dist/docs). Peran admin harus ditegakkan di sisi server, bukan hanya di UI. Tidak ada halaman manajemen akun di MVP.",
+        "testStrategy": "Pengunjung tanpa login diarahkan ke /login; password salah menampilkan galat; viewer ditolak (403) di halaman dan endpoint admin; admin berhasil.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Build login page",
-            "description": "Form with email and password, error states, Indonesian copy.",
+            "title": "Halaman login",
+            "description": "Form email dan password, status galat.",
             "status": "pending",
             "details": "",
             "parentId": 4
           },
           {
             "id": 2,
-            "title": "Create seeder script",
-            "description": "Idempotent creation of admin and viewer users plus profiles.",
+            "title": "Script seeder idempoten",
+            "description": "Buat akun admin dan akun lain beserta profiles.",
             "status": "pending",
             "details": "",
             "parentId": 4
           },
           {
             "id": 3,
-            "title": "Add session refresh and route protection",
-            "description": "Follow Next.js convention for this version.",
+            "title": "Proteksi rute dan penyegaran sesi",
+            "description": "Semua rute kecuali /login.",
             "status": "pending",
             "details": "",
             "parentId": 4
           },
           {
             "id": 4,
-            "title": "Add role helper for server code",
-            "description": "requireUser() and requireAdmin() used by pages and route handlers.",
+            "title": "Helper peran di server",
+            "description": "requireUser() dan requireAdmin() untuk halaman dan route handler.",
             "status": "pending",
             "details": "",
             "parentId": 4
           },
           {
             "id": 5,
-            "title": "Add password change page",
-            "description": "Allow changing the default password after first login.",
+            "title": "Ganti password setelah login pertama",
+            "description": "Cara sederhana mengganti password default.",
             "status": "pending",
             "details": "",
             "parentId": 4
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "5",
-        "title": "Token encryption module",
-        "description": "Encrypt and decrypt repository tokens with AES-256-GCM using TOKEN_ENCRYPTION_KEY.",
+        "title": "Enkripsi token repository",
+        "description": "Modul enkripsi AES-256-GCM untuk token akses, kunci dari environment.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
-          "1"
+          "2"
         ],
-        "details": "Server-only module src/lib/crypto.ts. Format: version.iv.ciphertext.tag in base64. Key from env (32 bytes base64); fail fast if missing or wrong length. Token is only decrypted inside sync and test-connection code, never returned to the browser, never logged. Document key rotation: losing the key means tokens must be re-entered.",
-        "testStrategy": "Unit tests: round trip, tampered ciphertext rejected, wrong key rejected, different IV per encryption, missing key throws.",
+        "details": "PRD Keamanan: token disimpan terenkripsi (enkripsi di aplikasi dengan kunci di environment Vercel). Modul server-only src/lib/crypto.ts, format versi.iv.ciphertext.tag base64, IV acak per enkripsi, kunci 32 byte base64 dari TOKEN_ENCRYPTION_KEY; gagal cepat bila kunci tidak ada atau salah panjang. Token hanya didekripsi di kode sinkronisasi dan uji koneksi; tidak pernah dikirim ke browser atau dicatat di log. Dokumentasikan: bila kunci hilang, token harus diisi ulang.",
+        "testStrategy": "Round trip berhasil; ciphertext yang diubah ditolak; kunci salah ditolak; IV berbeda tiap enkripsi; kunci kosong melempar galat.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Implement encrypt/decrypt",
-            "description": "Node crypto AES-256-GCM with random 12 byte IV.",
+            "title": "Implementasi enkripsi dan dekripsi",
+            "description": "AES-256-GCM dengan IV acak 12 byte.",
             "status": "pending",
             "details": "",
             "parentId": 5
           },
           {
             "id": 2,
-            "title": "Validate key on load",
-            "description": "Length and encoding checks with clear error.",
+            "title": "Validasi kunci saat dimuat",
+            "description": "Panjang dan encoding, pesan galat jelas.",
             "status": "pending",
             "details": "",
             "parentId": 5
           },
           {
             "id": 3,
-            "title": "Write unit tests",
-            "description": "Round trip, tamper, wrong key.",
+            "title": "Unit test",
+            "description": "Round trip, manipulasi data, kunci salah.",
             "status": "pending",
             "details": "",
             "parentId": 5
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "6",
-        "title": "Repository provider adapters (GitHub, GitLab, Bitbucket)",
-        "description": "One adapter per provider with the same contract: fetch raw file from URL, branch, and path.",
+        "title": "Adapter penyedia repo (GitHub, GitLab, Bitbucket)",
+        "description": "Satu adapter per penyedia dengan kontrak sama: ambil file mentah dari URL, branch, dan path.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
+          "1",
           "5"
         ],
-        "details": "Interface: fetchFile({ repoUrl, branch, path, token, etag? }) => { status: 'ok' | 'not_modified', content, etag, lastCommitAt } or a typed error (unauthorized, forbidden, not_found, rate_limited, token_expired, network). GitHub: GET /repos/{owner}/{repo}/contents/{path}?ref={branch} with Accept: application/vnd.github.raw+json. GitLab: GET /projects/:id/repository/files/:path/raw?ref=. Bitbucket: GET /2.0/repositories/{workspace}/{repo}/src/{branch}/{path}. Support conditional requests (If-None-Match) where available. Also fetch last commit time of the file (mitigates stale-commit risk). Map expiry/401 to a clear token error rather than empty data. Provider list is extensible without touching pages.",
-        "testStrategy": "Mock HTTP tests per adapter for 200, 304, 401, 403, 404, 429, network failure; one live smoke test against echoapp (stg) with a read-only token.",
+        "details": "PRD Sumber data dan arsitektur. Kontrak: fetchFile({ repoUrl, branch, path, token, etag? }) mengembalikan { status: ok | not_modified, content, etag, lastCommitAt } atau galat bertipe (tidak berwenang, dilarang, tidak ditemukan, rate limit, token kedaluwarsa, jaringan). GitHub memakai contents API dengan header Accept raw; GitLab repository files raw; Bitbucket src. Permintaan bersyarat (ETag) bila penyedia mendukung. Ambil juga waktu commit terakhir file agar terlihat bila tasks.json belum di-commit (mitigasi risiko PRD). Penyedia lain ditambah tanpa mengubah halaman. Token baca-saja (GitHub: fine-grained Contents: Read-only); token classic scope repo dihindari.",
+        "testStrategy": "Uji dengan HTTP tiruan untuk 200, 304, 401, 403, 404, 429, dan jaringan putus; satu uji nyata ke echoapp (stg) dengan token baca-saja.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Define adapter contract and error types",
-            "description": "Shared types and a registry keyed by provider.",
+            "title": "Definisikan kontrak adapter dan tipe galat",
+            "description": "Registry adapter berdasarkan penyedia.",
             "status": "pending",
             "details": "",
             "parentId": 6
           },
           {
             "id": 2,
-            "title": "Implement GitHub adapter",
-            "description": "Contents API with raw accept header, ETag, last commit lookup.",
+            "title": "Adapter GitHub",
+            "description": "Contents API, ETag, waktu commit terakhir.",
             "status": "pending",
             "details": "",
             "parentId": 6
           },
           {
             "id": 3,
-            "title": "Implement GitLab adapter",
-            "description": "Repository files raw endpoint, support self-hosted base URL.",
+            "title": "Adapter GitLab",
+            "description": "Raw file endpoint; dukung base URL self-hosted.",
             "status": "pending",
             "details": "",
             "parentId": 6
           },
           {
             "id": 4,
-            "title": "Implement Bitbucket adapter",
-            "description": "src endpoint with branch and path.",
+            "title": "Adapter Bitbucket",
+            "description": "Endpoint src dengan branch dan path.",
             "status": "pending",
             "details": "",
             "parentId": 6
           },
           {
             "id": 5,
-            "title": "Parse repo URL per provider",
-            "description": "Extract owner/repo, workspace/repo, or project path.",
+            "title": "Parser URL repo per penyedia",
+            "description": "Ekstrak owner/repo, workspace/repo, atau path proyek.",
             "status": "pending",
             "details": "",
             "parentId": 6
           },
           {
             "id": 6,
-            "title": "Write adapter tests",
-            "description": "Mocked responses and error mapping.",
+            "title": "Uji adapter",
+            "description": "Respons tiruan dan pemetaan galat.",
             "status": "pending",
             "details": "",
             "parentId": 6
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "7",
-        "title": "tasks.json normalizer",
-        "description": "Parse and normalize Taskmaster files in both shapes into tag, task, and subtask records.",
+        "title": "Normalizer tasks.json (dua bentuk file)",
+        "description": "Membaca dan menormalisasi file Taskmaster bentuk per-tag dan bentuk lama menjadi baris task.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
-          "2",
-          "3"
+          "1"
         ],
-        "details": "Accept { master: { tasks: [...] }, other-tag: {...} } and legacy { tasks: [...] }. Legacy files get tag 'master'. Output rows keyed by (tag, task_id) with title, description, status, priority, dependencies, details, testStrategy, subtasks (with status). Unknown statuses are preserved but counted under an 'other' bucket; missing fields default safely. A file that matches neither shape is a failed source with a clear error, never 0 tasks. Provide count-by-status helper for snapshots (pending, in-progress, review, done, deferred, cancelled).",
-        "testStrategy": "Unit tests using fixtures from Phase 0: both shapes, multi-tag, empty tasks array (valid, 0 tasks), invalid JSON, wrong shape, numeric vs string ids, large 660 KB file performance.",
+        "details": "PRD Model data. Kenali { master: { tasks: [...] }, tag-lain: {...} } dan { tasks: [...] } (tag diberi nama master). Hasilkan baris per (tag, ID task) berisi judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status. Bentuk yang tidak cocok ditandai sumber gagal dengan pesan jelas, bukan 0 task; array task kosong yang valid tetap berarti 0 task. Sediakan fungsi hitung jumlah per status (pending, in-progress, review, done, deferred, cancelled) dan persentase selesai untuk snapshot dan dashboard.",
+        "testStrategy": "Uji dengan fixture Fase 0: kedua bentuk, banyak tag, tasks kosong, JSON rusak, bentuk salah, ID angka dan string, file 660 KB.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Detect file shape",
-            "description": "Per-tag object versus top-level tasks array.",
+            "title": "Deteksi bentuk file",
+            "description": "Per-tag atau { tasks }.",
             "status": "pending",
             "details": "",
             "parentId": 7
           },
           {
             "id": 2,
-            "title": "Normalize task and subtask fields",
-            "description": "Stringify ids, default missing fields.",
+            "title": "Normalisasi field task dan subtask",
+            "description": "ID jadi string, default aman untuk field kosong.",
             "status": "pending",
             "details": "",
             "parentId": 7
           },
           {
             "id": 3,
-            "title": "Compute status counts and percent done",
-            "description": "Reusable for snapshots and dashboard.",
+            "title": "Hitung jumlah per status dan persentase selesai",
+            "description": "Dipakai snapshot dan dashboard.",
             "status": "pending",
             "details": "",
             "parentId": 7
           },
           {
             "id": 4,
-            "title": "Write normalizer tests with fixtures",
-            "description": "Include edge and failure cases.",
+            "title": "Uji dengan fixture",
+            "description": "Termasuk kasus gagal.",
             "status": "pending",
             "details": "",
             "parentId": 7
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "8",
-        "title": "Sync service and per-source route handler",
-        "description": "Route handler that syncs one source: fetch, normalize, upsert tasks, write snapshot, record status.",
+        "title": "Sinkronisasi per sumber (route handler dan snapshot)",
+        "description": "Route handler Next.js yang menyinkronkan satu sumber: ambil, normalisasi, simpan, catat snapshot.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
+          "3",
           "4",
           "6",
           "7"
         ],
-        "details": "POST /api/sync/[sourceId] (admin or authenticated per decision; at least logged in). One request per source to stay under Vercel function time limits; set maxDuration. Steps: load source with service role, decrypt token, call adapter with stored ETag, on 304 only update last_synced_at, on 200 normalize and replace that source's tasks in a transaction, insert a snapshot per tag, store new ETag and last commit time. On failure keep previous tasks, set last_sync_status=failed, last_error, keep last_synced_at of the last success. Never return the token. Return a per-source result JSON.",
-        "testStrategy": "Integration tests with a mocked adapter: success writes tasks and snapshot; 304 writes no snapshot or tasks; failure keeps old data and flags stale; two sources failing independently; token never present in response.",
+        "details": "PRD Sumber data, Performa, Keandalan. Satu permintaan server per sumber agar tidak melewati batas waktu fungsi Vercel (atur maxDuration). Langkah: baca sumber dengan service role, dekripsi token, panggil adapter dengan ETag tersimpan; bila not_modified hanya perbarui waktu sinkron; bila ok normalisasi, ganti task milik sumber itu dalam satu transaksi, catat satu snapshot jumlah task per status per tag, simpan ETag dan waktu commit. Bila gagal: pertahankan data terakhir yang berhasil, set status gagal dan pesan galat. Satu sumber gagal tidak menggagalkan yang lain. Respons berisi hasil per sumber dan tidak pernah memuat token. Hanya pengguna login yang boleh memanggil.",
+        "testStrategy": "Integrasi dengan adapter tiruan: sukses menulis task dan snapshot; not_modified tidak menulis snapshot; gagal mempertahankan data lama dan menandai usang; dua sumber gagal terpisah; token tidak ada di respons.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Implement sync core function",
-            "description": "Pure function: source id in, result out; used by route and future cron.",
+            "title": "Fungsi inti sinkronisasi",
+            "description": "Murni: id sumber masuk, hasil keluar; dipakai route dan cron Tahap 2.",
             "status": "pending",
             "details": "",
             "parentId": 8
           },
           {
             "id": 2,
-            "title": "Upsert tasks transactionally",
-            "description": "Delete missing tasks of that source/tag and upsert the rest.",
+            "title": "Simpan task dalam transaksi",
+            "description": "Hapus yang hilang dari file, upsert sisanya.",
             "status": "pending",
             "details": "",
             "parentId": 8
           },
           {
             "id": 3,
-            "title": "Write snapshots",
-            "description": "One per tag per successful change.",
+            "title": "Catat snapshot",
+            "description": "Satu per tag pada sinkronisasi berhasil.",
             "status": "pending",
             "details": "",
             "parentId": 8
           },
           {
             "id": 4,
-            "title": "Record success and failure state",
-            "description": "Status, error message, ETag, timestamps.",
+            "title": "Catat status sukses dan gagal",
+            "description": "Status, pesan galat, ETag, waktu sinkron, waktu commit file.",
             "status": "pending",
             "details": "",
             "parentId": 8
           },
           {
             "id": 5,
-            "title": "Create route handler with auth and maxDuration",
-            "description": "Reject unauthenticated callers.",
+            "title": "Route handler dengan autentikasi dan maxDuration",
+            "description": "Tolak pemanggil tanpa login.",
             "status": "pending",
             "details": "",
             "parentId": 8
           },
           {
             "id": 6,
-            "title": "Write integration tests",
-            "description": "Success, not modified, failure.",
+            "title": "Uji integrasi",
+            "description": "Sukses, tidak berubah, gagal.",
             "status": "pending",
             "details": "",
             "parentId": 8
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "9",
-        "title": "Source settings page (admin)",
-        "description": "Admin form to add, edit, deactivate, delete sources and test the connection.",
+        "title": "Halaman Pengaturan sumber (admin)",
+        "description": "Form admin untuk menambah, mengubah, menonaktifkan, menghapus sumber, dan uji koneksi.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
@@ -453,458 +444,421 @@
           "6",
           "8"
         ],
-        "details": "Form fields: app name, provider (GitHub, GitLab, Bitbucket), repo URL, branch, task file path, token. Token is write-only: encrypted on save, never shown again; editing leaves it unchanged unless a new value is entered. 'Test connection' button calls the adapter and reports file found, task count, or a precise error before saving. Deactivate and delete actions with confirmation. Show the branch of record on screen. All writes go through server actions or route handlers that check admin role.",
-        "testStrategy": "E2E: admin adds a source with a valid fixture and sees success; wrong path shows a clear not-found error; viewer cannot reach the page; token never appears in HTML, network payloads, or later edits.",
+        "details": "PRD halaman Pengaturan sumber. Form: nama aplikasi, penyedia repo (GitHub, GitLab, Bitbucket), URL repo, branch, path file task master, token. Token hanya ditulis: dienkripsi saat disimpan dan tidak pernah ditampilkan lagi; saat mengubah, token tidak berubah kecuali diisi baru. Tombol Uji koneksi memanggil adapter dan melaporkan file ditemukan beserta jumlah task, atau galat yang jelas, sebelum menyimpan. Nonaktifkan dan hapus dengan konfirmasi. Branch acuan ditampilkan di layar. Hanya admin; penulisan lewat server action atau route handler yang memeriksa peran.",
+        "testStrategy": "Admin menambah sumber valid dan berhasil; path salah menampilkan galat tidak ditemukan; viewer tidak bisa membuka halaman atau endpoint; token tidak muncul di HTML, payload jaringan, atau form edit.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Build source list and form UI",
-            "description": "Table of sources with status and actions.",
+            "title": "Daftar sumber dan form UI",
+            "description": "Tabel sumber dengan status dan aksi.",
             "status": "pending",
             "details": "",
             "parentId": 9
           },
           {
             "id": 2,
-            "title": "Implement save with token encryption",
-            "description": "Server action; write-only token field.",
+            "title": "Simpan dengan enkripsi token",
+            "description": "Server action; kolom token write-only.",
             "status": "pending",
             "details": "",
             "parentId": 9
           },
           {
             "id": 3,
-            "title": "Implement test connection",
-            "description": "Returns found/not found/auth error and task count.",
+            "title": "Tombol Uji koneksi",
+            "description": "Hasil: ditemukan (jumlah task), tidak ditemukan, atau galat autentikasi.",
             "status": "pending",
             "details": "",
             "parentId": 9
           },
           {
             "id": 4,
-            "title": "Implement deactivate and delete",
-            "description": "With confirmation.",
+            "title": "Nonaktifkan dan hapus sumber",
+            "description": "Dengan konfirmasi.",
             "status": "pending",
             "details": "",
             "parentId": 9
           },
           {
             "id": 5,
-            "title": "Audit that token never reaches the client",
-            "description": "Check payloads and rendered HTML.",
+            "title": "Audit token tidak bocor ke klien",
+            "description": "Periksa HTML dan payload.",
             "status": "pending",
             "details": "",
             "parentId": 9
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "10",
-        "title": "Dashboard page with per-app cards and Segarkan",
-        "description": "One card per app showing status counts, percent done, last sync, failure marker, and refresh buttons.",
+        "title": "Halaman Dashboard (kartu per aplikasi dan Segarkan)",
+        "description": "Satu kartu per aplikasi dengan jumlah task per status, persentase selesai, waktu sinkron, penanda gagal, dan tombol Segarkan.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
           "8",
           "9"
         ],
-        "details": "Cards show counts for pending, in-progress, review, done, deferred, cancelled, percent done, last sync time, branch, and a failed/stale marker with the error message and the time of the last successful data. 'Segarkan' per card and 'Segarkan semua' (client fans out one request per source in parallel and shows per-source result). Clicking a card opens the task list filtered to that app. Loads from Supabase cache in under 2 seconds. A failing source never hides the others.",
-        "testStrategy": "E2E: cards render from seeded data; refresh-all shows mixed success/failure results; failed source shows stale marker with old data; page loads under 2 s with cached data.",
+        "details": "PRD halaman Dashboard. Kartu: jumlah task per status (pending, in-progress, review, done, deferred, cancelled), persentase selesai, waktu sinkron terakhir, branch acuan, penanda gagal sinkron. Segarkan untuk satu aplikasi atau semua; Segarkan semua mengirim satu permintaan per sumber secara paralel dan menampilkan hasil per aplikasi. Klik kartu membuka daftar task aplikasi itu. Hanya menampilkan data. Muat dari cache Supabase kurang dari 2 detik. Bahasa tanpa istilah teknis untuk manajemen. Gunakan view atau RPC agregat agar tidak memuat semua task.",
+        "testStrategy": "Kartu tampil dari data seed; Segarkan semua menampilkan hasil campuran sukses dan gagal; sumber gagal menampilkan data lama dengan penanda; muat kurang dari 2 detik.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Build card component and grid",
-            "description": "Responsive layout, no technical jargon for stakeholders.",
+            "title": "Komponen kartu dan grid responsif",
+            "description": "Tanpa istilah teknis.",
             "status": "pending",
             "details": "",
             "parentId": 10
           },
           {
             "id": 2,
-            "title": "Query aggregated counts efficiently",
-            "description": "SQL view or RPC rather than loading all tasks.",
+            "title": "Query agregat jumlah per status",
+            "description": "View atau RPC.",
             "status": "pending",
             "details": "",
             "parentId": 10
           },
           {
             "id": 3,
-            "title": "Implement per-source and refresh-all actions",
-            "description": "Parallel requests, per-source result toasts.",
+            "title": "Segarkan satu dan semua sumber",
+            "description": "Permintaan paralel, hasil per aplikasi.",
             "status": "pending",
             "details": "",
             "parentId": 10
           },
           {
             "id": 4,
-            "title": "Show failed and stale markers",
-            "description": "Error message plus last successful sync.",
+            "title": "Penanda gagal dan usang",
+            "description": "Pesan galat dan waktu data terakhir yang berhasil.",
             "status": "pending",
             "details": "",
             "parentId": 10
           },
           {
             "id": 5,
-            "title": "Link cards to filtered task list",
-            "description": "Query params for source.",
+            "title": "Tautan kartu ke daftar task terfilter",
+            "description": "Parameter query aplikasi.",
             "status": "pending",
             "details": "",
             "parentId": 10
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "11",
-        "title": "Task list page with cross-app filters",
-        "description": "Table of all tasks across apps with filters and sorting.",
+        "title": "Halaman Daftar task lintas aplikasi",
+        "description": "Tabel semua task lintas aplikasi dengan filter dan pengurutan.",
         "status": "pending",
         "priority": "high",
         "dependencies": [
           "8"
         ],
-        "details": "Columns: app, tag, ID, title, status, priority, subtasks done/total. Filters: app, tag (all tags that exist in source files), status, priority; sort per column; filters kept in the URL. Server-side pagination and filtering because there are many tasks (173+ in a single app). Rows link to task detail.",
-        "testStrategy": "E2E: each filter and combination narrows results correctly; sorting works; URL restores state; pagination with thousands of rows stays fast.",
+        "details": "PRD halaman Daftar task. Kolom: aplikasi, tag, ID, judul, status, prioritas, jumlah subtask selesai dari total. Filter: aplikasi, tag (semua tag yang ada di file sumber), status, prioritas; urut per kolom. Filter disimpan di URL. Pagination dan filter di sisi server karena satu aplikasi bisa memiliki ratusan task. Baris membuka detail task.",
+        "testStrategy": "Tiap filter dan kombinasinya menyaring dengan benar; pengurutan bekerja; URL memulihkan state; pagination tetap cepat pada ribuan baris.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Build table and URL-synced filters",
-            "description": "Source, tag, status, priority.",
+            "title": "Tabel dan filter yang tersinkron ke URL",
+            "description": "Aplikasi, tag, status, prioritas.",
             "status": "pending",
             "details": "",
             "parentId": 11
           },
           {
             "id": 2,
-            "title": "Server-side query with pagination and sorting",
-            "description": "Indexes from the schema migration.",
+            "title": "Query server dengan pagination dan urutan",
+            "description": "Memakai indeks dari migrasi.",
             "status": "pending",
             "details": "",
             "parentId": 11
           },
           {
             "id": 3,
-            "title": "Subtask progress column",
-            "description": "Done count from the subtasks JSON.",
+            "title": "Kolom subtask selesai dari total",
+            "description": "Dihitung dari data subtask.",
             "status": "pending",
             "details": "",
             "parentId": 11
           },
           {
             "id": 4,
-            "title": "Empty and loading states",
-            "description": "Clear messages.",
+            "title": "Keadaan kosong dan memuat",
+            "description": "Pesan jelas.",
             "status": "pending",
             "details": "",
             "parentId": 11
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "12",
-        "title": "Task detail page",
-        "description": "Show title, description, implementation details, test strategy, clickable dependencies, and subtasks with status.",
+        "title": "Halaman Detail task",
+        "description": "Judul, deskripsi, detail implementasi, strategi pengujian, dependensi yang dapat diklik, dan subtask beserta statusnya.",
         "status": "pending",
         "priority": "medium",
         "dependencies": [
           "11"
         ],
-        "details": "Route like /tasks/[sourceId]/[tag]/[taskId]. Dependencies are links to sibling tasks in the same source and tag; missing dependency targets are shown as plain text. Render details and test strategy safely (escape or sanitize markdown). Read-only, no mutating actions.",
-        "testStrategy": "E2E: dependency links navigate correctly; subtasks show statuses; malicious markup in details is not executed; unknown task id returns 404.",
+        "details": "PRD halaman Detail task. Rute /tasks/[sourceId]/[tag]/[taskId]. Dependensi menjadi tautan ke task lain di sumber dan tag yang sama; target yang tidak ada ditampilkan sebagai teks biasa. Teks detail dan strategi pengujian dirender aman (sanitasi markdown). Hanya baca, tidak ada aksi mengubah task.",
+        "testStrategy": "Tautan dependensi berpindah dengan benar; subtask tampil dengan status; markup berbahaya tidak dieksekusi; ID tidak dikenal menghasilkan 404.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create detail route and query",
-            "description": "Composite key lookup.",
+            "title": "Rute dan query detail",
+            "description": "Pencarian dengan kunci gabungan.",
             "status": "pending",
             "details": "",
             "parentId": 12
           },
           {
             "id": 2,
-            "title": "Render text blocks safely",
-            "description": "Markdown with sanitization.",
+            "title": "Render teks panjang dengan aman",
+            "description": "Markdown dengan sanitasi.",
             "status": "pending",
             "details": "",
             "parentId": 12
           },
           {
             "id": 3,
-            "title": "Render dependencies and subtasks",
-            "description": "Links and status badges.",
+            "title": "Dependensi dan subtask",
+            "description": "Tautan dan lencana status.",
             "status": "pending",
             "details": "",
             "parentId": 12
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "13",
-        "title": "Trend page from snapshots",
-        "description": "Charts of task counts per status and percent done over time, per app and combined, with selectable range.",
+        "title": "Halaman Tren (grafik dari snapshot)",
+        "description": "Grafik jumlah task per status dan persentase selesai dari waktu ke waktu, per aplikasi dan gabungan.",
         "status": "pending",
         "priority": "medium",
         "dependencies": [
           "8"
         ],
-        "details": "Data from snapshots table. Per-app and combined views, range selector (7/30/90 days, all). Handle gaps honestly because snapshots only form when someone clicks Segarkan; show points, not interpolated lines that imply data. Consider a charting library with accessible colors; follow light/dark theme.",
-        "testStrategy": "Component tests with seeded snapshots: combined sums are correct, range filter works, gaps are visible, empty state when no snapshots.",
+        "details": "PRD halaman Tren dan Riwayat. Data dari snapshot tiap sinkronisasi. Per aplikasi dan gabungan, rentang waktu dapat dipilih. Snapshot hanya terbentuk saat ada yang klik Segarkan, jadi tren punya celah: tampilkan titik data apa adanya tanpa interpolasi yang menyiratkan data tidak ada. Warna aksesibel dan mengikuti tema terang/gelap.",
+        "testStrategy": "Data seed snapshot: total gabungan benar; filter rentang bekerja; celah terlihat; keadaan kosong bila belum ada snapshot.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Query snapshots by range and source",
-            "description": "Aggregate for combined view.",
+            "title": "Query snapshot per rentang dan sumber",
+            "description": "Agregasi untuk tampilan gabungan.",
             "status": "pending",
             "details": "",
             "parentId": 13
           },
           {
             "id": 2,
-            "title": "Build charts for status counts and percent done",
-            "description": "Accessible colors.",
+            "title": "Grafik jumlah per status dan persentase selesai",
+            "description": "Warna aksesibel.",
             "status": "pending",
             "details": "",
             "parentId": 13
           },
           {
             "id": 3,
-            "title": "Range selector and app selector",
-            "description": "State in URL.",
+            "title": "Pemilih rentang waktu dan aplikasi",
+            "description": "State di URL.",
             "status": "pending",
             "details": "",
             "parentId": 13
           },
           {
             "id": 4,
-            "title": "Gap and empty state handling",
-            "description": "No misleading interpolation.",
+            "title": "Penanganan celah dan keadaan kosong",
+            "description": "Tanpa interpolasi menyesatkan.",
             "status": "pending",
             "details": "",
             "parentId": 13
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "14",
-        "title": "Error handling, stale data, and token expiry visibility",
-        "description": "Make failures explicit across the app: failed source marker, stale data, token expiry errors.",
+        "title": "Penanda gagal, data usang, dan kedaluwarsa token",
+        "description": "Kegagalan dibuat eksplisit di seluruh aplikasi: sumber gagal, data usang, token kedaluwarsa.",
         "status": "pending",
         "priority": "medium",
         "dependencies": [
           "8",
           "10"
         ],
-        "details": "Map adapter errors to user-readable messages (token expired/unauthorized, repository or path not found, rate limited, invalid file shape, network). Record token expiry date if known and warn before it expires. Never present an error as 0 tasks. Show last commit time of the file to reveal stale repos.",
-        "testStrategy": "Tests for each error class showing the right message and the previous data retained; token expiry warning appears at the configured threshold.",
+        "details": "PRD Aturan umum, Keandalan, dan Keamanan. Jika satu repo gagal, data lain tetap tampil dan repo itu diberi penanda beserta pesan galat. Saat sinkron gagal tampilkan data terakhir yang berhasil dengan penanda usang dan waktu sinkron terakhir. Petakan galat adapter ke pesan jelas (token kedaluwarsa atau ditolak, repo atau path tidak ditemukan, rate limit, bentuk file tidak cocok, jaringan); galat tidak pernah ditampilkan sebagai 0 task. Catat tanggal kedaluwarsa token bila diketahui dan beri peringatan sebelum habis. Tampilkan waktu commit terakhir tasks.json untuk mengungkap repo yang belum di-commit.",
+        "testStrategy": "Tiap kelas galat menghasilkan pesan yang tepat dan data lama tetap ada; peringatan kedaluwarsa muncul pada ambang yang ditentukan.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Define error taxonomy and messages",
-            "description": "Indonesian user-facing strings.",
+            "title": "Taksonomi galat dan pesan bahasa Indonesia",
+            "description": "Pemetaan dari galat adapter.",
             "status": "pending",
             "details": "",
             "parentId": 14
           },
           {
             "id": 2,
-            "title": "Store optional token expiry date on source",
-            "description": "Warn before expiry.",
+            "title": "Catat tanggal kedaluwarsa token",
+            "description": "Kolom opsional di sumber dan peringatan dini.",
             "status": "pending",
             "details": "",
             "parentId": 14
           },
           {
             "id": 3,
-            "title": "Display last commit time of tasks.json",
-            "description": "On cards and source settings.",
+            "title": "Tampilkan waktu commit terakhir tasks.json",
+            "description": "Di kartu dan pengaturan sumber.",
             "status": "pending",
             "details": "",
             "parentId": 14
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "15",
-        "title": "Deploy to Vercel and configure environment",
-        "description": "Deploy the app on Vercel with all required environment variables and production Supabase settings.",
+        "title": "Deploy ke Vercel dan verifikasi metrik MVP",
+        "description": "Deploy produksi dan pengecekan target keberhasilan PRD.",
         "status": "pending",
         "priority": "medium",
         "dependencies": [
-          "4",
-          "10"
+          "10",
+          "11",
+          "12",
+          "13",
+          "14"
         ],
-        "details": "Set env vars in Vercel (never commit). Confirm sync route maxDuration fits the plan. Confirm Supabase redirect/site URL, sign-up disabled, RLS enabled on all tables. Add a basic runbook: rotate TOKEN_ENCRYPTION_KEY, revoke a source token, re-run the seeder.",
-        "testStrategy": "Production smoke test: login, add source, refresh, view dashboard, trend; verify no secrets in client bundles.",
+        "details": "PRD Rencana rilis Fase 1 dianggap selesai bila tim bisa menambah sumber sendiri dan memantau semua aplikasi beserta trennya. Pastikan env produksi terisi, pendaftaran publik mati, RLS aktif di semua tabel, dan tidak ada rahasia di bundel klien. Verifikasi metrik: status semua aplikasi terlihat kurang dari 1 menit, halaman utama dari cache kurang dari 2 detik, sinkron berhasil 99% atau lebih per siklus. Tulis runbook singkat: rotasi TOKEN_ENCRYPTION_KEY, cabut token per sumber, jalankan ulang seeder.",
+        "testStrategy": "Uji asap produksi: login, tambah sumber, Segarkan, dashboard, daftar, detail, tren; pindai bundel klien tidak memuat rahasia.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create Vercel project and connect GitHub repo",
-            "description": "Branch main.",
+            "title": "Deploy produksi dan cek environment",
+            "description": "Branch main di Vercel.",
             "status": "pending",
             "details": "",
             "parentId": 15
           },
           {
             "id": 2,
-            "title": "Add environment variables",
-            "description": "Supabase URL/keys and TOKEN_ENCRYPTION_KEY.",
+            "title": "Uji asap end-to-end",
+            "description": "Alur lengkap sebagai admin dan viewer.",
             "status": "pending",
             "details": "",
             "parentId": 15
           },
           {
             "id": 3,
-            "title": "Production smoke test",
-            "description": "End to end run.",
+            "title": "Ukur metrik PRD",
+            "description": "Waktu muat dan keberhasilan sinkron.",
             "status": "pending",
             "details": "",
             "parentId": 15
           },
           {
             "id": 4,
-            "title": "Write short runbook",
-            "description": "Key rotation, token revocation, seeding.",
+            "title": "Tulis runbook",
+            "description": "Rotasi kunci, pencabutan token, seeder.",
             "status": "pending",
             "details": "",
             "parentId": 15
           }
         ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "16",
-        "title": "Test suite and quality gates",
-        "description": "Unit, integration, and E2E tests plus lint and typecheck in CI.",
-        "status": "pending",
-        "priority": "medium",
+        "title": "Tahap 2: sinkronisasi terjadwal otomatis (opsional)",
+        "description": "Sinkron harian atau berkala agar tren tidak bolong.",
+        "status": "deferred",
+        "priority": "low",
         "dependencies": [
-          "7",
           "8"
         ],
-        "details": "Vitest for unit/integration (crypto, adapters, normalizer, sync), Playwright for core flows (login, add source, refresh, filter, detail, trend). GitHub Actions running lint, tsc, and tests on pull requests.",
-        "testStrategy": "CI green on main; coverage reported for crypto, adapters, normalizer, and sync.",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Set up Vitest and fixtures",
-            "description": "Reuse Phase 0 fixtures.",
-            "status": "pending",
-            "details": "",
-            "parentId": 16
-          },
-          {
-            "id": 2,
-            "title": "Set up Playwright with seeded test users",
-            "description": "Admin and viewer.",
-            "status": "pending",
-            "details": "",
-            "parentId": 16
-          },
-          {
-            "id": 3,
-            "title": "Add CI workflow",
-            "description": "Lint, typecheck, tests.",
-            "status": "pending",
-            "details": "",
-            "parentId": 16
-          }
-        ],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "details": "PRD Tahap 2. Pakai fungsi inti sinkronisasi; endpoint cron diamankan dengan secret dan memicu sinkron tiap sumber aktif secara terpisah agar tidak melewati batas waktu fungsi.",
+        "testStrategy": "Endpoint menolak tanpa secret; semua sumber aktif tersinkron; snapshot terbentuk harian.",
+        "subtasks": [],
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "17",
-        "title": "Phase 2: scheduled automatic sync (optional)",
-        "description": "Daily or periodic sync via Vercel Cron to avoid gaps in trends.",
+        "title": "Tahap 2: task terblokir dan task siap dikerjakan",
+        "description": "Hitung dan tampilkan task terblokir dependensi dan task siap dikerjakan per aplikasi.",
         "status": "deferred",
         "priority": "low",
         "dependencies": [
-          "8"
+          "11"
         ],
-        "details": "Reuse the sync core function. Cron endpoint secured with a secret, iterates active sources and triggers per-source syncs separately to respect function time limits.",
-        "testStrategy": "Cron endpoint rejects missing secret; triggers all active sources; snapshots appear daily.",
+        "details": "PRD Tahap 2 dan kebutuhan Developer. Terblokir bila ada dependensi yang belum done; siap bila pending dan semua dependensi done. Tambahkan filter atau tampilan di daftar task.",
+        "testStrategy": "Uji graf dependensi termasuk dependensi hilang dan melingkar.",
         "subtasks": [],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "18",
-        "title": "Phase 2: blocked and ready-to-work tasks",
-        "description": "Compute and show blocked tasks (unmet dependencies) and tasks ready to start.",
+        "title": "Tahap 2: pencarian teks judul dan deskripsi",
+        "description": "Pencarian teks lintas aplikasi.",
         "status": "deferred",
         "priority": "low",
         "dependencies": [
           "11"
         ],
-        "details": "A task is blocked if any dependency is not done; ready if pending and all dependencies done. Add filters/views in the task list.",
-        "testStrategy": "Unit tests on dependency graph logic including missing and circular dependencies.",
+        "details": "PRD Tahap 2. Full-text search Postgres (tsvector, indeks GIN) pada judul dan deskripsi, terpadu dengan filter yang ada.",
+        "testStrategy": "Pencarian mengembalikan baris yang diharapkan lintas aplikasi dan bekerja bersama filter.",
         "subtasks": [],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
         "id": "19",
-        "title": "Phase 2: text search on title and description",
-        "description": "Full-text search across tasks.",
-        "status": "deferred",
-        "priority": "low",
-        "dependencies": [
-          "11"
-        ],
-        "details": "Postgres full-text search (tsvector) on title and description with a GIN index; integrate with existing filters.",
-        "testStrategy": "Search returns expected rows across apps; works with filters.",
-        "subtasks": [],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
-      },
-      {
-        "id": "20",
-        "title": "Phase 2: additional provider adapters (Gitea, self-hosted)",
-        "description": "Add adapters for other providers without changing pages.",
+        "title": "Tahap 2: adapter penyedia lain (Gitea, self-hosted)",
+        "description": "Menambah adapter tanpa mengubah halaman.",
         "status": "deferred",
         "priority": "low",
         "dependencies": [
           "6"
         ],
-        "details": "Implement new adapters against the same contract and register them; extend the provider enum and settings form options.",
-        "testStrategy": "Adapter tests per provider; no changes needed in page code.",
+        "details": "PRD Tahap 2. Implementasikan adapter baru dengan kontrak yang sama, daftarkan ke registry, dan tambahkan opsi di form pengaturan sumber.",
+        "testStrategy": "Uji adapter per penyedia; halaman tidak perlu diubah.",
         "subtasks": [],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
-        "id": "21",
-        "title": "Phase 3: notifications for stalled tasks (Slack or email)",
-        "description": "Notify when tasks are stuck or sources keep failing.",
+        "id": "20",
+        "title": "Tahap 3: notifikasi task macet (Slack atau email)",
+        "description": "Notifikasi bila task macet atau sumber terus gagal.",
         "status": "deferred",
         "priority": "low",
         "dependencies": [
-          "17"
+          "16"
         ],
-        "details": "Define 'stalled' rules (e.g. in-progress for N days, repeated sync failure). Send via Slack webhook or email; avoid duplicate notifications.",
-        "testStrategy": "Rule evaluation tests; one notification per event; delivery failure does not break sync.",
+        "details": "PRD Tahap 3. Tentukan aturan macet (misal in-progress lebih dari N hari, gagal sinkron berulang), kirim lewat Slack webhook atau email, hindari notifikasi ganda.",
+        "testStrategy": "Evaluasi aturan teruji; satu notifikasi per kejadian; kegagalan kirim tidak mengganggu sinkron.",
         "subtasks": [],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       },
       {
-        "id": "22",
-        "title": "Phase 3: real-time sync via webhook push",
-        "description": "Receive push webhooks from providers to sync within minutes of a change.",
+        "id": "21",
+        "title": "Tahap 3: sinkronisasi real-time lewat webhook push",
+        "description": "Perubahan di repo muncul di dashboard dalam hitungan menit.",
         "status": "deferred",
         "priority": "low",
         "dependencies": [
           "8"
         ],
-        "details": "Webhook endpoint per provider with signature verification (GitHub HMAC, GitLab token, Bitbucket). Trigger per-source sync only when the tracked file path changed on the tracked branch.",
-        "testStrategy": "Signature verification rejects bad requests; relevant push triggers sync; unrelated pushes are ignored.",
+        "details": "PRD Tahap 3. Endpoint webhook per penyedia dengan verifikasi tanda tangan (GitHub HMAC, GitLab token, Bitbucket); memicu sinkron sumber hanya bila file yang dipantau berubah di branch yang dipantau.",
+        "testStrategy": "Tanda tangan salah ditolak; push relevan memicu sinkron; push lain diabaikan.",
         "subtasks": [],
-        "updatedAt": "2026-11-06T10:53:23.407Z"
+        "updatedAt": "2026-11-06T10:59:04.253Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T10:53:23.407Z",
-      "taskCount": 22,
+      "lastModified": "2026-11-06T10:59:04.253Z",
+      "taskCount": 21,
       "completedCount": 0,
       "tags": [
         "master"
