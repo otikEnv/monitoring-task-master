@@ -96,7 +96,7 @@ Website MVP terdiri dari enam halaman.
 | Halaman | Isi dan perilaku |
 | --- | --- |
 | Login | Email dan password lewat Supabase Auth. Tidak ada pendaftaran publik; akun (termasuk admin awal) dibuat lewat seeder database, tanpa halaman manajemen akun di MVP. Password awal sebaiknya diganti setelah login pertama. |
-| Dashboard | Satu kartu per aplikasi: jumlah task per status (pending, in-progress, review, done, deferred, cancelled), persentase selesai, waktu sinkron terakhir, dan penanda gagal sinkron. Tombol Segarkan untuk satu aplikasi atau semua. Klik kartu membuka daftar task aplikasi itu. |
+| Dashboard | Satu kartu per aplikasi: jumlah task per status (pending, in-progress, review, blocked, done, deferred, cancelled), persentase selesai, waktu sinkron terakhir, dan penanda gagal sinkron. Tombol Segarkan untuk satu aplikasi atau semua. Klik kartu membuka daftar task aplikasi itu. |
 | Daftar task | Tabel semua task lintas aplikasi: aplikasi, tag, ID, judul, status, prioritas, jumlah subtask selesai dari total. Filter aplikasi, tag (semua tag yang ada di file sumber), status, prioritas; urutkan per kolom. |
 | Detail task | Judul, deskripsi, detail implementasi, strategi pengujian, daftar dependensi (dapat diklik), dan subtask beserta statusnya. |
 | Tren | Grafik jumlah task per status dan persentase selesai dari waktu ke waktu, per aplikasi dan gabungan, dengan rentang waktu yang bisa dipilih. Datanya dari snapshot tiap sinkronisasi. |
@@ -139,7 +139,7 @@ Format `tasks.json` dari Taskmaster dinormalisasi menjadi empat entitas supaya t
 | --- | --- |
 | Sumber | Nama aplikasi, penyedia repo (GitHub, GitLab, dan lainnya), URL repo, branch, path file task master, token terenkripsi, aktif atau tidak, status dan waktu sinkron terakhir, pesan galat |
 | Task | Sumber, tag, ID task, judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status; diperbarui tiap sinkronisasi |
-| Snapshot | Dibuat tiap sinkronisasi berhasil: waktu, sumber, tag, jumlah task per status; dasar riwayat dan tren |
+| Snapshot | Dibuat tiap sinkronisasi berhasil: waktu, sumber, tag, jumlah task per status (pending, in-progress, review, blocked, done, deferred, cancelled; status lain yang tidak dikenal dihitung sebagai "other"); dasar riwayat dan tren |
 | Pengguna | Dikelola Supabase Auth (email dan password) dengan peran admin atau viewer |
 
 File Taskmaster versi baru mengelompokkan task per tag (`{ "master": { "tasks": [...] } }`), sedangkan versi lama langsung `{ "tasks": [...] }`. Pembaca data harus mengenali kedua bentuk, dan ID task hanya unik di dalam satu kombinasi sumber dan tag.
@@ -186,6 +186,7 @@ Semua pertanyaan awal sudah dijawab dan dimasukkan ke bagian lain dokumen ini. T
 | Tag | Bisa berbeda per sumber; semua tag ditampilkan sebagai filter |
 | Stack | Next.js, database Supabase, deploy di Vercel |
 | Token | Per sumber; disimpan terenkripsi di database (diizinkan) |
+| Status task | Tujuh status: pending, in-progress, review, blocked, done, deferred, cancelled. `blocked` ditandai manual oleh developer di tasks.json dan ditemukan di data asli (Fase 0); status tak dikenal dihitung "other" agar sinkronisasi tidak gagal |
 
 **Masih terbuka**
 

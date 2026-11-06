@@ -42,6 +42,26 @@ begin
   end if;
 end $$;
 
+-- 2b. Kolom blocked: default 0, boleh diisi, tidak boleh negatif.
+do $$
+begin
+  if (select blocked from public.snapshots where total = 4) <> 0 then
+    raise exception 'FAIL: blocked seharusnya default 0';
+  end if;
+  insert into public.snapshots (source_id, tag, total, blocked)
+  values ('00000000-0000-0000-0000-00000000c001', 'master', 3, 2);
+  if (select blocked from public.snapshots where total = 3) <> 2 then
+    raise exception 'FAIL: blocked tidak tersimpan';
+  end if;
+  delete from public.snapshots where total = 3;
+  begin
+    insert into public.snapshots (source_id, tag, blocked)
+    values ('00000000-0000-0000-0000-00000000c001', 'master', -1);
+    raise exception 'FAIL: blocked negatif seharusnya ditolak';
+  exception when check_violation then null;
+  end;
+end $$;
+
 -- 3. Pengguna anon tidak membaca apa pun.
 set local role anon;
 do $$

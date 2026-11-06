@@ -7,7 +7,9 @@
 
 **Lewat SQL editor (paling sederhana)**
 1. Supabase Dashboard > SQL Editor > New query.
-2. Tempel isi `migrations/20261106000000_init_schema.sql`, lalu Run. Jalankan sekali saja; file ini tidak idempoten.
+2. Jalankan migrasi **berurutan sesuai nama file**, satu file per query. Setiap file cukup dijalankan sekali; jangan menjalankan ulang file yang sudah diterapkan (tidak idempoten). Daftar yang sudah diterapkan di proyek ini:
+   - `20261106000000_init_schema.sql` - skema awal dan RLS (sudah diterapkan)
+   - `20261106010000_add_blocked_status.sql` - kolom `blocked` pada `snapshots`
 3. Tempel `tests/rls_test.sql`, lalu Run. Harapannya muncul notice `SEMUA UJI LOLOS` (tab Results/Messages). Kalau ada baris `FAIL: ...`, jangan lanjut.
 
 **Lewat Supabase CLI** (butuh `npx supabase login` dan `npx supabase link --project-ref <ref>`)

@@ -121,7 +121,7 @@
         "dependencies": [
           "2"
         ],
-        "details": "PRD Model data. Sumber: nama aplikasi, penyedia, URL repo, branch, path file, token terenkripsi, aktif atau tidak, status dan waktu sinkron terakhir, pesan galat (tambahan: etag, waktu commit terakhir file, tanggal kedaluwarsa token). Task: sumber, tag, ID task, judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status; kunci gabungan (sumber, tag, ID) karena ID hanya unik dalam satu kombinasi sumber dan tag. Snapshot: waktu, sumber, tag, jumlah task per status (pending, in-progress, review, done, deferred, cancelled). Pengguna: Supabase Auth dengan peran admin atau viewer (tabel profiles). RLS: pengguna login boleh membaca task dan snapshot; hanya admin yang menulis sumber; kolom token tidak terbaca dari klien; penulisan hasil sinkron lewat service role.",
+        "details": "PRD Model data. Sumber: nama aplikasi, penyedia, URL repo, branch, path file, token terenkripsi, aktif atau tidak, status dan waktu sinkron terakhir, pesan galat (tambahan: etag, waktu commit terakhir file, tanggal kedaluwarsa token). Task: sumber, tag, ID task, judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status; kunci gabungan (sumber, tag, ID) karena ID hanya unik dalam satu kombinasi sumber dan tag. Snapshot: waktu, sumber, tag, jumlah task per status (pending, in-progress, review, blocked, done, deferred, cancelled; status tak dikenal masuk \"other\"). Pengguna: Supabase Auth dengan peran admin atau viewer (tabel profiles). RLS: pengguna login boleh membaca task dan snapshot; hanya admin yang menulis sumber; kolom token tidak terbaca dari klien; penulisan hasil sinkron lewat service role.",
         "testStrategy": "Uji SQL: viewer tidak bisa menulis sumber; tidak ada peran klien yang bisa membaca token; anon tidak membaca apa pun; ID task yang sama boleh ada di tag atau sumber berbeda.",
         "subtasks": [
           {
@@ -168,9 +168,18 @@
             "details": "",
             "parentId": "3",
             "updatedAt": "2026-11-06T11:33:30.276Z"
+          },
+          {
+            "id": 6,
+            "title": "Tambah kolom blocked pada snapshots",
+            "description": "Migrasi 20261106010000_add_blocked_status.sql: status ketujuh 'blocked' ditemukan di data asli echoapp (Fase 0).",
+            "status": "done",
+            "details": "",
+            "parentId": "3",
+            "updatedAt": "2026-11-06T12:15:27.298Z"
           }
         ],
-        "updatedAt": "2026-11-06T11:33:30.276Z"
+        "updatedAt": "2026-11-06T12:15:27.298Z"
       },
       {
         "id": "4",
@@ -347,7 +356,7 @@
         "dependencies": [
           "1"
         ],
-        "details": "PRD Model data. Kenali { master: { tasks: [...] }, tag-lain: {...} } dan { tasks: [...] } (tag diberi nama master). Hasilkan baris per (tag, ID task) berisi judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status. Bentuk yang tidak cocok ditandai sumber gagal dengan pesan jelas, bukan 0 task; array task kosong yang valid tetap berarti 0 task. Sediakan fungsi hitung jumlah per status (pending, in-progress, review, done, deferred, cancelled) dan persentase selesai untuk snapshot dan dashboard.",
+        "details": "PRD Model data. Kenali { master: { tasks: [...] }, tag-lain: {...} } dan { tasks: [...] } (tag diberi nama master). Hasilkan baris per (tag, ID task) berisi judul, deskripsi, status, prioritas, dependensi, detail, strategi pengujian, subtask beserta status. Bentuk yang tidak cocok ditandai sumber gagal dengan pesan jelas, bukan 0 task; array task kosong yang valid tetap berarti 0 task. Sediakan fungsi hitung jumlah per status (pending, in-progress, review, blocked, done, deferred, cancelled; status tak dikenal masuk \"other\") dan persentase selesai untuk snapshot dan dashboard. Temuan Fase 0 (echoapp): ID task bertipe string, ID subtask bertipe angka, dependensi string; 57 dari 173 task tanpa testStrategy (boleh kosong); ada status 'blocked' pada task dan subtask serta 'cancelled' pada subtask.",
         "testStrategy": "Uji dengan fixture Fase 0: kedua bentuk, banyak tag, tasks kosong, JSON rusak, bentuk salah, ID angka dan string, file 660 KB.",
         "subtasks": [
           {
@@ -518,7 +527,7 @@
           "8",
           "9"
         ],
-        "details": "PRD halaman Dashboard. Kartu: jumlah task per status (pending, in-progress, review, done, deferred, cancelled), persentase selesai, waktu sinkron terakhir, branch acuan, penanda gagal sinkron. Segarkan untuk satu aplikasi atau semua; Segarkan semua mengirim satu permintaan per sumber secara paralel dan menampilkan hasil per aplikasi. Klik kartu membuka daftar task aplikasi itu. Hanya menampilkan data. Muat dari cache Supabase kurang dari 2 detik. Bahasa tanpa istilah teknis untuk manajemen. Gunakan view atau RPC agregat agar tidak memuat semua task.",
+        "details": "PRD halaman Dashboard. Kartu: jumlah task per status (pending, in-progress, review, blocked, done, deferred, cancelled; status tak dikenal masuk \"other\"), persentase selesai, waktu sinkron terakhir, branch acuan, penanda gagal sinkron. Segarkan untuk satu aplikasi atau semua; Segarkan semua mengirim satu permintaan per sumber secara paralel dan menampilkan hasil per aplikasi. Klik kartu membuka daftar task aplikasi itu. Hanya menampilkan data. Muat dari cache Supabase kurang dari 2 detik. Bahasa tanpa istilah teknis untuk manajemen. Gunakan view atau RPC agregat agar tidak memuat semua task.",
         "testStrategy": "Kartu tampil dari data seed; Segarkan semua menampilkan hasil campuran sukses dan gagal; sumber gagal menampilkan data lama dengan penanda; muat kurang dari 2 detik.",
         "subtasks": [
           {
@@ -875,7 +884,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T12:07:56.488Z",
+      "lastModified": "2026-11-06T12:15:27.298Z",
       "taskCount": 21,
       "completedCount": 5,
       "tags": [

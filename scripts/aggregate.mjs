@@ -17,7 +17,7 @@ const OUT_DIR = path.join(ROOT, ".aggregate-out");
 const FIXTURE_DIR = path.join(ROOT, "tests", "fixtures");
 const WRITE_FIXTURES = process.argv.includes("--fixtures");
 
-const STATUSES = ["pending", "in-progress", "review", "done", "deferred", "cancelled"];
+const STATUSES = ["pending", "in-progress", "review", "blocked", "done", "deferred", "cancelled"];
 
 // ---------------------------------------------------------------- pengambilan (GitHub)
 
@@ -193,9 +193,9 @@ const fmtKB = (b) => `${(b / 1024).toFixed(1)} KB`;
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function printTable(rows) {
-  const head = ["tag", "task", "sub", "pending", "in-prog", "review", "done", "deferred", "cancel", "other", "%done"];
+  const head = ["tag", "task", "sub", "pending", "in-prog", "review", "blocked", "done", "deferred", "cancel", "other", "%done"];
   const body = rows.map((r) => [
-    r.tag, r.total, r.subtasks, r.pending, r["in-progress"], r.review, r.done, r.deferred, r.cancelled, r.other, `${r.percentDone}%`,
+    r.tag, r.total, r.subtasks, r.pending, r["in-progress"], r.review, r.blocked, r.done, r.deferred, r.cancelled, r.other, `${r.percentDone}%`,
   ].map(String));
   const widths = head.map((h, i) => Math.max(h.length, ...body.map((b) => b[i].length)));
   const line = (cells) => "  " + cells.map((c, i) => c.padEnd(widths[i])).join("  ");
@@ -246,7 +246,7 @@ for (const source of sources) {
     printTable(rows);
 
     const unknown = rows.reduce((n, r) => n + r.other, 0);
-    if (unknown) console.log(`  PERHATIAN: ${unknown} task dengan status di luar enam status baku (dihitung "other").`);
+    if (unknown) console.log(`  PERHATIAN: ${unknown} task dengan status di luar tujuh status baku (dihitung "other").`);
     if (rows.every((r) => r.total === 0)) console.log("  PERHATIAN: semua tag berisi 0 task (file valid tapi kosong).");
 
     fs.writeFileSync(path.join(OUT_DIR, `${slug(source.name)}.raw.json`), file.content);
