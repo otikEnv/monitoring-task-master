@@ -17,7 +17,7 @@
             "description": "File konfigurasi lokal: penyedia, URL repo, branch, path file, nama env untuk token. Token tidak ditulis di file.",
             "status": "pending",
             "details": "",
-            "parentId": 1
+            "parentId": "1"
           },
           {
             "id": 2,
@@ -25,7 +25,7 @@
             "description": "GitHub dulu (GET /repos/{owner}/{repo}/contents/{path}?ref={branch} dengan Accept: application/vnd.github.raw+json), lalu GitLab dan Bitbucket.",
             "status": "pending",
             "details": "",
-            "parentId": 1
+            "parentId": "1"
           },
           {
             "id": 3,
@@ -33,7 +33,7 @@
             "description": "Jumlah task per aplikasi, tag, dan status; simpan contoh yang sudah disanitasi ke tests/fixtures.",
             "status": "pending",
             "details": "",
-            "parentId": 1
+            "parentId": "1"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -42,7 +42,7 @@
         "id": "2",
         "title": "Setup proyek: Next.js, Supabase, environment, Taskmaster",
         "description": "Fondasi MVP: aplikasi Next.js, klien Supabase, variabel environment, dan repo.",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD Stack: Next.js, database Supabase, deploy di Vercel. Helper Supabase di src/lib/supabase (client.ts untuk browser dengan anon key, server.ts untuk Server Component dan Route Handler dengan sesi pengguna, admin.ts dengan service role dan server-only). Env: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, TOKEN_ENCRYPTION_KEY (AES-256-GCM, 32 byte base64). Hanya .env.example yang di-commit.",
@@ -54,7 +54,7 @@
             "description": "TypeScript, Tailwind, ESLint, App Router, folder src, Turbopack.",
             "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2"
           },
           {
             "id": 2,
@@ -62,7 +62,7 @@
             "description": "@supabase/supabase-js, @supabase/ssr, server-only; buat client, server, dan admin helper.",
             "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2"
           },
           {
             "id": 3,
@@ -70,7 +70,7 @@
             "description": ".env.example, .env.local dengan TOKEN_ENCRYPTION_KEY hasil generate.",
             "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2"
           },
           {
             "id": 4,
@@ -78,7 +78,7 @@
             "description": "URL, anon key, service role key, dan Auth health, tanpa mencetak rahasia.",
             "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2"
           },
           {
             "id": 5,
@@ -86,26 +86,28 @@
             "description": "task-master-ai sebagai devDependency; remote origin dan branch main.",
             "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2"
           },
           {
             "id": 6,
             "title": "Matikan pendaftaran publik di Supabase Auth",
             "description": "Dashboard > Authentication > Sign In / Providers > matikan 'Allow new users to sign up'. Saat ini disable_signup masih false, bertentangan dengan PRD.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2",
+            "updatedAt": "2026-11-06T11:25:49.797Z"
           },
           {
             "id": 7,
             "title": "Buat proyek Vercel dan isi environment",
             "description": "Hubungkan repo GitHub, isi semua env di Vercel (tidak di-commit).",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": 2
+            "parentId": "2",
+            "updatedAt": "2026-11-06T11:25:54.992Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T11:25:54.992Z"
       },
       {
         "id": "3",
@@ -125,7 +127,7 @@
             "description": "Enum penyedia dan peran.",
             "status": "pending",
             "details": "",
-            "parentId": 3
+            "parentId": "3"
           },
           {
             "id": 2,
@@ -133,7 +135,7 @@
             "description": "Kunci gabungan dan indeks untuk filter aplikasi, tag, status, prioritas.",
             "status": "pending",
             "details": "",
-            "parentId": 3
+            "parentId": "3"
           },
           {
             "id": 3,
@@ -141,7 +143,7 @@
             "description": "Baca untuk pengguna login, tulis sumber hanya admin.",
             "status": "pending",
             "details": "",
-            "parentId": 3
+            "parentId": "3"
           },
           {
             "id": 4,
@@ -149,7 +151,7 @@
             "description": "View atau column privileges untuk daftar sumber tanpa token.",
             "status": "pending",
             "details": "",
-            "parentId": 3
+            "parentId": "3"
           },
           {
             "id": 5,
@@ -157,7 +159,7 @@
             "description": "Lewat Supabase CLI atau SQL editor; dokumentasikan caranya.",
             "status": "pending",
             "details": "",
-            "parentId": 3
+            "parentId": "3"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -180,7 +182,7 @@
             "description": "Form email dan password, status galat.",
             "status": "pending",
             "details": "",
-            "parentId": 4
+            "parentId": "4"
           },
           {
             "id": 2,
@@ -188,7 +190,7 @@
             "description": "Buat akun admin dan akun lain beserta profiles.",
             "status": "pending",
             "details": "",
-            "parentId": 4
+            "parentId": "4"
           },
           {
             "id": 3,
@@ -196,7 +198,7 @@
             "description": "Semua rute kecuali /login.",
             "status": "pending",
             "details": "",
-            "parentId": 4
+            "parentId": "4"
           },
           {
             "id": 4,
@@ -204,7 +206,7 @@
             "description": "requireUser() dan requireAdmin() untuk halaman dan route handler.",
             "status": "pending",
             "details": "",
-            "parentId": 4
+            "parentId": "4"
           },
           {
             "id": 5,
@@ -212,7 +214,7 @@
             "description": "Cara sederhana mengganti password default.",
             "status": "pending",
             "details": "",
-            "parentId": 4
+            "parentId": "4"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -235,7 +237,7 @@
             "description": "AES-256-GCM dengan IV acak 12 byte.",
             "status": "pending",
             "details": "",
-            "parentId": 5
+            "parentId": "5"
           },
           {
             "id": 2,
@@ -243,7 +245,7 @@
             "description": "Panjang dan encoding, pesan galat jelas.",
             "status": "pending",
             "details": "",
-            "parentId": 5
+            "parentId": "5"
           },
           {
             "id": 3,
@@ -251,7 +253,7 @@
             "description": "Round trip, manipulasi data, kunci salah.",
             "status": "pending",
             "details": "",
-            "parentId": 5
+            "parentId": "5"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -275,7 +277,7 @@
             "description": "Registry adapter berdasarkan penyedia.",
             "status": "pending",
             "details": "",
-            "parentId": 6
+            "parentId": "6"
           },
           {
             "id": 2,
@@ -283,7 +285,7 @@
             "description": "Contents API, ETag, waktu commit terakhir.",
             "status": "pending",
             "details": "",
-            "parentId": 6
+            "parentId": "6"
           },
           {
             "id": 3,
@@ -291,7 +293,7 @@
             "description": "Raw file endpoint; dukung base URL self-hosted.",
             "status": "pending",
             "details": "",
-            "parentId": 6
+            "parentId": "6"
           },
           {
             "id": 4,
@@ -299,7 +301,7 @@
             "description": "Endpoint src dengan branch dan path.",
             "status": "pending",
             "details": "",
-            "parentId": 6
+            "parentId": "6"
           },
           {
             "id": 5,
@@ -307,7 +309,7 @@
             "description": "Ekstrak owner/repo, workspace/repo, atau path proyek.",
             "status": "pending",
             "details": "",
-            "parentId": 6
+            "parentId": "6"
           },
           {
             "id": 6,
@@ -315,7 +317,7 @@
             "description": "Respons tiruan dan pemetaan galat.",
             "status": "pending",
             "details": "",
-            "parentId": 6
+            "parentId": "6"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -338,7 +340,7 @@
             "description": "Per-tag atau { tasks }.",
             "status": "pending",
             "details": "",
-            "parentId": 7
+            "parentId": "7"
           },
           {
             "id": 2,
@@ -346,7 +348,7 @@
             "description": "ID jadi string, default aman untuk field kosong.",
             "status": "pending",
             "details": "",
-            "parentId": 7
+            "parentId": "7"
           },
           {
             "id": 3,
@@ -354,7 +356,7 @@
             "description": "Dipakai snapshot dan dashboard.",
             "status": "pending",
             "details": "",
-            "parentId": 7
+            "parentId": "7"
           },
           {
             "id": 4,
@@ -362,7 +364,7 @@
             "description": "Termasuk kasus gagal.",
             "status": "pending",
             "details": "",
-            "parentId": 7
+            "parentId": "7"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -388,7 +390,7 @@
             "description": "Murni: id sumber masuk, hasil keluar; dipakai route dan cron Tahap 2.",
             "status": "pending",
             "details": "",
-            "parentId": 8
+            "parentId": "8"
           },
           {
             "id": 2,
@@ -396,7 +398,7 @@
             "description": "Hapus yang hilang dari file, upsert sisanya.",
             "status": "pending",
             "details": "",
-            "parentId": 8
+            "parentId": "8"
           },
           {
             "id": 3,
@@ -404,7 +406,7 @@
             "description": "Satu per tag pada sinkronisasi berhasil.",
             "status": "pending",
             "details": "",
-            "parentId": 8
+            "parentId": "8"
           },
           {
             "id": 4,
@@ -412,7 +414,7 @@
             "description": "Status, pesan galat, ETag, waktu sinkron, waktu commit file.",
             "status": "pending",
             "details": "",
-            "parentId": 8
+            "parentId": "8"
           },
           {
             "id": 5,
@@ -420,7 +422,7 @@
             "description": "Tolak pemanggil tanpa login.",
             "status": "pending",
             "details": "",
-            "parentId": 8
+            "parentId": "8"
           },
           {
             "id": 6,
@@ -428,7 +430,7 @@
             "description": "Sukses, tidak berubah, gagal.",
             "status": "pending",
             "details": "",
-            "parentId": 8
+            "parentId": "8"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -453,7 +455,7 @@
             "description": "Tabel sumber dengan status dan aksi.",
             "status": "pending",
             "details": "",
-            "parentId": 9
+            "parentId": "9"
           },
           {
             "id": 2,
@@ -461,7 +463,7 @@
             "description": "Server action; kolom token write-only.",
             "status": "pending",
             "details": "",
-            "parentId": 9
+            "parentId": "9"
           },
           {
             "id": 3,
@@ -469,7 +471,7 @@
             "description": "Hasil: ditemukan (jumlah task), tidak ditemukan, atau galat autentikasi.",
             "status": "pending",
             "details": "",
-            "parentId": 9
+            "parentId": "9"
           },
           {
             "id": 4,
@@ -477,7 +479,7 @@
             "description": "Dengan konfirmasi.",
             "status": "pending",
             "details": "",
-            "parentId": 9
+            "parentId": "9"
           },
           {
             "id": 5,
@@ -485,7 +487,7 @@
             "description": "Periksa HTML dan payload.",
             "status": "pending",
             "details": "",
-            "parentId": 9
+            "parentId": "9"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -509,7 +511,7 @@
             "description": "Tanpa istilah teknis.",
             "status": "pending",
             "details": "",
-            "parentId": 10
+            "parentId": "10"
           },
           {
             "id": 2,
@@ -517,7 +519,7 @@
             "description": "View atau RPC.",
             "status": "pending",
             "details": "",
-            "parentId": 10
+            "parentId": "10"
           },
           {
             "id": 3,
@@ -525,7 +527,7 @@
             "description": "Permintaan paralel, hasil per aplikasi.",
             "status": "pending",
             "details": "",
-            "parentId": 10
+            "parentId": "10"
           },
           {
             "id": 4,
@@ -533,7 +535,7 @@
             "description": "Pesan galat dan waktu data terakhir yang berhasil.",
             "status": "pending",
             "details": "",
-            "parentId": 10
+            "parentId": "10"
           },
           {
             "id": 5,
@@ -541,7 +543,7 @@
             "description": "Parameter query aplikasi.",
             "status": "pending",
             "details": "",
-            "parentId": 10
+            "parentId": "10"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -564,7 +566,7 @@
             "description": "Aplikasi, tag, status, prioritas.",
             "status": "pending",
             "details": "",
-            "parentId": 11
+            "parentId": "11"
           },
           {
             "id": 2,
@@ -572,7 +574,7 @@
             "description": "Memakai indeks dari migrasi.",
             "status": "pending",
             "details": "",
-            "parentId": 11
+            "parentId": "11"
           },
           {
             "id": 3,
@@ -580,7 +582,7 @@
             "description": "Dihitung dari data subtask.",
             "status": "pending",
             "details": "",
-            "parentId": 11
+            "parentId": "11"
           },
           {
             "id": 4,
@@ -588,7 +590,7 @@
             "description": "Pesan jelas.",
             "status": "pending",
             "details": "",
-            "parentId": 11
+            "parentId": "11"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -611,7 +613,7 @@
             "description": "Pencarian dengan kunci gabungan.",
             "status": "pending",
             "details": "",
-            "parentId": 12
+            "parentId": "12"
           },
           {
             "id": 2,
@@ -619,7 +621,7 @@
             "description": "Markdown dengan sanitasi.",
             "status": "pending",
             "details": "",
-            "parentId": 12
+            "parentId": "12"
           },
           {
             "id": 3,
@@ -627,7 +629,7 @@
             "description": "Tautan dan lencana status.",
             "status": "pending",
             "details": "",
-            "parentId": 12
+            "parentId": "12"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -650,7 +652,7 @@
             "description": "Agregasi untuk tampilan gabungan.",
             "status": "pending",
             "details": "",
-            "parentId": 13
+            "parentId": "13"
           },
           {
             "id": 2,
@@ -658,7 +660,7 @@
             "description": "Warna aksesibel.",
             "status": "pending",
             "details": "",
-            "parentId": 13
+            "parentId": "13"
           },
           {
             "id": 3,
@@ -666,7 +668,7 @@
             "description": "State di URL.",
             "status": "pending",
             "details": "",
-            "parentId": 13
+            "parentId": "13"
           },
           {
             "id": 4,
@@ -674,7 +676,7 @@
             "description": "Tanpa interpolasi menyesatkan.",
             "status": "pending",
             "details": "",
-            "parentId": 13
+            "parentId": "13"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -698,7 +700,7 @@
             "description": "Pemetaan dari galat adapter.",
             "status": "pending",
             "details": "",
-            "parentId": 14
+            "parentId": "14"
           },
           {
             "id": 2,
@@ -706,7 +708,7 @@
             "description": "Kolom opsional di sumber dan peringatan dini.",
             "status": "pending",
             "details": "",
-            "parentId": 14
+            "parentId": "14"
           },
           {
             "id": 3,
@@ -714,7 +716,7 @@
             "description": "Di kartu dan pengaturan sumber.",
             "status": "pending",
             "details": "",
-            "parentId": 14
+            "parentId": "14"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -741,7 +743,7 @@
             "description": "Branch main di Vercel.",
             "status": "pending",
             "details": "",
-            "parentId": 15
+            "parentId": "15"
           },
           {
             "id": 2,
@@ -749,7 +751,7 @@
             "description": "Alur lengkap sebagai admin dan viewer.",
             "status": "pending",
             "details": "",
-            "parentId": 15
+            "parentId": "15"
           },
           {
             "id": 3,
@@ -757,7 +759,7 @@
             "description": "Waktu muat dan keberhasilan sinkron.",
             "status": "pending",
             "details": "",
-            "parentId": 15
+            "parentId": "15"
           },
           {
             "id": 4,
@@ -765,7 +767,7 @@
             "description": "Rotasi kunci, pencabutan token, seeder.",
             "status": "pending",
             "details": "",
-            "parentId": 15
+            "parentId": "15"
           }
         ],
         "updatedAt": "2026-11-06T10:59:04.253Z"
@@ -857,9 +859,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T10:59:04.253Z",
+      "lastModified": "2026-11-06T11:25:54.993Z",
       "taskCount": 21,
-      "completedCount": 0,
+      "completedCount": 1,
       "tags": [
         "master"
       ]
