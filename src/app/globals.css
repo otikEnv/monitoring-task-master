@@ -24,3 +24,65 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/*
+ * Palet grafik (halaman Tren). Urutan dari dasar ke puncak tumpukan:
+ *   selesai (hijau), dikerjakan (biru), terhambat (merah), ditinjau (ungu), menunggu (kuning), lainnya (magenta).
+ * Divalidasi dengan validate_palette.js pada permukaan #fcfcfb (terang) dan #1a1a19 (gelap):
+ *   - pemisahan CVD terburuk antarseri bersebelahan: 16,3 terang / 13,2 gelap (target >= 8)
+ *   - penglihatan normal terburuk: 19,6 terang / 19,3 gelap (batas >= 15)
+ *   - kontras terhadap permukaan: gelap semua >= 3:1; terang kuning (2,11) dan magenta (2,62) di bawah 3:1.
+ *     Itu sah hanya dengan "relief" yang WAJIB tetap ada: legenda bernama, tooltip nilai, dan tabel data.
+ * Warna mengikuti ENTITAS (status), bukan peringkat, dan serasi dengan lencana status di seluruh aplikasi.
+ * Urutan tumpukan bukan urutan alur kerja karena susunan itu (biru dan ungu bersebelahan) gagal validator.
+ * Mode gelap = anak tangga yang sama untuk permukaan gelap, bukan pembalikan otomatis.
+ */
+.viz-root {
+  color-scheme: light;
+  --viz-surface: #fcfcfb;
+  --viz-text-primary: #0b0b0b;
+  --viz-text-secondary: #52514e;
+  --viz-text-muted: #898781;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-done: #008300;
+  --viz-in-progress: #2a78d6;
+  --viz-blocked: #e34948;
+  --viz-review: #6250d6;
+  --viz-pending: #eda100;
+  --viz-other: #e87ba4;
+  --viz-good-text: #006300;
+  --viz-bad-text: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    color-scheme: dark;
+    --viz-surface: #1a1a19;
+    --viz-text-primary: #f0efec;
+    --viz-text-secondary: #c3c2b7;
+    --viz-grid: #2c2c2a;
+    --viz-axis: #383835;
+    --viz-in-progress: #3987e5;
+    --viz-blocked: #e66767;
+    --viz-review: #9085e9;
+    --viz-pending: #c98500;
+    --viz-other: #d55181;
+    --viz-good-text: #0ca30c;
+    --viz-bad-text: #e66767;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --viz-surface: #1a1a19;
+  --viz-text-primary: #f0efec;
+  --viz-text-secondary: #c3c2b7;
+  --viz-grid: #2c2c2a;
+  --viz-axis: #383835;
+  --viz-in-progress: #3987e5;
+  --viz-blocked: #e66767;
+  --viz-review: #9085e9;
+  --viz-pending: #c98500;
+  --viz-other: #d55181;
+  --viz-good-text: #0ca30c;
+  --viz-bad-text: #e66767;
+}

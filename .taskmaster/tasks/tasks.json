@@ -696,7 +696,7 @@
         "id": "13",
         "title": "Halaman Tren (grafik dari snapshot)",
         "description": "Grafik jumlah task per status dan persentase selesai dari waktu ke waktu, per aplikasi dan gabungan.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "8"
@@ -708,36 +708,40 @@
             "id": 1,
             "title": "Query snapshot per rentang dan sumber",
             "description": "Agregasi untuk tampilan gabungan.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "13"
+            "parentId": "13",
+            "updatedAt": "2026-11-06T19:17:29.676Z"
           },
           {
             "id": 2,
             "title": "Grafik jumlah per status dan persentase selesai",
             "description": "Warna aksesibel.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "13"
+            "parentId": "13",
+            "updatedAt": "2026-11-06T19:17:34.760Z"
           },
           {
             "id": 3,
             "title": "Pemilih rentang waktu dan aplikasi",
             "description": "State di URL.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "13"
+            "parentId": "13",
+            "updatedAt": "2026-11-06T19:17:39.993Z"
           },
           {
             "id": 4,
             "title": "Penanganan celah dan keadaan kosong",
             "description": "Tanpa interpolasi menyesatkan.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "13"
+            "parentId": "13",
+            "updatedAt": "2026-11-06T19:17:44.975Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T19:17:44.975Z"
       },
       {
         "id": "14",
@@ -917,9 +921,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T18:51:38.610Z",
+      "lastModified": "2026-11-06T19:17:44.975Z",
       "taskCount": 21,
-      "completedCount": 12,
+      "completedCount": 13,
       "tags": [
         "master"
       ]

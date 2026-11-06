@@ -12,8 +12,9 @@
    - `20261106010000_add_blocked_status.sql` - kolom `blocked` pada `snapshots` (sudah diterapkan)
    - `20261107000000_sync_apply_success.sql` - fungsi `sync_apply_success` (sudah diterapkan; penulisan hasil sinkronisasi secara atomik; hanya service role)
    - `20261107010000_source_status_counts_view.sql` - view `source_status_counts` (sudah diterapkan; hitungan task per status untuk kartu dashboard)
-   - `20261107020000_task_list_views.sql` - view `task_list` dan `source_tags` (halaman Daftar task: filter, urutan, paginasi)
-3. Tempel `tests/rls_test.sql` (serta `tests/sync_test.sql`, `tests/counts_view_test.sql`, dan `tests/task_list_test.sql` setelah migrasinya), lalu Run. Harapannya muncul notice `SEMUA UJI LOLOS` (tab Results/Messages). Kalau ada baris `FAIL: ...`, jangan lanjut.
+   - `20261107020000_task_list_views.sql` - view `task_list` dan `source_tags` (sudah diterapkan; halaman Daftar task: filter, urutan, paginasi)
+   - `20261107030000_source_snapshot_totals_view.sql` - view `source_snapshot_totals` (total per sinkronisasi untuk halaman Tren)
+3. Tempel `tests/rls_test.sql` (serta `tests/sync_test.sql`, `tests/counts_view_test.sql`, `tests/task_list_test.sql`, dan `tests/trend_view_test.sql` setelah migrasinya), lalu Run. Harapannya muncul notice `SEMUA UJI LOLOS` (tab Results/Messages). Kalau ada baris `FAIL: ...`, jangan lanjut.
 
 **Lewat Supabase CLI** (butuh `npx supabase login` dan `npx supabase link --project-ref <ref>`)
 `npx supabase db push`

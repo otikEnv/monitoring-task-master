@@ -15,6 +15,9 @@ export function AppHeader({ user }: { user: SessionUser }) {
         <Link href="/tasks" className="hover:underline">
           Daftar task
         </Link>
+        <Link href="/tren" className="hover:underline">
+          Tren
+        </Link>
         {user.role === "admin" && (
           <Link href="/pengaturan/sumber" className="hover:underline">
             Pengaturan sumber
