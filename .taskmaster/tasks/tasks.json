@@ -113,7 +113,7 @@
         "id": "3",
         "title": "Skema database dan Row Level Security",
         "description": "Migrasi SQL untuk empat entitas (sumber, task, snapshot, pengguna) beserta RLS.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "2"
@@ -125,44 +125,49 @@
             "id": 1,
             "title": "Migrasi tabel sources dan profiles",
             "description": "Enum penyedia dan peran.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "3"
+            "parentId": "3",
+            "updatedAt": "2026-11-06T11:30:26.152Z"
           },
           {
             "id": 2,
             "title": "Migrasi tabel tasks dan snapshots",
             "description": "Kunci gabungan dan indeks untuk filter aplikasi, tag, status, prioritas.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "3"
+            "parentId": "3",
+            "updatedAt": "2026-11-06T11:30:31.463Z"
           },
           {
             "id": 3,
             "title": "Tulis kebijakan RLS",
             "description": "Baca untuk pengguna login, tulis sumber hanya admin.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "3"
+            "parentId": "3",
+            "updatedAt": "2026-11-06T11:30:36.545Z"
           },
           {
             "id": 4,
             "title": "Sembunyikan kolom token dari klien",
             "description": "View atau column privileges untuk daftar sumber tanpa token.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "3"
+            "parentId": "3",
+            "updatedAt": "2026-11-06T11:30:41.486Z"
           },
           {
             "id": 5,
             "title": "Terapkan migrasi ke proyek Supabase",
             "description": "Lewat Supabase CLI atau SQL editor; dokumentasikan caranya.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "3"
+            "parentId": "3",
+            "updatedAt": "2026-11-06T11:33:30.276Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T11:33:30.276Z"
       },
       {
         "id": "4",
@@ -859,9 +864,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T11:25:54.993Z",
+      "lastModified": "2026-11-06T11:33:30.276Z",
       "taskCount": 21,
-      "completedCount": 1,
+      "completedCount": 2,
       "tags": [
         "master"
       ]
