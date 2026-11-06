@@ -654,7 +654,7 @@
         "id": "12",
         "title": "Halaman Detail task",
         "description": "Judul, deskripsi, detail implementasi, strategi pengujian, dependensi yang dapat diklik, dan subtask beserta statusnya.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "11"
@@ -666,28 +666,31 @@
             "id": 1,
             "title": "Rute dan query detail",
             "description": "Pencarian dengan kunci gabungan.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "12"
+            "parentId": "12",
+            "updatedAt": "2026-11-06T18:51:29.363Z"
           },
           {
             "id": 2,
             "title": "Render teks panjang dengan aman",
             "description": "Markdown dengan sanitasi.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "12"
+            "parentId": "12",
+            "updatedAt": "2026-11-06T18:51:33.977Z"
           },
           {
             "id": 3,
             "title": "Dependensi dan subtask",
             "description": "Tautan dan lencana status.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "12"
+            "parentId": "12",
+            "updatedAt": "2026-11-06T18:51:38.610Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T18:51:38.610Z"
       },
       {
         "id": "13",
@@ -914,9 +917,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T18:31:28.783Z",
+      "lastModified": "2026-11-06T18:51:38.610Z",
       "taskCount": 21,
-      "completedCount": 11,
+      "completedCount": 12,
       "tags": [
         "master"
       ]
