@@ -351,7 +351,7 @@
         "id": "7",
         "title": "Normalizer tasks.json (dua bentuk file)",
         "description": "Membaca dan menormalisasi file Taskmaster bentuk per-tag dan bentuk lama menjadi baris task.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1"
@@ -363,36 +363,40 @@
             "id": 1,
             "title": "Deteksi bentuk file",
             "description": "Per-tag atau { tasks }.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "7"
+            "parentId": "7",
+            "updatedAt": "2026-11-06T16:30:41.851Z"
           },
           {
             "id": 2,
             "title": "Normalisasi field task dan subtask",
             "description": "ID jadi string, default aman untuk field kosong.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "7"
+            "parentId": "7",
+            "updatedAt": "2026-11-06T16:30:48.411Z"
           },
           {
             "id": 3,
             "title": "Hitung jumlah per status dan persentase selesai",
             "description": "Dipakai snapshot dan dashboard.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "7"
+            "parentId": "7",
+            "updatedAt": "2026-11-06T16:30:54.661Z"
           },
           {
             "id": 4,
             "title": "Uji dengan fixture",
             "description": "Termasuk kasus gagal.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "7"
+            "parentId": "7",
+            "updatedAt": "2026-11-06T16:31:01.315Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T16:31:01.315Z"
       },
       {
         "id": "8",
@@ -884,9 +888,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T12:15:27.298Z",
+      "lastModified": "2026-11-06T16:31:01.315Z",
       "taskCount": 21,
-      "completedCount": 5,
+      "completedCount": 6,
       "tags": [
         "master"
       ]
