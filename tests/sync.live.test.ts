@@ -129,6 +129,24 @@ describe.skipIf(!ENABLED)("sinkronisasi nyata (echoapp -> Supabase)", () => {
     expect((await source()).last_sync_status).toBe("failed");
   });
 
+  it("token palsu dan tanggal kedaluwarsa SUDAH LEWAT: pesan 'token kedaluwarsa' dengan tanggalnya, tersimpan untuk dashboard", async () => {
+    const tasksBefore = await count("tasks");
+    await db.from("sources").update({
+      token_encrypted: encryptToken("ghp_palsu1234567890"), token_expires_at: "2026-11-01T09:30:29Z", etag: null,
+    }).eq("id", sourceId);
+
+    const r = await syncSource(sourceId, deps());
+    expect(r).toMatchObject({ status: "failed", error: { kind: "token_expired" } });
+    const msg = r.status === "failed" ? r.error.message : "";
+    expect(msg).toContain("Token kedaluwarsa pada 01 Nov 2026");
+    expect(msg).toContain("Pengaturan sumber");
+
+    const s = await source();
+    expect(s.last_sync_status).toBe("failed");
+    expect(s.last_error).toBe(msg); // pesan yang sama yang dibaca dashboard
+    expect(await count("tasks")).toBe(tasksBefore); // data terakhir yang berhasil tetap ada
+  });
+
   it("token terenkripsi rusak: token_decrypt, tanpa memanggil GitHub", async () => {
     await db.from("sources").update({ token_encrypted: "v1.rusak.rusak.rusak" }).eq("id", sourceId);
     const r = await syncSource(sourceId, deps());

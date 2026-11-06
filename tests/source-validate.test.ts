@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { formatDate, formatDateInput, tokenExpiryState } from "@/lib/format";
 import { parseSourceForm } from "@/lib/sources/validate";
 
 const base = {
@@ -126,10 +127,32 @@ describe("token", () => {
 });
 
 describe("tanggal kedaluwarsa token", () => {
-  it("kosong -> null; tanggal valid -> akhir hari UTC", () => {
+  it("kosong -> null; tanggal valid -> akhir hari menurut WIB (23.59.59 WIB = 16.59.59 UTC)", () => {
     expect((parse({ tokenExpiresAt: "" }) as { ok: true; value: { tokenExpiresAt: string | null } }).value.tokenExpiresAt).toBeNull();
     const r = parse({ tokenExpiresAt: "2027-02-04" });
-    expect(r.ok && r.value.tokenExpiresAt).toBe("2027-02-04T23:59:59.000Z");
+    expect(r.ok && r.value.tokenExpiresAt).toBe("2027-02-04T16:59:59.000Z");
+  });
+
+  it("REGRESI: tanggal yang diketik admin sama persis dengan yang ditampilkan dan diisi ulang di form (tidak bergeser sehari)", () => {
+    // Bug asli: disimpan sebagai 23.59.59 UTC, yang di WIB sudah hari berikutnya, sehingga 4 Feb tampil sebagai 5 Feb.
+    for (const typed of ["2027-02-04", "2026-12-31", "2028-02-29", "2027-01-01", "2027-03-01"]) {
+      const r = parse({ tokenExpiresAt: typed });
+      const stored = r.ok ? r.value.tokenExpiresAt : null;
+      expect(stored).not.toBeNull();
+      expect(formatDateInput(stored)).toBe(typed); // yang diisi ulang di form
+      const shown = formatDate(stored); // yang tampil di daftar dan dashboard
+      const [y, m, d] = typed.split("-").map(Number);
+      expect(shown).toContain(String(y));
+      expect(shown.startsWith(String(d).padStart(2, "0"))).toBe(true);
+      expect(shown).toContain(["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"][m - 1]);
+    }
+  });
+
+  it("kedaluwarsa pada akhir hari: token berlaku sampai 23.59 WIB, kedaluwarsa tepat sesudahnya", () => {
+    const r = parse({ tokenExpiresAt: "2027-02-04" });
+    const t = new Date(r.ok ? r.value.tokenExpiresAt! : "").getTime();
+    expect(tokenExpiryState(new Date(t).toISOString(), t - 1)).not.toBe("expired"); // 23.59.58 WIB: masih berlaku
+    expect(tokenExpiryState(new Date(t).toISOString(), t + 1)).toBe("expired"); // 00.00.00 WIB berikutnya
   });
   it("menolak format salah dan tanggal yang tidak ada", () => {
     expect(errorsOf({ tokenExpiresAt: "04/02/2027" }).tokenExpiresAt).toBeTruthy();

@@ -747,7 +747,7 @@
         "id": "14",
         "title": "Penanda gagal, data usang, dan kedaluwarsa token",
         "description": "Kegagalan dibuat eksplisit di seluruh aplikasi: sumber gagal, data usang, token kedaluwarsa.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "8",
@@ -760,28 +760,31 @@
             "id": 1,
             "title": "Taksonomi galat dan pesan bahasa Indonesia",
             "description": "Pemetaan dari galat adapter.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "14"
+            "parentId": "14",
+            "updatedAt": "2026-11-06T19:34:32.029Z"
           },
           {
             "id": 2,
             "title": "Catat tanggal kedaluwarsa token",
             "description": "Kolom opsional di sumber dan peringatan dini.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "14"
+            "parentId": "14",
+            "updatedAt": "2026-11-06T19:34:37.693Z"
           },
           {
             "id": 3,
             "title": "Tampilkan waktu commit terakhir tasks.json",
             "description": "Di kartu dan pengaturan sumber.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "14"
+            "parentId": "14",
+            "updatedAt": "2026-11-06T19:34:42.661Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T19:34:42.661Z"
       },
       {
         "id": "15",
@@ -921,9 +924,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T19:17:44.975Z",
+      "lastModified": "2026-11-06T19:34:42.661Z",
       "taskCount": 21,
-      "completedCount": 13,
+      "completedCount": 14,
       "tags": [
         "master"
       ]

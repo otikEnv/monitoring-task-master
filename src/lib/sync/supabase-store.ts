@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { SourceRecord, SuccessPayload, SyncStore } from "./types";
 
 const SOURCE_COLUMNS =
-  "id, name, provider, repo_url, branch, file_path, token_encrypted, is_active, etag, last_synced_at";
+  "id, name, provider, repo_url, branch, file_path, token_encrypted, token_expires_at, is_active, etag, last_synced_at";
 
 /** Penyimpanan sinkronisasi di Supabase. Memakai service role: HANYA untuk kode server. */
 export function createSupabaseStore(db: SupabaseClient = createAdminClient()): SyncStore {

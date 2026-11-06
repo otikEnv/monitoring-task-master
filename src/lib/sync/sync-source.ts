@@ -1,5 +1,6 @@
 import "server-only";
 import { decryptToken } from "@/lib/crypto";
+import { formatDate } from "@/lib/format";
 import { getAdapter } from "@/lib/providers";
 import { ProviderError, type ProviderAdapter } from "@/lib/providers/types";
 import {
@@ -88,7 +89,18 @@ export async function syncSource(
         etag: source.etag,
       });
     } catch (e) {
-      if (e instanceof ProviderError) return await fail(e.kind, e.message);
+      if (e instanceof ProviderError) {
+        // Penyedia hanya menjawab 401 untuk token salah, dicabut, maupun kedaluwarsa. Bila kedaluwarsanya
+        // sudah kita ketahui dan sudah lewat, katakan itu secara jelas (PRD: kedaluwarsa token harus terlihat).
+        const expiresAt = source.token_expires_at ? Date.parse(source.token_expires_at) : NaN;
+        if (e.kind === "unauthorized" && Number.isFinite(expiresAt) && expiresAt <= deps.now()) {
+          return await fail(
+            "token_expired",
+            `Token kedaluwarsa pada ${formatDate(source.token_expires_at)}. Buat token baru lalu isi lewat Pengaturan sumber.`,
+          );
+        }
+        return await fail(e.kind, e.message);
+      }
       throw e;
     }
 

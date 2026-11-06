@@ -25,6 +25,14 @@ export function formatDate(iso: string | null | undefined): string {
   });
 }
 
+/** yyyy-mm-dd menurut WIB, untuk nilai awal <input type="date"> (konsisten dengan tampilan formatDate). */
+export function formatDateInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;

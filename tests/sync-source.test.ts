@@ -27,6 +27,7 @@ const source = (over: Partial<SourceRecord> = {}): SourceRecord => ({
   branch: "stg",
   file_path: ".taskmaster/tasks/tasks.json",
   token_encrypted: STORED,
+  token_expires_at: null,
   is_active: true,
   etag: '"etag-lama"',
   last_synced_at: "2026-11-05T00:00:00Z",
@@ -60,11 +61,13 @@ function setup(opts: {
   sources?: SourceRecord[];
   fetchFile?: (p: Parameters<ProviderAdapter["fetchFile"]>[0]) => Promise<FetchFileResult>;
   decrypt?: (s: string) => string;
+  /** Waktu awal jam tiruan (ms). Bawaan 1000 (1970); atur ke waktu nyata untuk menguji kedaluwarsa. */
+  nowBase?: number;
 } = {}) {
   const fs_ = fakeStore(opts.sources ?? [source()]);
   const fetchFile = vi.fn(opts.fetchFile ?? (async () => FILE_OK));
   const adapter: ProviderAdapter = { provider: "github", validateRepoUrl: () => null, fetchFile };
-  let t = 1000;
+  let t = opts.nowBase ?? 1000;
   const deps: SyncDeps = {
     store: fs_.store,
     decrypt: opts.decrypt ?? ((s) => (s === STORED ? TOKEN : "salah")),
@@ -231,6 +234,81 @@ describe("kegagalan mempertahankan data terakhir yang berhasil", () => {
     noSecrets(r);
     expect(JSON.stringify(t.log.failed)).not.toContain(TOKEN);
     expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(TOKEN);
+  });
+});
+
+describe("token kedaluwarsa yang sudah diketahui", () => {
+  // Jam tiruan: 7 Nov 2026 12.00 UTC.
+  const NOW = Date.UTC(2026, 10, 7, 12);
+  const unauthorized = async () => { throw new ProviderError("unauthorized", "Token ditolak (401): salah, dicabut, atau kedaluwarsa."); };
+  const run = async (expiresAt: string | null, fetchFile: () => Promise<FetchFileResult> = unauthorized) => {
+    const t = setup({ sources: [source({ token_expires_at: expiresAt })], fetchFile, nowBase: NOW });
+    return { t, r: await syncSource(ID_A, t.deps) };
+  };
+
+  it("401 dan tanggal kedaluwarsa sudah lewat -> pesan token kedaluwarsa dengan tanggalnya", async () => {
+    const { t, r } = await run("2026-11-01T09:30:29.000Z");
+    expect(r).toMatchObject({ status: "failed", error: { kind: "token_expired" } });
+    const msg = r.status === "failed" ? r.error.message : "";
+    expect(msg).toContain("Token kedaluwarsa pada 01 Nov 2026");
+    expect(msg).toContain("Pengaturan sumber"); // tahu apa yang harus dilakukan
+    expect(t.log.failed).toEqual([{ id: ID_A, message: msg }]); // pesan yang sama tersimpan untuk dashboard
+    expect(t.log.applied).toEqual([]);
+    noSecrets(r);
+  });
+
+  it("tanggal ditampilkan menurut WIB (tidak bergeser sehari)", async () => {
+    // 4 Feb 2027 23:59:59 WIB = 16:59:59 UTC pada hari yang sama -> tetap 04 Feb
+    const { r } = await run("2026-02-04T16:59:59.000Z");
+    expect(r.status === "failed" && r.error.message).toContain("04 Feb 2026");
+    // 20.00 UTC = 03.00 WIB hari berikutnya -> 05 Feb
+    const { r: r2 } = await run("2026-02-04T20:00:00.000Z");
+    expect(r2.status === "failed" && r2.error.message).toContain("05 Feb 2026");
+  });
+
+  it("401 tetapi kedaluwarsa masih di masa depan -> pesan umum (kita tidak tahu penyebabnya)", async () => {
+    const { r } = await run("2027-02-04T09:30:29.000Z");
+    expect(r).toMatchObject({ status: "failed", error: { kind: "unauthorized" } });
+    expect(r.status === "failed" && r.error.message).toMatch(/salah, dicabut, atau kedaluwarsa/);
+  });
+
+  it("401 tanpa tanggal kedaluwarsa -> pesan umum", async () => {
+    const { r } = await run(null);
+    expect(r).toMatchObject({ status: "failed", error: { kind: "unauthorized" } });
+  });
+
+  it("tanggal kedaluwarsa tidak valid -> pesan umum, tanpa galat", async () => {
+    const { r } = await run("bukan-tanggal");
+    expect(r).toMatchObject({ status: "failed", error: { kind: "unauthorized" } });
+  });
+
+  it("tepat pada saat kedaluwarsa dianggap sudah kedaluwarsa (batas <=)", async () => {
+    const at = (expiresAt: number) => {
+      const t = setup({ sources: [source({ token_expires_at: new Date(expiresAt).toISOString() })], fetchFile: unauthorized });
+      t.deps.now = () => NOW; // jam TETAP: batasnya terukur sampai milidetik
+      return syncSource(ID_A, t.deps);
+    };
+    expect(await at(NOW)).toMatchObject({ status: "failed", error: { kind: "token_expired" } }); // tepat = kedaluwarsa
+    expect(await at(NOW - 1)).toMatchObject({ error: { kind: "token_expired" } });
+    expect(await at(NOW + 1)).toMatchObject({ error: { kind: "unauthorized" } }); // 1 ms lagi = belum
+  });
+
+  it("jenis galat lain tidak diubah walau tanggalnya sudah lewat (404, 403, jaringan, rate limit)", async () => {
+    for (const kind of ["not_found", "forbidden", "network", "rate_limited", "server_error", "timeout"] as const) {
+      const { r } = await run("2026-01-01T00:00:00.000Z", async () => { throw new ProviderError(kind, `pesan ${kind}`); });
+      expect(r).toMatchObject({ status: "failed", error: { kind, message: `pesan ${kind}` } });
+    }
+  });
+
+  it("sinkronisasi yang berhasil tidak terpengaruh tanggal kedaluwarsa yang sudah lewat", async () => {
+    // mis. penyedia tidak menegakkan kedaluwarsa, atau tanggal di database sudah usang
+    const { r } = await run("2026-01-01T00:00:00.000Z", async () => FILE_OK);
+    expect(r.status).toBe("success");
+  });
+
+  it("pesan tidak memuat token", async () => {
+    const { r } = await run("2026-11-01T00:00:00.000Z");
+    expect(JSON.stringify(r)).not.toContain(TOKEN);
   });
 });
 

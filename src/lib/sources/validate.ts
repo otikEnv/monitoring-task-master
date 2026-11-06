@@ -89,7 +89,8 @@ export function parseSourceForm(fd: FormData, opts: { requireToken: boolean }): 
   let tokenExpiresAt: string | null = null;
   if (expRaw) {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expRaw);
-    const d = m ? new Date(`${expRaw}T23:59:59Z`) : null;
+    // Akhir hari menurut WIB (UTC+7), zona yang dipakai di seluruh tampilan: tanggal yang diketik = tanggal yang terlihat.
+    const d = m ? new Date(`${expRaw}T23:59:59+07:00`) : null;
     // Date menggeser tanggal tidak valid (30 Feb -> 2 Mar); tolak bila bulan/harinya berubah.
     if (!m || !d || Number.isNaN(d.getTime()) || d.getUTCMonth() + 1 !== Number(m[2]) || d.getUTCDate() !== Number(m[3])) {
       errors.tokenExpiresAt = "Tanggal tidak valid.";

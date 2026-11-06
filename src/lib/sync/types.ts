@@ -10,6 +10,8 @@ export type SourceRecord = {
   branch: string;
   file_path: string;
   token_encrypted: string | null;
+  /** Tanggal kedaluwarsa token bila diketahui (dilaporkan penyedia atau diisi admin). */
+  token_expires_at: string | null;
   is_active: boolean;
   etag: string | null;
   last_synced_at: string | null;
@@ -39,6 +41,7 @@ export interface SyncStore {
 
 export type SyncErrorKind =
   | "no_token"
+  | "token_expired"
   | "token_decrypt"
   | "invalid_file"
   | "storage"

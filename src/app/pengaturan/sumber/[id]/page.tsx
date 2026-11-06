@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { requireAdmin } from "@/lib/auth";
+import { formatDateInput } from "@/lib/format";
 import { getSourceView } from "@/lib/sources/repo";
 import { SourceForm } from "../source-form";
 
@@ -44,7 +45,7 @@ async function EditSourceContent({ params }: { params: Promise<{ id: string }> }
             branch: source.branch,
             filePath: source.filePath,
             hasToken: source.hasToken,
-            tokenExpiresOn: source.tokenExpiresAt ? source.tokenExpiresAt.slice(0, 10) : "",
+            tokenExpiresOn: formatDateInput(source.tokenExpiresAt),
           }}
         />
       </main>
