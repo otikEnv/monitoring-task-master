@@ -173,7 +173,7 @@
         "id": "4",
         "title": "Login, seeder akun, dan peran admin/viewer",
         "description": "Login email dan password lewat Supabase Auth tanpa pendaftaran publik; akun dibuat lewat seeder.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "3"
@@ -185,44 +185,49 @@
             "id": 1,
             "title": "Halaman login",
             "description": "Form email dan password, status galat.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "4"
+            "parentId": "4",
+            "updatedAt": "2026-11-06T11:49:47.961Z"
           },
           {
             "id": 2,
             "title": "Script seeder idempoten",
             "description": "Buat akun admin dan akun lain beserta profiles.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "4"
+            "parentId": "4",
+            "updatedAt": "2026-11-06T11:43:20.535Z"
           },
           {
             "id": 3,
             "title": "Proteksi rute dan penyegaran sesi",
             "description": "Semua rute kecuali /login.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "4"
+            "parentId": "4",
+            "updatedAt": "2026-11-06T11:43:26.245Z"
           },
           {
             "id": 4,
             "title": "Helper peran di server",
             "description": "requireUser() dan requireAdmin() untuk halaman dan route handler.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "4"
+            "parentId": "4",
+            "updatedAt": "2026-11-06T11:43:32.083Z"
           },
           {
             "id": 5,
             "title": "Ganti password setelah login pertama",
             "description": "Cara sederhana mengganti password default.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "4"
+            "parentId": "4",
+            "updatedAt": "2026-11-06T11:49:59.949Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T11:49:59.949Z"
       },
       {
         "id": "5",
@@ -864,9 +869,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T11:33:30.276Z",
+      "lastModified": "2026-11-06T11:49:59.950Z",
       "taskCount": 21,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "master"
       ]
