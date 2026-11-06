@@ -542,7 +542,7 @@
         "id": "10",
         "title": "Halaman Dashboard (kartu per aplikasi dan Segarkan)",
         "description": "Satu kartu per aplikasi dengan jumlah task per status, persentase selesai, waktu sinkron, penanda gagal, dan tombol Segarkan.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8",
@@ -555,44 +555,49 @@
             "id": 1,
             "title": "Komponen kartu dan grid responsif",
             "description": "Tanpa istilah teknis.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "10"
+            "parentId": "10",
+            "updatedAt": "2026-11-06T18:14:35.751Z"
           },
           {
             "id": 2,
             "title": "Query agregat jumlah per status",
             "description": "View atau RPC.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "10"
+            "parentId": "10",
+            "updatedAt": "2026-11-06T18:14:08.315Z"
           },
           {
             "id": 3,
             "title": "Segarkan satu dan semua sumber",
             "description": "Permintaan paralel, hasil per aplikasi.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "10"
+            "parentId": "10",
+            "updatedAt": "2026-11-06T18:14:13.063Z"
           },
           {
             "id": 4,
             "title": "Penanda gagal dan usang",
             "description": "Pesan galat dan waktu data terakhir yang berhasil.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "10"
+            "parentId": "10",
+            "updatedAt": "2026-11-06T18:14:17.643Z"
           },
           {
             "id": 5,
             "title": "Tautan kartu ke daftar task terfilter",
             "description": "Parameter query aplikasi.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "10"
+            "parentId": "10",
+            "updatedAt": "2026-11-06T18:14:22.275Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T18:14:35.751Z"
       },
       {
         "id": "11",
@@ -905,9 +910,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T17:55:09.894Z",
+      "lastModified": "2026-11-06T18:14:35.751Z",
       "taskCount": 21,
-      "completedCount": 9,
+      "completedCount": 10,
       "tags": [
         "master"
       ]
