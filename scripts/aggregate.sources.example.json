@@ -1,0 +1,10 @@
+[
+  {
+    "name": "echoapp",
+    "provider": "github",
+    "repoUrl": "https://github.com/OWNER/REPO",
+    "branch": "stg",
+    "path": ".taskmaster/tasks/tasks.json",
+    "tokenEnv": "AGG_TOKEN_ECHOAPP"
+  }
+]

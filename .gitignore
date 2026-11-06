@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 !.env.example
+
+# Script agregator Fase 0 (sementara): hasil tarikan mentah dan daftar sumber lokal
+/.aggregate-out/
+/scripts/aggregate.sources.json

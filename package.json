@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:users": "node --experimental-websocket --env-file=.env.local scripts/seed-users.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "aggregate": "node --env-file=.env.local scripts/aggregate.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -5,7 +5,7 @@
         "id": "1",
         "title": "Fase 0: Validasi data - script agregator tasks.json",
         "description": "Script yang menarik tasks.json dari semua repo yang dipantau ke satu file untuk memvalidasi sumber data.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD Rencana rilis, Fase 0. Script Node (scripts/aggregate.mjs) membaca daftar sumber (penyedia, URL repo, branch, path, token dari env), mengambil file lewat API penyedia, mengenali dua bentuk file ({ master: { tasks } } dan { tasks }), lalu mencetak jumlah task per aplikasi, per tag, dan per status. Bukti awal: tasks.json repo echoapp (branch stg) terbaca lewat GitHub API dengan 200 OK, sekitar 660 KB. Galat harus jelas, bukan dianggap 0 task. Hasilnya juga dipakai sebagai fixture uji normalizer.",
@@ -15,28 +15,31 @@
             "id": 1,
             "title": "Tentukan daftar sumber untuk script",
             "description": "File konfigurasi lokal: penyedia, URL repo, branch, path file, nama env untuk token. Token tidak ditulis di file.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "1"
+            "parentId": "1",
+            "updatedAt": "2026-11-06T12:07:43.890Z"
           },
           {
             "id": 2,
             "title": "Ambil dan parse file tiap repo",
             "description": "GitHub dulu (GET /repos/{owner}/{repo}/contents/{path}?ref={branch} dengan Accept: application/vnd.github.raw+json), lalu GitLab dan Bitbucket.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "1"
+            "parentId": "1",
+            "updatedAt": "2026-11-06T12:07:50.293Z"
           },
           {
             "id": 3,
             "title": "Cetak ringkasan dan simpan fixture",
             "description": "Jumlah task per aplikasi, tag, dan status; simpan contoh yang sudah disanitasi ke tests/fixtures.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "1"
+            "parentId": "1",
+            "updatedAt": "2026-11-06T12:07:56.488Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T12:07:56.488Z"
       },
       {
         "id": "2",
@@ -872,9 +875,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T12:00:38.459Z",
+      "lastModified": "2026-11-06T12:07:56.488Z",
       "taskCount": 21,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "master"
       ]

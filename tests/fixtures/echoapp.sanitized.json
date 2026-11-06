@@ -1,0 +1,238 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Task 1",
+        "description": "Deskripsi disanitasi.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Detail disanitasi.",
+        "testStrategy": "Strategi pengujian disanitasi.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Subtask 1",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 1,
+            "title": "Subtask 2",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 1,
+            "title": "Subtask 3",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "Task 2",
+        "description": "Deskripsi disanitasi.",
+        "status": "in-progress",
+        "priority": "medium",
+        "dependencies": [
+          "5"
+        ],
+        "details": "Detail disanitasi.",
+        "testStrategy": "Strategi pengujian disanitasi.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Subtask 1",
+            "description": "Deskripsi disanitasi.",
+            "status": "in-progress",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 2,
+            "title": "Subtask 2",
+            "description": "Deskripsi disanitasi.",
+            "status": "in-progress",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 3,
+            "title": "Subtask 3",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          }
+        ]
+      },
+      {
+        "id": "7",
+        "title": "Task 3",
+        "description": "Deskripsi disanitasi.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "5",
+          "6"
+        ],
+        "details": "Detail disanitasi.",
+        "testStrategy": "Strategi pengujian disanitasi.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Subtask 1",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 2,
+            "title": "Subtask 2",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 3,
+            "title": "Subtask 3",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          }
+        ]
+      },
+      {
+        "id": "165",
+        "title": "Task 4",
+        "description": "Deskripsi disanitasi.",
+        "status": "blocked",
+        "priority": "medium",
+        "dependencies": [
+          "159",
+          "160",
+          "161"
+        ],
+        "details": "Detail disanitasi.",
+        "testStrategy": "Strategi pengujian disanitasi.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Subtask 1",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 2,
+            "title": "Subtask 2",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 3,
+            "title": "Subtask 3",
+            "description": "Deskripsi disanitasi.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Task 5",
+        "description": "Deskripsi disanitasi.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "details": "Detail disanitasi.",
+        "testStrategy": "Strategi pengujian disanitasi.",
+        "subtasks": [
+          {
+            "id": 2,
+            "title": "Subtask 1",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 2,
+            "title": "Subtask 2",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 2,
+            "title": "Subtask 3",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          }
+        ]
+      },
+      {
+        "id": "3",
+        "title": "Task 6",
+        "description": "Deskripsi disanitasi.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "2"
+        ],
+        "details": "Detail disanitasi.",
+        "testStrategy": "Strategi pengujian disanitasi.",
+        "subtasks": [
+          {
+            "id": 3,
+            "title": "Subtask 1",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 3,
+            "title": "Subtask 2",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          },
+          {
+            "id": 3,
+            "title": "Subtask 3",
+            "description": "Deskripsi disanitasi.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Detail disanitasi."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "sanitized": true
+    }
+  }
+}
