@@ -233,7 +233,7 @@
         "id": "5",
         "title": "Enkripsi token repository",
         "description": "Modul enkripsi AES-256-GCM untuk token akses, kunci dari environment.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "2"
@@ -245,28 +245,31 @@
             "id": 1,
             "title": "Implementasi enkripsi dan dekripsi",
             "description": "AES-256-GCM dengan IV acak 12 byte.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "5"
+            "parentId": "5",
+            "updatedAt": "2026-11-06T12:00:25.418Z"
           },
           {
             "id": 2,
             "title": "Validasi kunci saat dimuat",
             "description": "Panjang dan encoding, pesan galat jelas.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "5"
+            "parentId": "5",
+            "updatedAt": "2026-11-06T12:00:32.035Z"
           },
           {
             "id": 3,
             "title": "Unit test",
             "description": "Round trip, manipulasi data, kunci salah.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "5"
+            "parentId": "5",
+            "updatedAt": "2026-11-06T12:00:38.458Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T12:00:38.458Z"
       },
       {
         "id": "6",
@@ -869,9 +872,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T11:49:59.950Z",
+      "lastModified": "2026-11-06T12:00:38.459Z",
       "taskCount": 21,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]
