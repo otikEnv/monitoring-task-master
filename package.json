@@ -24,6 +24,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",
+    "task-master-ai": "^0.43.1",
     "typescript": "^5"
   }
 }
