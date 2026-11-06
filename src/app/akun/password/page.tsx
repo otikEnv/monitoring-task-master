@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { requireUser } from "@/lib/auth";
 import { PasswordForm } from "./password-form";
 
 export const metadata: Metadata = { title: "Ganti password" };
 
-export default async function PasswordPage() {
+// Cache Components aktif: bagian yang membaca sesi (cookies) harus di dalam <Suspense>.
+export default function PasswordPage() {
+  return (
+    <Suspense fallback={<p className="px-4 py-8 text-sm text-neutral-500">Memuat…</p>}>
+      <PasswordContent />
+    </Suspense>
+  );
+}
+
+async function PasswordContent() {
   const user = await requireUser();
 
   return (

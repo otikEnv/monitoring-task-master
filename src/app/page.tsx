@@ -1,8 +1,18 @@
+import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { requireUser } from "@/lib/auth";
 
 // Sementara: halaman beranda terproteksi. Dashboard sebenarnya dibuat di task 10.
-export default async function Home() {
+// Cache Components aktif: bagian yang membaca sesi (cookies) harus di dalam <Suspense>.
+export default function Home() {
+  return (
+    <Suspense fallback={<p className="px-4 py-8 text-sm text-neutral-500">Memuat…</p>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
   const user = await requireUser();
 
   return (
