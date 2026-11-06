@@ -603,7 +603,7 @@
         "id": "11",
         "title": "Halaman Daftar task lintas aplikasi",
         "description": "Tabel semua task lintas aplikasi dengan filter dan pengurutan.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8"
@@ -615,36 +615,40 @@
             "id": 1,
             "title": "Tabel dan filter yang tersinkron ke URL",
             "description": "Aplikasi, tag, status, prioritas.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "11"
+            "parentId": "11",
+            "updatedAt": "2026-11-06T18:31:14.553Z"
           },
           {
             "id": 2,
             "title": "Query server dengan pagination dan urutan",
             "description": "Memakai indeks dari migrasi.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "11"
+            "parentId": "11",
+            "updatedAt": "2026-11-06T18:31:19.397Z"
           },
           {
             "id": 3,
             "title": "Kolom subtask selesai dari total",
             "description": "Dihitung dari data subtask.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "11"
+            "parentId": "11",
+            "updatedAt": "2026-11-06T18:31:24.073Z"
           },
           {
             "id": 4,
             "title": "Keadaan kosong dan memuat",
             "description": "Pesan jelas.",
-            "status": "pending",
+            "status": "done",
             "details": "",
-            "parentId": "11"
+            "parentId": "11",
+            "updatedAt": "2026-11-06T18:31:28.783Z"
           }
         ],
-        "updatedAt": "2026-11-06T10:59:04.253Z"
+        "updatedAt": "2026-11-06T18:31:28.783Z"
       },
       {
         "id": "12",
@@ -910,9 +914,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T18:14:35.751Z",
+      "lastModified": "2026-11-06T18:31:28.783Z",
       "taskCount": 21,
-      "completedCount": 10,
+      "completedCount": 11,
       "tags": [
         "master"
       ]

@@ -49,3 +49,30 @@ export const STATUS_TONE: Record<DisplayStatus, string> = {
   cancelled: "bg-neutral-100 text-neutral-500 line-through dark:bg-neutral-900 dark:text-neutral-500",
   other: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
 };
+
+const RAW_TO_KEY: Record<string, DisplayStatus> = {
+  pending: "pending",
+  "in-progress": "in_progress",
+  review: "review",
+  blocked: "blocked",
+  done: "done",
+  deferred: "deferred",
+  cancelled: "cancelled",
+};
+
+/** Nilai status mentah di tasks.json -> status tampilan ("other" untuk yang tak dikenal). */
+export function displayStatus(raw: string): DisplayStatus {
+  return RAW_TO_KEY[raw] ?? "other";
+}
+
+export const PRIORITY_LABEL: Record<string, string> = {
+  high: "Tinggi",
+  medium: "Sedang",
+  low: "Rendah",
+};
+
+export const PRIORITY_TONE: Record<string, string> = {
+  high: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
+  medium: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  low: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+};

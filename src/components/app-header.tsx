@@ -12,6 +12,9 @@ export function AppHeader({ user }: { user: SessionUser }) {
         <span className="text-neutral-500">
           {user.email} · {user.role}
         </span>
+        <Link href="/tasks" className="hover:underline">
+          Daftar task
+        </Link>
         {user.role === "admin" && (
           <Link href="/pengaturan/sumber" className="hover:underline">
             Pengaturan sumber
