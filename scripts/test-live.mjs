@@ -8,7 +8,7 @@ const root = path.resolve(import.meta.dirname, "..");
 if (!loadEnv()) console.error("Tidak ada .env.local atau .env; uji langsung dilewati.");
 
 const vitest = path.join(root, "node_modules", "vitest", "vitest.mjs");
-const r = spawnSync(process.execPath, [vitest, "run", "tests/providers.live.test.ts"], {
+const r = spawnSync(process.execPath, [vitest, "run", ".live.test"], {
   cwd: root,
   stdio: "inherit",
   env: process.env,

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:users": "node --experimental-websocket scripts/seed-users.mjs",
+    "seed:users": "node scripts/seed-users.mjs",
     "test": "vitest run",
     "aggregate": "node scripts/aggregate.mjs",
     "test:live": "node scripts/test-live.mjs"
