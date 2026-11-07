@@ -55,12 +55,12 @@ export async function authorizeApi(minRole: Role = "viewer") {
   const user = await getSessionUser();
   if (!user) {
     return {
-      error: NextResponse.json({ error: "Belum login" }, { status: 401 }),
+      error: NextResponse.json({ error: "Not signed in" }, { status: 401 }),
     } as const;
   }
   if (minRole === "admin" && user.role !== "admin") {
     return {
-      error: NextResponse.json({ error: "Tidak diizinkan" }, { status: 403 }),
+      error: NextResponse.json({ error: "Not allowed" }, { status: 403 }),
     } as const;
   }
   return { user } as const;

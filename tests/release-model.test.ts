@@ -8,7 +8,7 @@ const task = (taskId: string, status = "pending", extra: Partial<TaskInput> = {}
   taskId, title: `Task ${taskId}`, status, priority: null, dependencies: [], subtasksTotal: 0, subtasksDone: 0, ...extra,
 });
 
-// Rentang 10..19, jendela 1..21 Nov 2026 (20 hari). "Hari ini" diatur per tes.
+// Range 10..19, jendela 1..21 Nov 2026 (20 hari). "Hari ini" diatur per tes.
 const def: ReleaseDef = { rangeStart: 10, rangeEnd: 19, startDate: "2026-11-01", targetDate: "2026-11-21", releasedOn: null };
 const at = (ymd: string) => new Date(`${ymd}T12:00:00+07:00`);
 
@@ -126,7 +126,7 @@ describe("penanda risiko", () => {
     expect(s.risk).toBe("at_risk");
   });
 
-  it("task terhambat memicu berisiko walau progres sesuai waktu", () => {
+  it("task blocked memicu berisiko walau progres sesuai waktu", () => {
     const s = computeRelease(def, tenTasks(5, (i) => (i === 9 ? { status: "blocked" } : {})), now);
     expect(s.gap).toBeCloseTo(0);
     expect(s.risk).toBe("at_risk");
@@ -161,7 +161,7 @@ describe("hambatan dari dependensi", () => {
   const now = at("2026-11-02");
   const ext = (status: string) => [task("5", status, { title: "Di luar" })];
 
-  it("dependensi di luar rentang yang belum selesai: menunggu dan memicu berisiko", () => {
+  it("dependensi di luar rentang yang belum selesai: pending dan memicu berisiko", () => {
     const s = computeRelease(
       def,
       [...ext("pending"), task("10", "pending", { dependencies: [5] }), task("11", "pending")],
@@ -191,7 +191,7 @@ describe("hambatan dari dependensi", () => {
     expect(s.risk).toBe("on_track");
   });
 
-  it("task selesai atau dibatalkan tidak dianggap menunggu", () => {
+  it("tasks done atau dibatalkan tidak dianggap pending", () => {
     const s = computeRelease(
       def,
       [...ext("pending"), task("10", "done", { dependencies: [5] }), task("11", "cancelled", { dependencies: [5] })],

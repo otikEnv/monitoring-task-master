@@ -55,7 +55,7 @@ export function ReleaseDetailView({
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Navigasi" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+      <nav aria-label="Navigation" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
         <Link href="/release" className="hover:underline">Release</Link>
         <span aria-hidden="true">›</span>
         <span aria-current="page">{sourceName} · {release.name}</span>
@@ -74,13 +74,13 @@ export function ReleaseDetailView({
         <dl className="grid gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
           <div><dt className="inline">Tag: </dt><dd className="inline text-foreground">{release.tag}</dd></div>
           <div>
-            <dt className="inline">Rentang task: </dt>
+            <dt className="inline">Task range: </dt>
             <dd className="inline text-foreground">
               {formatRange(release.rangeStart, release.rangeEnd)}
-              {stats.firstId && ` (yang ada: #${stats.firstId}–#${stats.lastId})`}
+              {stats.firstId && ` (existing: #${stats.firstId}–#${stats.lastId})`}
             </dd>
           </div>
-          <div><dt className="inline">Mulai: </dt><dd className="inline text-foreground">{formatYmd(release.startDate)}</dd></div>
+          <div><dt className="inline">Start: </dt><dd className="inline text-foreground">{formatYmd(release.startDate)}</dd></div>
           <div>
             <dt className="inline">Target: </dt>
             <dd className="inline text-foreground">
@@ -89,63 +89,62 @@ export function ReleaseDetailView({
             </dd>
           </div>
           {released && (
-            <div><dt className="inline">Dirilis: </dt><dd className="inline text-foreground">{formatYmd(release.releasedOn)}</dd></div>
+            <div><dt className="inline">Released: </dt><dd className="inline text-foreground">{formatYmd(release.releasedOn)}</dd></div>
           )}
           <div>
-            <dt className="inline">Data task diperbarui: </dt>
+            <dt className="inline">Task data updated: </dt>
             <dd className="inline text-foreground">{formatDateTime(overview.lastSyncedAt)}</dd>
           </div>
         </dl>
         {!overview.tagFound && (
           <p role="status" className="rounded-md bg-muted p-3 text-sm">
-            Tag <strong>{release.tag}</strong> tidak ditemukan pada data terakhir. Angka di bawah dianggap nol; ubah
-            tag release bila namanya berganti di repo.
+            Tag <strong>{release.tag}</strong> was not found in the latest data. The numbers below are treated as zero; edit the release tag if it was renamed in the repo.
           </p>
         )}
         {(!overview.sourceActive || overview.syncStatus === "failed") && (
           <p role="status" className="rounded-md bg-muted p-3 text-sm">
-            {!overview.sourceActive && "Aplikasi ini nonaktif. "}
+            {!overview.sourceActive && "This application is inactive. "}
             {overview.syncStatus === "failed" &&
-              `Sinkronisasi terakhir gagal; data berasal dari sinkronisasi yang berhasil pada ${formatDateTime(overview.lastSyncedAt)}.`}
+              `The last sync failed; the data comes from the last successful sync on ${formatDateTime(overview.lastSyncedAt)}.`}
           </p>
         )}
       </header>
 
       {released && (
         <p className="text-sm">
-          Dirilis pada <strong>{formatYmd(release.releasedOn)}</strong>
-          {stats.percentDone !== null && <>, progres task saat ini {stats.percentDone}%</>}.
+          Released on <strong>{formatYmd(release.releasedOn)}</strong>
+          {stats.percentDone !== null && <>, current task progress {stats.percentDone}%</>}.
         </p>
       )}
 
       <section aria-labelledby="sec-ringkasan" className="space-y-3">
-        <h2 id="sec-ringkasan" className="sr-only">Ringkasan</h2>
+        <h2 id="sec-ringkasan" className="sr-only">Summary</h2>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Tile label="Total task" value={stats.total} />
-          <Tile label="Selesai" value={stats.done} hint={stats.percentDone === null ? undefined : `${stats.percentDone}% dari total`} />
-          <Tile label="Dalam pengerjaan" value={stats.inProgress} hint="dikerjakan dan ditinjau" />
-          <Tile label="Perlu perhatian" value={attentionCount} hint="terhambat, ditunda, dibatalkan" />
+          <Tile label="Total tasks" value={stats.total} />
+          <Tile label="Done" value={stats.done} hint={stats.percentDone === null ? undefined : `${stats.percentDone}% of total`} />
+          <Tile label="In progress" value={stats.inProgress} hint="in progress and in review" />
+          <Tile label="Needs attention" value={attentionCount} hint="blocked, deferred, cancelled" />
         </div>
       </section>
 
       <section aria-labelledby="sec-progres" className={section}>
-        <h2 id="sec-progres" className={heading}>Progres</h2>
+        <h2 id="sec-progres" className={heading}>Progress</h2>
         {stats.total === 0 ? (
-          <p className="text-sm text-muted-foreground">Belum ada task di rentang ini.</p>
+          <p className="text-sm text-muted-foreground">No tasks in this range yet.</p>
         ) : (
           <>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-3xl font-semibold tabular-nums">{stats.percentDone}%</p>
               <p className="text-sm text-muted-foreground">
-                {stats.done} dari {stats.total} selesai
-                {!released && <> · waktu berjalan {Math.round(stats.elapsedPercent)}%</>}
+                {stats.done} of {stats.total} done
+                {!released && <> · time elapsed {Math.round(stats.elapsedPercent)}%</>}
                 {!released && stats.gap !== null && stats.gap > 0 && (
-                  <> · tertinggal {Math.round(stats.gap)} poin dari waktu</>
+                  <> · {Math.round(stats.gap)} points behind the elapsed time</>
                 )}
               </p>
             </div>
             <ReleaseProgress
-              label={`Progres ${sourceName} ${release.name}`}
+              label={`Progress ${sourceName} ${release.name}`}
               counts={stats.counts}
               total={stats.total}
               percent={stats.percentDone}
@@ -153,20 +152,20 @@ export function ReleaseDetailView({
           </>
         )}
         <p className="text-xs text-muted-foreground">
-          Penanda dihitung dari selisih persen waktu yang sudah lewat dan persen task selesai: tertinggal lebih dari{" "}
-          {AMBANG_BERISIKO} poin = Berisiko, lebih dari {AMBANG_TERTINGGAL} poin = Tertinggal. Task terhambat atau
-          dependensi di luar rentang yang belum selesai juga menandai Berisiko. Ini panduan, bukan prediksi pasti.
+          The indicator compares the share of time that has elapsed with the share of tasks done: more than{" "}
+          {AMBANG_BERISIKO} points behind = At risk, more than {AMBANG_TERTINGGAL} points behind = Behind. Blocked tasks or
+          unfinished dependencies outside the range also mark the release At risk. This is guidance, not an exact prediction.
         </p>
       </section>
 
       <section aria-labelledby="sec-perhatian" className={section}>
-        <h2 id="sec-perhatian" className={heading}>Perlu perhatian</h2>
+        <h2 id="sec-perhatian" className={heading}>Needs attention</h2>
         {!hasAttention ? (
-          <p className="text-sm text-muted-foreground">Tidak ada hambatan.</p>
+          <p className="text-sm text-muted-foreground">No blockers.</p>
         ) : (
           <div className="space-y-5">
             {attention.blocked.length > 0 && (
-              <Group title={`Terhambat (${attention.blocked.length})`}>
+              <Group title={`Blocked (${attention.blocked.length})`}>
                 {attention.blocked.map((t) => (
                   <li key={t.taskId}><TaskLink sourceId={sourceId} tag={release.tag} task={t} /></li>
                 ))}
@@ -174,14 +173,14 @@ export function ReleaseDetailView({
             )}
             {attention.waiting.length > 0 && (
               <Group
-                title={`Menunggu task di luar rentang (${attention.waiting.length})`}
-                hint="Dependensi ini tidak dihitung di progres release, tetapi menahan task di dalamnya."
+                title={`Waiting on tasks outside the range (${attention.waiting.length})`}
+                hint="These dependencies are not counted in the release progress, but they hold back tasks inside it."
               >
                 {attention.waiting.map((w) => (
                   <li key={w.task.taskId} className="space-y-0.5">
                     <TaskLink sourceId={sourceId} tag={release.tag} task={w.task} />
                     <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                      menunggu
+                      waiting on
                       {w.deps.map((d) => (
                         <span key={d.id} className="inline-flex items-center gap-1.5">
                           <Link href={taskHref(sourceId, release.tag, d.id)} className="underline">#{d.id} {d.title}</Link>
@@ -195,8 +194,8 @@ export function ReleaseDetailView({
             )}
             {attention.deferred.length + attention.cancelled.length > 0 && (
               <Group
-                title={`Perlu dievaluasi: ditunda ${attention.deferred.length}, dibatalkan ${attention.cancelled.length}`}
-                hint="Tetap dihitung di total sehingga terlihat apa yang menahan progres."
+                title={`To evaluate: ${attention.deferred.length} deferred, ${attention.cancelled.length} cancelled`}
+                hint="Still counted in the total so you can see what is holding back progress."
               >
                 {[...attention.deferred, ...attention.cancelled]
                   .sort((a, b) => a.seq - b.seq)
@@ -210,13 +209,13 @@ export function ReleaseDetailView({
             )}
             {attention.missingDeps.length > 0 && (
               <Group
-                title={`Dependensi tidak ditemukan (${attention.missingDeps.length})`}
-                hint="ID dependensi ini tidak ada pada tag ini; periksa tasks.json di repo."
+                title={`Dependencies not found (${attention.missingDeps.length})`}
+                hint="These dependency IDs do not exist in this tag; check tasks.json in the repo."
               >
                 {attention.missingDeps.map((m) => (
                   <li key={m.task.taskId} className="space-y-0.5">
                     <TaskLink sourceId={sourceId} tag={release.tag} task={m.task} />
-                    <p className="text-xs text-muted-foreground">bergantung pada {m.ids.map((i) => `#${i}`).join(", ")}</p>
+                    <p className="text-xs text-muted-foreground">depends on {m.ids.map((i) => `#${i}`).join(", ")}</p>
                   </li>
                 ))}
               </Group>
@@ -226,10 +225,10 @@ export function ReleaseDetailView({
       </section>
 
       <section aria-labelledby="sec-task" className="space-y-3">
-        <h2 id="sec-task" className={heading}>Task di rentang ({stats.total})</h2>
+        <h2 id="sec-task" className={heading}>Tasks in range ({stats.total})</h2>
         {stats.total === 0 ? (
           <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-            Belum ada task di rentang ini.
+            No tasks in this range yet.
           </p>
         ) : (
           <div className="rounded-xl border bg-card">
@@ -237,9 +236,9 @@ export function ReleaseDetailView({
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead scope="col" className="w-16">ID</TableHead>
-                  <TableHead scope="col">Judul</TableHead>
+                  <TableHead scope="col">Title</TableHead>
                   <TableHead scope="col">Status</TableHead>
-                  <TableHead scope="col">Prioritas</TableHead>
+                  <TableHead scope="col">Priority</TableHead>
                   <TableHead scope="col" className="text-right">Subtask</TableHead>
                 </TableRow>
               </TableHeader>
@@ -266,7 +265,7 @@ export function ReleaseDetailView({
       </section>
 
       <p>
-        <Link href="/release" className="text-sm text-muted-foreground hover:underline">← Kembali ke daftar release</Link>
+        <Link href="/release" className="text-sm text-muted-foreground hover:underline">← Back to release list</Link>
       </p>
     </div>
   );

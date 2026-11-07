@@ -9,7 +9,7 @@ import { requireUser } from "@/lib/auth";
 import { getTaskDetail } from "@/lib/tasks/detail";
 import { parseDetailKey, type TaskDetail } from "@/lib/tasks/detail-model";
 
-export const metadata: Metadata = { title: "Detail task" };
+export const metadata: Metadata = { title: "Task detail" };
 
 type Params = Promise<{ sourceId: string; tag: string; taskId: string }>;
 
@@ -35,7 +35,7 @@ async function TaskDetailContent({ params }: { params: Params }) {
     console.error("[detail-task] gagal memuat data", { error: (e as Error)?.name });
     return (
       <AppShell user={user} width="narrow">
-        <LoadError title="Detail task belum bisa dimuat." />
+        <LoadError title="The task detail could not be loaded." />
       </AppShell>
     );
   }

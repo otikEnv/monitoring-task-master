@@ -67,7 +67,7 @@ export async function syncSource(
 
   try {
     if (!source.token_encrypted) {
-      return await fail("no_token", "Token belum diisi untuk sumber ini.");
+      return await fail("no_token", "No token has been set for this source.");
     }
 
     let token: string;
@@ -96,7 +96,7 @@ export async function syncSource(
         if (e.kind === "unauthorized" && Number.isFinite(expiresAt) && expiresAt <= deps.now()) {
           return await fail(
             "token_expired",
-            `Token kedaluwarsa pada ${formatDate(source.token_expires_at)}. Buat token baru lalu isi lewat Pengaturan sumber.`,
+            `The token expired on ${formatDate(source.token_expires_at)}. Create a new token and enter it in Source settings.`,
           );
         }
         return await fail(e.kind, e.message);
@@ -134,7 +134,7 @@ export async function syncSource(
       });
     } catch (e) {
       console.error("[sync] gagal menyimpan hasil", { sourceId, error: (e as Error)?.name });
-      return await fail("storage", "Gagal menyimpan hasil sinkronisasi. Data sebelumnya tetap dipakai.");
+      return await fail("storage", "Could not save the sync result. The previous data is still in use.");
     }
 
     return {
@@ -150,6 +150,6 @@ export async function syncSource(
   } catch (e) {
     // Galat tak terduga. Hanya nama galat yang dicatat; pesan aslinya bisa memuat data sensitif.
     console.error("[sync] galat tak terduga", { sourceId, error: (e as Error)?.name });
-    return await fail("internal", "Terjadi kesalahan internal saat sinkronisasi.");
+    return await fail("internal", "An internal error occurred during sync.");
   }
 }

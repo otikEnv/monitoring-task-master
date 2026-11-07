@@ -112,7 +112,7 @@ describe("nextSort", () => {
     expect(nextSort(P({ sort: "title", dir: "asc" }), "title")).toEqual({ sort: "title", dir: "desc" });
     expect(nextSort(P({ sort: "title", dir: "desc" }), "title")).toEqual({ sort: "title", dir: "asc" });
   });
-  it("kolom baru mulai dari naik", () => {
+  it("kolom baru mulai dari up", () => {
     expect(nextSort(P({ sort: "title", dir: "desc" }), "id")).toEqual({ sort: "id", dir: "asc" });
   });
 });

@@ -20,7 +20,7 @@ export function RowActions({ id, name, isActive }: { id: string; name: string; i
       setError(null);
       const res = await fn();
       if (res.ok) toast.success(success);
-      else setError(res.error ?? "Gagal.");
+      else setError(res.error ?? "Failed.");
       setConfirming(false);
     });
 
@@ -28,18 +28,18 @@ export function RowActions({ id, name, isActive }: { id: string; name: string; i
     <div className="space-y-1">
       <div className="flex flex-wrap gap-1.5">
         <Link href={`/pengaturan/sumber/${id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-          Ubah
+          Edit
         </Link>
         <Button
           type="button" variant="outline" size="sm" disabled={pending}
           onClick={() =>
-            run(() => setActive(id, !isActive), isActive ? `${name} dinonaktifkan.` : `${name} diaktifkan.`)
+            run(() => setActive(id, !isActive), isActive ? `${name} deactivated.` : `${name} activated.`)
           }
         >
-          {isActive ? "Nonaktifkan" : "Aktifkan"}
+          {isActive ? "Deactivate" : "Activate"}
         </Button>
         <Button type="button" variant="destructive" size="sm" disabled={pending} onClick={() => setConfirming(true)}>
-          Hapus
+          Delete
         </Button>
       </div>
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
@@ -47,18 +47,18 @@ export function RowActions({ id, name, isActive }: { id: string; name: string; i
       <AlertDialog open={confirming} onOpenChange={(o) => !pending && setConfirming(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus {name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Semua task dan riwayat tren aplikasi ini ikut terhapus dan tidak bisa dikembalikan.
+              All tasks and trend history of this application are deleted too and cannot be restored.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <Button
               type="button" variant="destructive" disabled={pending}
-              onClick={() => run(() => removeSource(id), `${name} dihapus.`)}
+              onClick={() => run(() => removeSource(id), `${name} deleted.`)}
             >
-              {pending ? "Menghapus…" : "Ya, hapus"}
+              {pending ? "Deleting…" : "Yes, delete"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -17,16 +17,16 @@ export async function changePassword(
   const confirm = String(formData.get("confirm") ?? "");
 
   if (password.length < MIN_LENGTH) {
-    return { error: `Password minimal ${MIN_LENGTH} karakter.` };
+    return { error: `Password must be at least ${MIN_LENGTH} characters.` };
   }
   if (password !== confirm) {
-    return { error: "Konfirmasi password tidak sama." };
+    return { error: "Password confirmation does not match." };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
-    return { error: "Gagal mengganti password. Coba masuk ulang lalu ulangi." };
+    return { error: "Could not change the password. Sign in again and retry." };
   }
-  return { success: "Password berhasil diganti." };
+  return { success: "Password changed." };
 }

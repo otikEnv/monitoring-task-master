@@ -12,7 +12,7 @@ import { requireUser } from "@/lib/auth";
 import { hasActiveFilters, parseTaskListParams } from "@/lib/tasks/list-params";
 import { getTaskList, type TaskListResult } from "@/lib/tasks/list";
 
-export const metadata: Metadata = { title: "Daftar task" };
+export const metadata: Metadata = { title: "Task list" };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -41,33 +41,33 @@ async function TasksContent({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <AppShell user={user}>
-      <PageHeader title="Daftar task" description="Semua task dari seluruh aplikasi yang dipantau." />
+      <PageHeader title="Task list" description="All tasks from every monitored application." />
 
       {!data ? (
-        <LoadError title="Daftar task belum bisa dimuat." />
+        <LoadError title="The task list could not be loaded." />
       ) : (
         <>
           {/* key: formulir dibangun ulang saat URL berubah agar pilihan selalu sama dengan URL */}
           <FilterBar key={JSON.stringify(data.params)} params={data.params} sources={data.sources} tags={data.tags} />
 
           {data.ignoredTag && (
-            <Notice>Tag &ldquo;{data.ignoredTag}&rdquo; tidak ada pada pilihan aplikasi ini, jadi filter tag diabaikan.</Notice>
+            <Notice>Tag &ldquo;{data.ignoredTag}&rdquo; does not exist for the selected application, so the tag filter was ignored.</Notice>
           )}
 
           <p className="text-sm text-muted-foreground" aria-live="polite">
-            {data.total === 0 ? "Tidak ada task." : `Menampilkan ${from}–${to} dari ${data.total} task`}
+            {data.total === 0 ? "No tasks." : `Showing ${from}–${to} of ${data.total} tasks`}
           </p>
 
           {data.total === 0 ? (
             <EmptyState>
               {hasActiveFilters(data.params) ? (
                 <>
-                  Tidak ada task yang cocok dengan filter.{" "}
-                  <Link href="/tasks" className="underline">Hapus semua filter</Link>
+                  No tasks match the filters.{" "}
+                  <Link href="/tasks" className="underline">Clear all filters</Link>
                 </>
               ) : (
                 <>
-                  Belum ada task. Sinkronkan aplikasi lewat tombol Segarkan di{" "}
+                  No tasks yet. Sync an application with the Refresh button on the{" "}
                   <Link href="/" className="underline">Dashboard</Link>.
                 </>
               )}

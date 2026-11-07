@@ -21,8 +21,8 @@ export function TrendControls({
   return (
     <div className="flex flex-wrap items-end gap-x-6 gap-y-3 rounded-xl border bg-card p-4">
       <div className="space-y-1.5">
-        <p className="text-xs font-medium text-muted-foreground">Rentang waktu</p>
-        <div role="group" aria-label="Rentang waktu" className="inline-flex gap-1 rounded-lg bg-muted p-1">
+        <p className="text-xs font-medium text-muted-foreground">Time range</p>
+        <div role="group" aria-label="Time range" className="inline-flex gap-1 rounded-lg bg-muted p-1">
           {RANGES.map((r) => {
             const on = params.range === r;
             return (
@@ -45,18 +45,18 @@ export function TrendControls({
       <form ref={form} method="get" action="/tren" onChange={() => form.current?.requestSubmit()} className="flex items-end gap-2">
         {params.range !== DEFAULT_RANGE && <input type="hidden" name="range" value={params.range} />}
         <div className="space-y-1.5">
-          <Label htmlFor="trend-source" className="text-xs text-muted-foreground">Aplikasi</Label>
+          <Label htmlFor="trend-source" className="text-xs text-muted-foreground">Application</Label>
           <NativeSelect id="trend-source" name="source" defaultValue={params.source ?? ""} className="min-w-56">
-            <option value="">Semua aplikasi (gabungan)</option>
+            <option value="">All applications (combined)</option>
             {sources.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
-                {s.isActive ? "" : " (nonaktif)"}
+                {s.isActive ? "" : " (inactive)"}
               </option>
             ))}
           </NativeSelect>
         </div>
-        <Button type="submit" variant="outline">Terapkan</Button>
+        <Button type="submit" variant="outline">Apply</Button>
       </form>
     </div>
   );

@@ -15,11 +15,11 @@ export function PasswordForm() {
       <CardContent>
         <form action={action} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="password">Password baru</Label>
+            <Label htmlFor="password">New password</Label>
             <Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirm">Ulangi password baru</Label>
+            <Label htmlFor="confirm">Repeat new password</Label>
             <Input id="confirm" name="confirm" type="password" autoComplete="new-password" minLength={8} required />
           </div>
 
@@ -35,7 +35,7 @@ export function PasswordForm() {
           )}
 
           <Button type="submit" disabled={pending}>
-            {pending ? "Menyimpan…" : "Simpan password"}
+            {pending ? "Saving…" : "Save password"}
           </Button>
         </form>
       </CardContent>

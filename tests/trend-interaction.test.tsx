@@ -60,7 +60,7 @@ describe("navigasi keyboard", () => {
     fireEvent.focus(percentOverlay());
     expect(tooltips()).toHaveLength(1);
     expect(tooltips()[0].textContent).toContain("75%");
-    expect(tooltips()[0].textContent).toContain("90 dari 120 task");
+    expect(tooltips()[0].textContent).toContain("90 of 120 tasks");
   });
 
   it("panah kiri dan kanan berpindah antar titik dan tidak melewati ujung", () => {
@@ -122,7 +122,7 @@ describe("navigasi keyboard", () => {
     mount();
     for (const o of overlays()) {
       expect(o.getAttribute("tabindex")).toBe("0");
-      expect(o.getAttribute("aria-label")).toMatch(/panah kiri dan kanan/);
+      expect(o.getAttribute("aria-label")).toMatch(/left and right arrow keys/);
     }
   });
 });
@@ -167,7 +167,7 @@ describe("penunjuk (crosshair menempel ke titik terdekat)", () => {
     mount();
     fireEvent.pointerMove(percentOverlay(), { clientX: xOf(POINTS[1].t) });
     expect(tooltips()).toHaveLength(1);
-    expect(tooltips()[0].textContent).toContain("selesai"); // tooltip persentase
+    expect(tooltips()[0].textContent).toContain("done"); // tooltip persentase
     // pada grafik kolom, kolom lain diredupkan (dua dari tiga), kolom aktif tetap terang
     const dimmed = document.querySelectorAll('g[opacity="0.55"]');
     expect(dimmed).toHaveLength(2);
@@ -189,7 +189,7 @@ describe("isi tooltip", () => {
     expect(t).toMatch(/01 Nov 2026/);
     expect(t).toMatch(/10[.:]00/); // 03:00 UTC = 10:00 WIB
     expect(t).toContain("40%");
-    expect(t).toContain("40 dari 100 task");
+    expect(t).toContain("40 of 100 tasks");
   });
 
   it("kolom: keenam seri dalam urutan dari puncak ke dasar, dengan nilai dan total", () => {
@@ -198,13 +198,13 @@ describe("isi tooltip", () => {
     const t = tooltips()[0];
     const items = [...t.querySelectorAll("li")].map((li) => li.textContent ?? "");
     expect(items).toHaveLength(6);
-    // titik pertama: lainnya = ditunda 5 + dibatalkan 3 + lainnya 2 = 10 (puncak), lalu menunggu 20, ditinjau 5, terhambat 5, dikerjakan 20, selesai 40
-    expect(items[0]).toMatch(/10.*Ditunda, dibatalkan, lainnya/);
-    expect(items[1]).toMatch(/20.*Menunggu/);
-    expect(items[2]).toMatch(/5.*Ditinjau/);
-    expect(items[3]).toMatch(/5.*Terhambat/);
-    expect(items[4]).toMatch(/20.*Dikerjakan/);
-    expect(items[5]).toMatch(/40.*Selesai/);
+    // titik pertama: lainnya = ditunda 5 + dibatalkan 3 + lainnya 2 = 10 (puncak), lalu pending 20, ditinjau 5, blocked 5, in progress 20, selesai 40
+    expect(items[0]).toMatch(/10.*Deferred, cancelled, other/);
+    expect(items[1]).toMatch(/20.*Pending/);
+    expect(items[2]).toMatch(/5.*In review/);
+    expect(items[3]).toMatch(/5.*Blocked/);
+    expect(items[4]).toMatch(/20.*In progress/);
+    expect(items[5]).toMatch(/40.*Done/);
     expect(t.textContent).toContain("Total");
     expect(t.textContent).toContain("100");
   });
@@ -242,10 +242,10 @@ describe("pembaca layar", () => {
     const o = percentOverlay();
     fireEvent.keyDown(o, { key: "Home" });
     expect(announce()).toMatch(/01 Nov 2026/);
-    expect(announce()).toContain("40% selesai");
-    expect(announce()).toContain("40 dari 100 task");
+    expect(announce()).toContain("40% done");
+    expect(announce()).toContain("40 of 100 tasks");
     fireEvent.keyDown(o, { key: "End" });
-    expect(announce()).toContain("75% selesai");
+    expect(announce()).toContain("75% done");
     fireEvent.keyDown(o, { key: "Escape" });
     expect(announce()).toBe("");
   });

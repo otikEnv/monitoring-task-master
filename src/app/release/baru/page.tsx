@@ -9,7 +9,7 @@ import { getSourceOptions, type SourceOption } from "@/lib/releases/load";
 import { parseReleaseListParams } from "@/lib/releases/params";
 import { ReleaseForm } from "../release-form";
 
-export const metadata: Metadata = { title: "Tambah release" };
+export const metadata: Metadata = { title: "Add release" };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -37,9 +37,9 @@ async function NewReleaseContent({ searchParams }: { searchParams: SearchParams 
 
   return (
     <AppShell user={user} width="narrow">
-      <PageHeader title="Tambah release" description="Target rilis dengan rentang nomor task pada satu aplikasi dan tag." />
+      <PageHeader title="Add release" description="A release target with a task number range on one application and tag." />
       {!sources ? (
-        <LoadError title="Pilihan aplikasi belum bisa dimuat." />
+        <LoadError title="The application options could not be loaded." />
       ) : (
         <ReleaseForm
           sources={sources}

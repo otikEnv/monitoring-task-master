@@ -9,12 +9,12 @@ import type { TaskListRow } from "@/lib/tasks/list";
 import { PRIORITY_LABEL, PRIORITY_TONE, STATUS_LABEL, STATUS_TONE, displayStatus } from "@/lib/status";
 
 const COLUMNS: Array<{ key: SortKey; label: string; className?: string }> = [
-  { key: "app", label: "Aplikasi" },
+  { key: "app", label: "Application" },
   { key: "tag", label: "Tag" },
   { key: "id", label: "ID", className: "w-16" },
-  { key: "title", label: "Judul" },
+  { key: "title", label: "Title" },
   { key: "status", label: "Status" },
-  { key: "priority", label: "Prioritas" },
+  { key: "priority", label: "Priority" },
   { key: "subtasks", label: "Subtask", className: "text-right" },
 ];
 
@@ -22,7 +22,7 @@ export function StatusBadge({ status }: { status: string }) {
   const key = displayStatus(status);
   return (
     <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_TONE[key]}`}>
-      {key === "other" ? `Lainnya (${status})` : STATUS_LABEL[key]}
+      {key === "other" ? `Other (${status})` : STATUS_LABEL[key]}
     </span>
   );
 }
@@ -41,7 +41,7 @@ export function TaskTable({ rows, params }: { rows: TaskListRow[]; params: TaskL
   return (
     <div className="rounded-xl border bg-card">
       <Table className="min-w-[56rem]">
-        <TableCaption className="sr-only">Daftar task semua aplikasi</TableCaption>
+        <TableCaption className="sr-only">Task list for all applications</TableCaption>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             {COLUMNS.map((c) => {

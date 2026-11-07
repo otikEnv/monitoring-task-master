@@ -26,9 +26,9 @@ export function ReleaseFilter({
       className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
     >
       <div className="min-w-48 space-y-1.5">
-        <Label htmlFor="r-source" className="text-xs text-muted-foreground">Aplikasi</Label>
+        <Label htmlFor="r-source" className="text-xs text-muted-foreground">Application</Label>
         <NativeSelect id="r-source" name="source" defaultValue={params.source ?? ""} className="w-full">
-          <option value="">Semua aplikasi</option>
+          <option value="">All applications</option>
           {sources.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
@@ -37,13 +37,13 @@ export function ReleaseFilter({
 
       <label className="flex items-center gap-2 pb-2 text-sm">
         <input type="checkbox" name="rilis" value="1" defaultChecked={params.showReleased} className="size-4 accent-primary" />
-        Tampilkan yang sudah rilis
+        Show released
       </label>
 
       <div className="flex items-center gap-2 pb-0.5">
-        <Button type="submit" variant="outline" size="sm">Terapkan</Button>
+        <Button type="submit" variant="outline" size="sm">Apply</Button>
         {active && (
-          <Link href="/release" className={buttonVariants({ variant: "ghost", size: "sm" })}>Hapus filter</Link>
+          <Link href="/release" className={buttonVariants({ variant: "ghost", size: "sm" })}>Clear filters</Link>
         )}
       </div>
     </form>

@@ -61,7 +61,7 @@ function setup(opts: {
   sources?: SourceRecord[];
   fetchFile?: (p: Parameters<ProviderAdapter["fetchFile"]>[0]) => Promise<FetchFileResult>;
   decrypt?: (s: string) => string;
-  /** Waktu awal jam tiruan (ms). Bawaan 1000 (1970); atur ke waktu nyata untuk menguji kedaluwarsa. */
+  /** Time awal jam tiruan (ms). Bawaan 1000 (1970); atur ke waktu nyata untuk menguji kedaluwarsa. */
   nowBase?: number;
 } = {}) {
   const fs_ = fakeStore(opts.sources ?? [source()]);
@@ -143,7 +143,7 @@ describe("sinkronisasi berhasil", () => {
     const dupSub = JSON.stringify({ tasks: [{ id: "1", title: "a", status: "done", subtasks: [{ id: 1, title: "x" }, { id: 1, title: "y" }] }] });
     const t = setup({ fetchFile: async () => ({ ...FILE_OK, content: dupSub }) });
     const r = await syncSource(ID_A, t.deps);
-    expect(r.status === "success" && r.warnings.some((w) => /subtask tidak unik/.test(w))).toBe(true);
+    expect(r.status === "success" && r.warnings.some((w) => /subtask IDs are not unique/.test(w))).toBe(true);
   });
 });
 
@@ -240,7 +240,7 @@ describe("kegagalan mempertahankan data terakhir yang berhasil", () => {
 describe("token kedaluwarsa yang sudah diketahui", () => {
   // Jam tiruan: 7 Nov 2026 12.00 UTC.
   const NOW = Date.UTC(2026, 10, 7, 12);
-  const unauthorized = async () => { throw new ProviderError("unauthorized", "Token ditolak (401): salah, dicabut, atau kedaluwarsa."); };
+  const unauthorized = async () => { throw new ProviderError("unauthorized", "Token rejected (401): wrong, revoked, or expired."); };
   const run = async (expiresAt: string | null, fetchFile: () => Promise<FetchFileResult> = unauthorized) => {
     const t = setup({ sources: [source({ token_expires_at: expiresAt })], fetchFile, nowBase: NOW });
     return { t, r: await syncSource(ID_A, t.deps) };
@@ -250,8 +250,8 @@ describe("token kedaluwarsa yang sudah diketahui", () => {
     const { t, r } = await run("2026-11-01T09:30:29.000Z");
     expect(r).toMatchObject({ status: "failed", error: { kind: "token_expired" } });
     const msg = r.status === "failed" ? r.error.message : "";
-    expect(msg).toContain("Token kedaluwarsa pada 01 Nov 2026");
-    expect(msg).toContain("Pengaturan sumber"); // tahu apa yang harus dilakukan
+    expect(msg).toContain("The token expired on 01 Nov 2026");
+    expect(msg).toContain("Source settings"); // tahu apa yang harus dilakukan
     expect(t.log.failed).toEqual([{ id: ID_A, message: msg }]); // pesan yang sama tersimpan untuk dashboard
     expect(t.log.applied).toEqual([]);
     noSecrets(r);
@@ -269,7 +269,7 @@ describe("token kedaluwarsa yang sudah diketahui", () => {
   it("401 tetapi kedaluwarsa masih di masa depan -> pesan umum (kita tidak tahu penyebabnya)", async () => {
     const { r } = await run("2027-02-04T09:30:29.000Z");
     expect(r).toMatchObject({ status: "failed", error: { kind: "unauthorized" } });
-    expect(r.status === "failed" && r.error.message).toMatch(/salah, dicabut, atau kedaluwarsa/);
+    expect(r.status === "failed" && r.error.message).toMatch(/wrong, revoked, or expired/);
   });
 
   it("401 tanpa tanggal kedaluwarsa -> pesan umum", async () => {

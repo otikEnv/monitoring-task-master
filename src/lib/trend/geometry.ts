@@ -43,15 +43,15 @@ export function timeTicks(start: number, end: number, count = 5): number[] {
 /** Label tick waktu (WIB): tanggal, ditambah jam bila rentangnya pendek. */
 export function formatTick(t: number, spanMs: number): string {
   const d = new Date(t);
-  const date = d.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "2-digit", month: "short" });
+  const date = d.toLocaleDateString("en-GB", { timeZone: "Asia/Jakarta", day: "2-digit", month: "short" });
   if (spanMs > 3 * DAY) return date;
-  const time = d.toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" });
+  const time = d.toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" });
   return `${date} ${time}`;
 }
 
 /** Tanggal dan jam lengkap untuk tooltip dan tabel. */
 export function formatFull(t: number): string {
-  return new Date(t).toLocaleString("id-ID", {
+  return new Date(t).toLocaleString("en-GB", {
     timeZone: "Asia/Jakarta", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
   });
 }

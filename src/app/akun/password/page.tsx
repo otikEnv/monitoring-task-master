@@ -6,7 +6,7 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { requireUser } from "@/lib/auth";
 import { PasswordForm } from "./password-form";
 
-export const metadata: Metadata = { title: "Ganti password" };
+export const metadata: Metadata = { title: "Change password" };
 
 // Cache Components aktif: bagian yang membaca sesi (cookies) harus di dalam Suspense.
 export default function PasswordPage() {
@@ -22,7 +22,7 @@ async function PasswordContent() {
 
   return (
     <AppShell user={user} width="narrow">
-      <PageHeader title="Ganti password" description="Password awal dari seeder sebaiknya segera diganti." />
+      <PageHeader title="Change password" description="Change the initial password from the seeder as soon as possible." />
       <PasswordForm />
     </AppShell>
   );

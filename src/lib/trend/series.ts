@@ -10,7 +10,7 @@ export const RANGES = ["7d", "30d", "90d", "all"] as const;
 export type Range = (typeof RANGES)[number];
 export const DEFAULT_RANGE: Range = "30d";
 export const RANGE_LABEL: Record<Range, string> = {
-  "7d": "7 hari", "30d": "30 hari", "90d": "90 hari", all: "Semua",
+  "7d": "7 days", "30d": "30 days", "90d": "90 days", all: "All",
 };
 const RANGE_DAYS: Record<Exclude<Range, "all">, number> = { "7d": 7, "30d": 30, "90d": 90 };
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -170,12 +170,12 @@ export function summarizeTrend(points: readonly SeriesPoint[]): TrendSummary {
  * ada di tooltip dan tabel.
  */
 export const STACK = [
-  { key: "done", label: "Selesai", parts: ["done"], cssVar: "--viz-done" },
-  { key: "in_progress", label: "Dikerjakan", parts: ["in_progress"], cssVar: "--viz-in-progress" },
-  { key: "blocked", label: "Terhambat", parts: ["blocked"], cssVar: "--viz-blocked" },
-  { key: "review", label: "Ditinjau", parts: ["review"], cssVar: "--viz-review" },
-  { key: "pending", label: "Menunggu", parts: ["pending"], cssVar: "--viz-pending" },
-  { key: "other", label: "Ditunda, dibatalkan, lainnya", parts: ["deferred", "cancelled", "other"], cssVar: "--viz-other" },
+  { key: "done", label: "Done", parts: ["done"], cssVar: "--viz-done" },
+  { key: "in_progress", label: "In progress", parts: ["in_progress"], cssVar: "--viz-in-progress" },
+  { key: "blocked", label: "Blocked", parts: ["blocked"], cssVar: "--viz-blocked" },
+  { key: "review", label: "In review", parts: ["review"], cssVar: "--viz-review" },
+  { key: "pending", label: "Pending", parts: ["pending"], cssVar: "--viz-pending" },
+  { key: "other", label: "Deferred, cancelled, other", parts: ["deferred", "cancelled", "other"], cssVar: "--viz-other" },
 ] as const satisfies ReadonlyArray<{ key: string; label: string; parts: ReadonlyArray<keyof Counts>; cssVar: string }>;
 
 export type StackKey = (typeof STACK)[number]["key"];

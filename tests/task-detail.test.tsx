@@ -6,7 +6,7 @@ import type { TaskDetail } from "@/lib/tasks/detail-model";
 const SRC = "11111111-1111-4111-8111-111111111111";
 const detail = (over: Partial<TaskDetail> = {}): TaskDetail => ({
   sourceId: SRC, sourceName: "Echo App", tag: "master", taskId: "165",
-  title: "Verifikasi aktif di staging", description: "Deskripsi **tebal**",
+  title: "Verifikasi aktif di staging", description: "Description **tebal**",
   status: "blocked", priority: "high",
   details: "**Scope**: contoh\n\n- butir satu\n- butir dua",
   testStrategy: "Jalankan uji penetrasi.",
@@ -29,17 +29,17 @@ describe("kepala halaman", () => {
   it("menampilkan judul dengan ID, status, prioritas, dan ringkasan subtask", () => {
     const html = render();
     expect(html).toMatch(/<h1[^>]*>[\s\S]*#165[\s\S]*Verifikasi aktif di staging/);
-    expect(html).toContain("Terhambat");
-    expect(html).toContain("Tinggi");
-    expect(html).toContain("1 dari 3 subtask selesai");
+    expect(html).toContain("Blocked");
+    expect(html).toContain("High");
+    expect(html).toContain("1 of 3 subtasks done");
   });
 
   it("menampilkan aplikasi, tag, dan waktu data diperbarui", () => {
     const html = render();
-    expect(html).toContain("Aplikasi: ");
+    expect(html).toContain("Application: ");
     expect(html).toContain("Echo App");
     expect(html).toContain("Tag: ");
-    expect(html).toContain("Data diperbarui: ");
+    expect(html).toContain("Data updated: ");
   });
 
   it("breadcrumb menaut ke daftar, aplikasi, dan tag", () => {
@@ -61,20 +61,20 @@ describe("dependensi", () => {
     expect(html).toContain(`href="/tasks/${SRC}/master/159"`);
     expect(html).toContain("#159 Perbaikan A");
     expect(html).toContain(`href="/tasks/${SRC}/master/160"`);
-    expect(html).toContain("Selesai");
-    expect(html).toContain("Menunggu");
+    expect(html).toContain("Done");
+    expect(html).toContain("Pending");
   });
 
   it("status tiap dependensi tampil tepat di sebelah tautannya (bukan sekadar muncul di tempat lain)", () => {
     const html = render();
-    expect(html).toMatch(/#159 Perbaikan A<\/a>\s*<span[^>]*>Selesai<\/span>/);
-    expect(html).toMatch(/#160 Perbaikan B<\/a>\s*<span[^>]*>Menunggu<\/span>/);
+    expect(html).toMatch(/#159 Perbaikan A<\/a>\s*<span[^>]*>Done<\/span>/);
+    expect(html).toMatch(/#160 Perbaikan B<\/a>\s*<span[^>]*>Pending<\/span>/);
   });
 
   it("yang tidak ditemukan tampil sebagai teks biasa, bukan tautan", () => {
     const html = render();
     expect(html).toContain("#999");
-    expect(html).toContain("tidak ditemukan pada tag ini");
+    expect(html).toContain("not found in this tag");
     expect(html).not.toContain('/master/999"');
   });
 
@@ -85,7 +85,7 @@ describe("dependensi", () => {
 
   it("tanpa dependensi: keterangan, bukan daftar kosong", () => {
     const html = render(detail({ dependencies: [] }));
-    expect(html).toContain("Tidak bergantung pada task lain.");
+    expect(html).toContain("Does not depend on other tasks.");
   });
 });
 
@@ -95,19 +95,19 @@ describe("teks panjang", () => {
     expect(html).toContain("<strong>Scope</strong>");
     expect(html).toMatch(/<li[^>]*>butir satu<\/li>/);
     expect(html).toContain("Jalankan uji penetrasi.");
-    expect(html).toContain("Deskripsi <strong>tebal</strong>");
+    expect(html).toContain("Description <strong>tebal</strong>");
   });
 
-  it("strategi pengujian kosong -> keterangan (57 dari 173 task asli begini)", () => {
-    expect(render(detail({ testStrategy: null }))).toContain("Belum ada strategi pengujian.");
+  it("strategi pengujian kosong -> keterangan (57 of 173 tasks asli begini)", () => {
+    expect(render(detail({ testStrategy: null }))).toContain("No test strategy yet.");
   });
 
   it("detail kosong -> keterangan", () => {
-    expect(render(detail({ details: null }))).toContain("Belum ada detail implementasi.");
+    expect(render(detail({ details: null }))).toContain("No implementation details yet.");
   });
 
-  it("deskripsi kosong -> bagian Deskripsi tidak ditampilkan", () => {
-    expect(render(detail({ description: null }))).not.toContain(">Deskripsi<");
+  it("deskripsi kosong -> bagian Description tidak ditampilkan", () => {
+    expect(render(detail({ description: null }))).not.toContain(">Description<");
   });
 
   it("HTML berbahaya di seluruh field teks tidak dieksekusi", () => {
@@ -131,17 +131,17 @@ describe("subtask", () => {
     expect(html).toContain("Siapkan alat");
     expect(html).toContain("165.2");
     expect(html).toContain("165.3");
-    expect(html).toContain("1 dari 3 selesai");
+    expect(html).toContain("1 of 3 done");
   });
 
   it("dependensi subtask ditampilkan sebagai teks", () => {
-    expect(render()).toContain("Bergantung pada: 1");
+    expect(render()).toContain("Depends on: 1");
   });
 
   it("detail subtask dilipat (details/summary), tanpa JavaScript", () => {
     const html = render();
     expect(html).toContain("<details");
-    expect(html).toContain("Lihat detail");
+    expect(html).toContain("Show details");
     expect(html).toContain("Detail <strong>subtask</strong>");
   });
 
@@ -152,8 +152,8 @@ describe("subtask", () => {
 
   it("tanpa subtask: keterangan dan tidak ada ringkasan progres", () => {
     const html = render(detail({ subtasks: [] }));
-    expect(html).toContain("Tidak ada subtask.");
-    expect(html).not.toContain("subtask selesai");
+    expect(html).toContain("No subtasks.");
+    expect(html).not.toContain("subtasks done");
   });
 
   it("subtask berurutan sebagai daftar bernomor", () => {
@@ -177,6 +177,6 @@ describe("hanya-baca dan aksesibilitas", () => {
 
   it("tautan kembali ke daftar membawa aplikasi dan tag", () => {
     expect(render()).toContain(`href="/tasks?source=${SRC}&amp;tag=master"`);
-    expect(render()).toContain("← Kembali ke daftar task");
+    expect(render()).toContain("← Back to task list");
   });
 });

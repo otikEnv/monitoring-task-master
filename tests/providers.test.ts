@@ -200,7 +200,7 @@ describe.each(CASES)("adapter $provider (kontrak yang sama)", (c) => {
     const err = await failure(adapter.fetchFile(params("bukan-url"), { fetch: m.fetch }));
     expect(err.kind).toBe("invalid_url");
     expect(m.calls).toHaveLength(0);
-    expect(adapter.validateRepoUrl("bukan-url")).toMatch(/tidak valid/i);
+    expect(adapter.validateRepoUrl("bukan-url")).toMatch(/invalid/i);
     expect(adapter.validateRepoUrl(c.repoUrl)).toBeNull();
   });
 });

@@ -7,7 +7,7 @@ export function LoadError({ title }: { title: string }) {
     <Alert variant="destructive">
       <AlertTriangle aria-hidden="true" />
       <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>Coba muat ulang halaman ini. Bila terus terjadi, hubungi admin.</AlertDescription>
+      <AlertDescription>Try reloading this page. If it keeps happening, contact an admin.</AlertDescription>
     </Alert>
   );
 }

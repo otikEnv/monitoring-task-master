@@ -26,22 +26,22 @@ const render = (points = POINTS, over: Partial<{ start: number; end: number; dow
 describe("kerangka grafik", () => {
   it("memuat dua kartu grafik dengan judul yang menyebut apa yang digambar", () => {
     const html = render();
-    expect(html).toContain("Persentase task selesai");
-    expect(html).toContain("Jumlah task per status");
+    expect(html).toContain("Percentage of tasks done");
+    expect(html).toContain("Tasks per status");
     expect((html.match(/<h2/g) ?? []).length).toBe(2);
   });
 
   it("setiap grafik punya teks alternatif dan keterangan bahwa nilai lengkap ada di tabel", () => {
     const html = render();
-    expect(html).toMatch(/role="img"[^>]*aria-label="Grafik garis persentase task selesai, 3 titik data/);
-    expect(html).toMatch(/role="img"[^>]*aria-label="Grafik kolom bertumpuk jumlah task per status, 3 titik data/);
+    expect(html).toMatch(/role="img"[^>]*aria-label="Line chart of the percentage of tasks done, 3 data points/);
+    expect(html).toMatch(/role="img"[^>]*aria-label="Stacked column chart of tasks per status, 3 data points/);
   });
 
   it("lapisan interaksi dapat difokuskan keyboard dan diberi nama", () => {
     const html = render();
     expect((html.match(/role="application"/g) ?? []).length).toBe(2);
     expect((html.match(/tabindex="0"/g) ?? []).length).toBeGreaterThanOrEqual(2);
-    expect(html).toContain("Gunakan panah kiri dan kanan");
+    expect(html).toContain("Use the left and right arrow keys");
   });
 
   it("memuat wilayah pengumuman untuk pembaca layar", () => {
@@ -62,8 +62,8 @@ describe("kerangka grafik", () => {
 describe("grafik persentase (satu seri)", () => {
   it("tidak punya kotak legenda (judul sudah menyebut seri)", () => {
     const html = render();
-    const card = html.slice(html.indexOf("Persentase task selesai"), html.indexOf("Jumlah task per status"));
-    expect(card).not.toContain('aria-label="Legenda"');
+    const card = html.slice(html.indexOf("Percentage of tasks done"), html.indexOf("Tasks per status"));
+    expect(card).not.toContain('aria-label="Legend"');
   });
 
   it("sumbu-Y 0 sampai 100% dengan gridline hairline", () => {
@@ -98,18 +98,18 @@ describe("grafik persentase (satu seri)", () => {
 
   it("persentase terakhir tidak bulat memakai koma desimal", () => {
     const html = render([pt(0, { total: 3, done: 1 }), pt(1, { total: 173, done: 142 })]);
-    expect(html).toContain(">82,1%<");
+    expect(html).toContain(">82.1%<");
   });
 
   it("celah panjang digambar putus-putus dan dijelaskan; tanpa celah tidak ada penjelasan", () => {
     const gappy = render(); // titik 2 -> 20 berjarak 18 hari pada rentang 32 hari (ambang 3 hari)
     expect(gappy).toContain('stroke-dasharray="4 4"');
-    expect(gappy).toContain("Garis putus-putus: tidak ada sinkronisasi pada selang itu.");
+    expect(gappy).toContain("Dashed line: no sync in that interval.");
 
     // sinkron harian: jarak 1 hari selalu di bawah ambang (minimal 2 hari), jadi tidak putus-putus
     const dense = render([pt(0, { total: 10, done: 1 }), pt(1, { total: 10, done: 2 }), pt(2, { total: 10, done: 3 })], { start: T0, end: T0 + 3 * DAY });
     expect(dense).not.toContain('stroke-dasharray="4 4"');
-    expect(dense).not.toContain("Garis putus-putus");
+    expect(dense).not.toContain("Dashed line");
   });
 
   it("garis menghubungkan HANYA titik yang ada (tanpa titik buatan di sela)", () => {
@@ -136,19 +136,19 @@ describe("grafik persentase (satu seri)", () => {
 describe("grafik kolom bertumpuk", () => {
   const stack = () => {
     const html = render();
-    return html.slice(html.indexOf("Jumlah task per status"));
+    return html.slice(html.indexOf("Tasks per status"));
   };
 
   it("legenda selalu ada untuk >= 2 seri dan memuat keenam nama", () => {
     const s = stack();
-    expect(s).toContain('aria-label="Legenda"');
+    expect(s).toContain('aria-label="Legend"');
     for (const label of STACK.map((x) => x.label)) expect(s).toContain(label);
     expect((s.match(/<li class="flex items-center gap-1\.5"/g) ?? []).length).toBe(6);
   });
 
   it("legenda benar-benar terlihat (tidak disembunyikan dengan hidden, sr-only, atau display:none)", () => {
     const s = stack();
-    const tag = /<ul[^>]*aria-label="Legenda"[^>]*>/.exec(s)?.[0] ?? "";
+    const tag = /<ul[^>]*aria-label="Legend"[^>]*>/.exec(s)?.[0] ?? "";
     expect(tag).not.toBe("");
     expect(tag).not.toMatch(/\bhidden\b/);
     expect(tag).not.toContain("sr-only");
@@ -162,7 +162,7 @@ describe("grafik kolom bertumpuk", () => {
   it("nama di legenda memakai warna teks, kuncinya yang memakai warna seri", () => {
     const s = stack();
     for (const v of STACK.map((x) => x.cssVar)) expect(s).toContain(`background:var(${v})`);
-    expect(s).toMatch(/<span style="color:var\(--viz-text-secondary\)">Selesai<\/span>/);
+    expect(s).toMatch(/<span style="color:var\(--viz-text-secondary\)">Done<\/span>/);
   });
 
   it("tiap titik menjadi satu kolom; segmen memakai warna entitasnya", () => {
@@ -212,10 +212,10 @@ describe("grafik kolom bertumpuk", () => {
 describe("tabel (padanan grafik)", () => {
   it("memuat setiap titik dengan semua status, terbaru di atas", () => {
     const html = render();
-    expect(html).toContain("Lihat sebagai tabel (3 titik data)");
+    expect(html).toContain("View as table (3 data points)");
     const body = html.slice(html.indexOf("<tbody"), html.indexOf("</tbody>"));
     expect((body.match(/<tr/g) ?? []).length).toBe(3);
-    for (const h of ["Waktu", "Total", "Selesai", "% selesai", "Dikerjakan", "Terhambat", "Ditinjau", "Menunggu", "Ditunda", "Dibatalkan", "Lainnya"]) {
+    for (const h of ["Time", "Total", "Done", "% done", "In progress", "Blocked", "In review", "Pending", "Deferred", "Cancelled", "Other"]) {
       expect(html).toContain(`>${h}</th>`);
     }
     // baris pertama = titik terbaru (120 total, 75%)
@@ -240,8 +240,8 @@ describe("tabel (padanan grafik)", () => {
   });
 
   it("catatan peringkasan hanya muncul bila data diringkas", () => {
-    expect(render(POINTS, { downsampled: false })).not.toContain("satu titik per hari");
-    expect(render(POINTS, { downsampled: true })).toContain("satu titik per hari");
+    expect(render(POINTS, { downsampled: false })).not.toContain("one point per day");
+    expect(render(POINTS, { downsampled: true })).toContain("one point per day");
   });
 });
 
@@ -249,7 +249,7 @@ describe("keadaan khusus", () => {
   it("satu titik: satu penanda, tanpa garis, tanpa penjelasan celah, tanpa NaN", () => {
     const html = render([pt(0, { total: 10, done: 5 })], { start: T0 - DAY, end: T0 + 29 * DAY });
     expect((html.match(/<circle/g) ?? []).length).toBe(1);
-    expect(html).not.toContain("Garis putus-putus");
+    expect(html).not.toContain("Dashed line");
     expect(html).not.toContain("NaN");
     expect(html).not.toContain("Infinity");
   });
@@ -258,7 +258,7 @@ describe("keadaan khusus", () => {
     const html = render([]);
     expect(html).not.toContain("NaN");
     expect(html).not.toContain("Infinity");
-    expect(html).toContain("(0 titik data)");
+    expect(html).toContain("(0 data points)");
   });
 
   it("semua task nol: tidak ada pembagian nol", () => {
@@ -274,7 +274,7 @@ describe("keadaan khusus", () => {
 });
 
 describe("kartu ringkasan", () => {
-  const tiles = (points: SeriesPoint[], period = "awal rentang (30 hari)") =>
+  const tiles = (points: SeriesPoint[], period = "start of range (30 days)") =>
     renderToStaticMarkup(<TrendTiles summary={summarizeTrend(points)} period={period} />);
 
   it("tanpa data tidak menampilkan apa pun", () => {
@@ -288,16 +288,16 @@ describe("kartu ringkasan", () => {
     expect((html.match(/text-5xl/g) ?? []).length).toBe(1); // hanya satu angka utama
   });
 
-  it("selisih ditandai tanda, panah, dan kata (bukan warna saja); naik selesai = baik", () => {
+  it("selisih ditandai tanda, panah, dan kata (bukan warna saja); up selesai = baik", () => {
     const html = tiles(POINTS);
     expect(html).toContain("▲");
-    expect(html).toContain("+35 poin");
-    expect(html).toContain("naik");
-    expect(html).toContain("dibanding awal rentang (30 hari)");
-    expect(html).toMatch(/color:var\(--viz-good-text\)[^>]*>[\s\S]*\+35 poin/);
+    expect(html).toContain("+35 points");
+    expect(html).toContain("up");
+    expect(html).toContain("compared to start of range (30 days)");
+    expect(html).toMatch(/color:var\(--viz-good-text\)[^>]*>[\s\S]*\+35 points/);
   });
 
-  it("terhambat turun = baik (hijau), terhambat naik = buruk (merah)", () => {
+  it("blocked down = baik (hijau), blocked up = buruk (merah)", () => {
     const down = tiles(POINTS); // 5 -> 2
     expect(down).toContain("−3 task");
     expect(down).toMatch(/var\(--viz-good-text\)[^>]*>[\s\S]*−3 task/);
@@ -306,30 +306,30 @@ describe("kartu ringkasan", () => {
     expect(up).toMatch(/var\(--viz-bad-text\)[^>]*>[\s\S]*\+3 task/);
   });
 
-  it("persentase turun ditampilkan sebagai buruk dengan tanda minus", () => {
+  it("persentase down ditampilkan sebagai buruk dengan tanda minus", () => {
     const html = tiles([pt(0, { total: 10, done: 10 }), pt(1, { total: 20, done: 10 })]);
     expect(html).toContain("▼");
-    expect(html).toContain("−50 poin");
-    expect(html).toMatch(/var\(--viz-bad-text\)[^>]*>[\s\S]*−50 poin/);
+    expect(html).toContain("−50 points");
+    expect(html).toMatch(/var\(--viz-bad-text\)[^>]*>[\s\S]*−50 points/);
   });
 
   it("tidak berubah: keterangan netral tanpa panah", () => {
     const html = tiles([pt(0, { total: 10, done: 5 }), pt(1, { total: 10, done: 5 })]);
-    expect(html).toContain("tidak berubah");
+    expect(html).toContain("unchanged");
     expect(html).not.toContain("▲");
     expect(html).not.toContain("▼");
   });
 
   it("satu titik: tidak ada selisih, dijelaskan", () => {
     const html = tiles([pt(0, { total: 10, done: 5 })]);
-    expect(html).toContain("Belum ada pembanding");
+    expect(html).toContain("No comparison yet");
     expect(html).not.toContain("▲");
   });
 
   it("jumlah titik dan waktu data terakhir ditampilkan", () => {
     const html = tiles(POINTS);
-    expect(html).toContain("3 titik data dalam rentang ini");
-    expect(html).toContain("Data terakhir");
+    expect(html).toContain("3 data points in this range");
+    expect(html).toContain("Latest data");
   });
 });
 
@@ -341,9 +341,9 @@ describe("kontrol (satu baris filter di atas grafik)", () => {
 
   it("keempat rentang adalah tautan; yang aktif ditandai aria-current", () => {
     const html = controls();
-    for (const l of ["7 hari", "30 hari", "90 hari", "Semua"]) expect(html).toContain(`>${l}</a>`);
+    for (const l of ["7 days", "30 days", "90 days", "All"]) expect(html).toContain(`>${l}</a>`);
     expect((html.match(/aria-current="true"/g) ?? []).length).toBe(1);
-    expect(html).toMatch(/aria-current="true"[^>]*>30 hari</);
+    expect(html).toMatch(/aria-current="true"[^>]*>30 days</);
   });
 
   it("tautan rentang mempertahankan aplikasi terpilih dan tidak menulis nilai bawaan", () => {
@@ -354,20 +354,20 @@ describe("kontrol (satu baris filter di atas grafik)", () => {
 
   it("pilihan aplikasi: semua (gabungan) + tiap aplikasi, yang nonaktif diberi keterangan", () => {
     const html = controls();
-    expect(html).toContain("Semua aplikasi (gabungan)");
+    expect(html).toContain("All applications (combined)");
     expect(html).toContain("Echo App");
-    expect(html).toContain("Lama (nonaktif)");
+    expect(html).toContain("Lama (inactive)");
   });
 
   it("aplikasi terpilih ditandai selected", () => {
     expect(controls({ range: "30d", source: SRC })).toMatch(new RegExp(`<option value="${SRC}" selected`));
   });
 
-  it("form method=get ke /tren dengan tombol Terapkan (tanpa JavaScript tetap berfungsi)", () => {
+  it("form method=get ke /tren dengan tombol Apply (tanpa JavaScript tetap berfungsi)", () => {
     const html = controls();
     expect(html).toContain('method="get"');
     expect(html).toContain('action="/tren"');
-    expect(html).toContain(">Terapkan<");
+    expect(html).toContain(">Apply<");
   });
 
   it("rentang non-bawaan dikirim lewat input tersembunyi agar tidak hilang saat memilih aplikasi", () => {

@@ -32,13 +32,13 @@ export type SourceView = {
 
 export class DuplicateSourceError extends Error {
   constructor() {
-    super("Sumber dengan URL repo, branch, dan path yang sama sudah terdaftar.");
+    super("A source with the same repo URL, branch, and path is already registered.");
     this.name = "DuplicateSourceError";
   }
 }
 export class SourceNotFoundError extends Error {
   constructor() {
-    super("Sumber tidak ditemukan.");
+    super("Source not found.");
     this.name = "SourceNotFoundError";
   }
 }

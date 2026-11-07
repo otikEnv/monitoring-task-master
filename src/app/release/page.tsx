@@ -49,7 +49,7 @@ async function ReleaseContent({ searchParams }: { searchParams: SearchParams }) 
     <AppShell user={user}>
       <PageHeader
         title="Release"
-        description="Target rilis per aplikasi: rentang task, progres, sisa waktu, dan hambatan."
+        description="Release targets per application: task range, progress, time left, and blockers."
         actions={
           isAdmin && (
             <Link href="/release/baru" className={buttonVariants()}>
@@ -60,21 +60,21 @@ async function ReleaseContent({ searchParams }: { searchParams: SearchParams }) 
       />
 
       {!data ? (
-        <LoadError title="Daftar release belum bisa dimuat." />
+        <LoadError title="The release list could not be loaded." />
       ) : (
         <>
           {/* key: formulir dibangun ulang saat URL berubah agar pilihan selalu sama dengan URL */}
           <ReleaseFilter key={JSON.stringify(params)} params={params} sources={data.sources} />
 
           {data.overviews.length === 0 ? (
-            <EmptyState title={params.source || params.showReleased ? "Tidak ada release yang cocok." : "Belum ada release."}>
+            <EmptyState title={params.source || params.showReleased ? "No matching releases." : "No releases yet."}>
               {params.showReleased
-                ? "Belum ada release pada pilihan ini."
-                : "Tidak ada release yang sedang berjalan. Centang “Tampilkan yang sudah rilis” untuk melihat riwayat."}
+                ? "There are no releases for this selection."
+                : "No releases are in progress. Tick “Show released” to see the history."}
               {isAdmin && (
                 <>
                   {" "}
-                  <Link href="/release/baru" className="underline">Tambah release</Link>.
+                  <Link href="/release/baru" className="underline">Add a release</Link>.
                 </>
               )}
             </EmptyState>

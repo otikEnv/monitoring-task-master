@@ -36,7 +36,7 @@ export async function saveSource(formData: FormData): Promise<SaveResult> {
 
   const id = idFrom(formData);
   const editing = formData.get("id") !== null && formData.get("id") !== "";
-  if (editing && !id) return { ok: false, error: "ID sumber tidak valid." };
+  if (editing && !id) return { ok: false, error: "Invalid source ID." };
 
   const parsed = parseSourceForm(formData, { requireToken: !id });
   if (!parsed.ok) return { ok: false, fieldErrors: parsed.fieldErrors };
@@ -49,7 +49,7 @@ export async function saveSource(formData: FormData): Promise<SaveResult> {
     if (e instanceof SourceNotFoundError) return { ok: false, error: e.message };
     // Jangan teruskan pesan asli ke klien; catat hanya nama galatnya.
     console.error("[sumber] gagal menyimpan", { error: (e as Error)?.name });
-    return { ok: false, error: "Gagal menyimpan sumber. Coba lagi." };
+    return { ok: false, error: "Could not save the source. Try again." };
   }
 
   revalidatePath("/pengaturan/sumber");
@@ -66,7 +66,7 @@ export async function testConnection(formData: FormData): Promise<TestResult> {
   const id = idFrom(formData);
   const parsed = parseSourceForm(formData, { requireToken: false });
   if (!parsed.ok) {
-    return { ok: false, kind: "validation", message: "Periksa isian yang bertanda galat.", fieldErrors: parsed.fieldErrors };
+    return { ok: false, kind: "validation", message: "Check the fields marked with errors.", fieldErrors: parsed.fieldErrors };
   }
   const { provider, repoUrl, branch, filePath } = parsed.value;
 
@@ -75,11 +75,11 @@ export async function testConnection(formData: FormData): Promise<TestResult> {
     try {
       token = await getStoredToken(id);
     } catch {
-      return { ok: false, kind: "token_decrypt", message: "Token tersimpan tidak bisa dibuka. Isi token baru." };
+      return { ok: false, kind: "token_decrypt", message: "The stored token could not be opened. Enter a new token." };
     }
   }
   if (!token) {
-    return { ok: false, kind: "validation", message: "Isi token untuk menguji koneksi.", fieldErrors: { token: "Token wajib diisi untuk uji koneksi." } };
+    return { ok: false, kind: "validation", message: "Enter a token to test the connection.", fieldErrors: { token: "A token is required to test the connection." } };
   }
 
   return runConnectionTest({ provider, repoUrl, branch, filePath, token });
@@ -87,13 +87,13 @@ export async function testConnection(formData: FormData): Promise<TestResult> {
 
 export async function setActive(id: string, isActive: boolean): Promise<SimpleResult> {
   await requireAdmin();
-  if (!UUID.test(id)) return { ok: false, error: "ID sumber tidak valid." };
+  if (!UUID.test(id)) return { ok: false, error: "Invalid source ID." };
   try {
     await setSourceActive(id, isActive);
   } catch (e) {
     if (e instanceof SourceNotFoundError) return { ok: false, error: e.message };
     console.error("[sumber] gagal mengubah status", { error: (e as Error)?.name });
-    return { ok: false, error: "Gagal mengubah status sumber." };
+    return { ok: false, error: "Could not change the source status." };
   }
   revalidatePath("/pengaturan/sumber");
   return { ok: true };
@@ -101,13 +101,13 @@ export async function setActive(id: string, isActive: boolean): Promise<SimpleRe
 
 export async function removeSource(id: string): Promise<SimpleResult> {
   await requireAdmin();
-  if (!UUID.test(id)) return { ok: false, error: "ID sumber tidak valid." };
+  if (!UUID.test(id)) return { ok: false, error: "Invalid source ID." };
   try {
     await deleteSource(id);
   } catch (e) {
     if (e instanceof SourceNotFoundError) return { ok: false, error: e.message };
     console.error("[sumber] gagal menghapus", { error: (e as Error)?.name });
-    return { ok: false, error: "Gagal menghapus sumber." };
+    return { ok: false, error: "Could not delete the source." };
   }
   revalidatePath("/pengaturan/sumber");
   return { ok: true };

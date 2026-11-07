@@ -48,45 +48,45 @@ export function parseReleaseForm(fd: FormData): ReleaseParseResult {
   const errors: ReleaseFieldErrors = {};
 
   const sourceId = text(fd, "sourceId").trim().toLowerCase();
-  if (!UUID.test(sourceId)) errors.sourceId = "Pilih aplikasi.";
+  if (!UUID.test(sourceId)) errors.sourceId = "Select an application.";
 
   const tag = text(fd, "tag").trim();
-  if (!tag) errors.tag = "Pilih tag.";
-  else if (tag.length > 100) errors.tag = "Nama tag terlalu panjang.";
-  else if (HAS_CONTROL.test(tag)) errors.tag = "Nama tag memuat karakter yang tidak valid.";
+  if (!tag) errors.tag = "Select a tag.";
+  else if (tag.length > 100) errors.tag = "Tag name is too long.";
+  else if (HAS_CONTROL.test(tag)) errors.tag = "Tag name contains invalid characters.";
 
   const name = text(fd, "name").trim();
-  if (!name) errors.name = "Nama release wajib diisi.";
-  else if (name.length > 100) errors.name = "Nama release maksimal 100 karakter.";
-  else if (HAS_CONTROL.test(name)) errors.name = "Nama release memuat karakter yang tidak valid.";
+  if (!name) errors.name = "Release name is required.";
+  else if (name.length > 100) errors.name = "Release name must be at most 100 characters.";
+  else if (HAS_CONTROL.test(name)) errors.name = "Release name contains invalid characters.";
 
   const startRaw = text(fd, "rangeStart");
   const endRaw = text(fd, "rangeEnd");
   const rangeStart = parseRangeNumber(startRaw);
   const rangeEnd = parseRangeNumber(endRaw);
   if (rangeStart === null) {
-    errors.rangeStart = startRaw.trim() === "" ? "Task awal wajib diisi." : "Task awal harus bilangan bulat positif (maksimal 15 digit).";
+    errors.rangeStart = startRaw.trim() === "" ? "Start task is required." : "Start task must be a positive whole number (at most 15 digits).";
   }
   if (rangeEnd === null) {
-    errors.rangeEnd = endRaw.trim() === "" ? "Task akhir wajib diisi." : "Task akhir harus bilangan bulat positif (maksimal 15 digit).";
+    errors.rangeEnd = endRaw.trim() === "" ? "End task is required." : "End task must be a positive whole number (at most 15 digits).";
   }
   if (rangeStart !== null && rangeEnd !== null && rangeStart > rangeEnd) {
-    errors.rangeEnd = "Task akhir tidak boleh lebih kecil dari task awal.";
+    errors.rangeEnd = "End task cannot be smaller than the start task.";
   }
 
   const targetDate = text(fd, "targetDate").trim();
-  if (!targetDate) errors.targetDate = "Tanggal target wajib diisi.";
-  else if (!isValidDate(targetDate)) errors.targetDate = "Tanggal target tidak valid.";
+  if (!targetDate) errors.targetDate = "Target date is required.";
+  else if (!isValidDate(targetDate)) errors.targetDate = "Target date is not valid.";
 
   const startDateRaw = text(fd, "startDate").trim();
   let startDate: string | null = null;
   if (startDateRaw) {
-    if (!isValidDate(startDateRaw)) errors.startDate = "Tanggal mulai tidak valid.";
+    if (!isValidDate(startDateRaw)) errors.startDate = "Start date is not valid.";
     else startDate = startDateRaw;
   }
   // yyyy-mm-dd dapat dibandingkan sebagai teks.
   if (startDate && targetDate && isValidDate(targetDate) && startDate > targetDate) {
-    errors.startDate = "Tanggal mulai tidak boleh setelah tanggal target.";
+    errors.startDate = "Start date cannot be after the target date.";
   }
 
   if (Object.keys(errors).length > 0 || rangeStart === null || rangeEnd === null) {

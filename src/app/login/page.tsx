@@ -3,7 +3,7 @@ import { ListChecks } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from "./login-form";
 
-export const metadata: Metadata = { title: "Masuk" };
+export const metadata: Metadata = { title: "Sign in" };
 
 export default function LoginPage() {
   return (
@@ -17,8 +17,8 @@ export default function LoginPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Masuk</CardTitle>
-            <CardDescription>Masuk untuk melihat progres semua aplikasi.</CardDescription>
+            <CardTitle className="text-xl">Sign in</CardTitle>
+            <CardDescription>Sign in to see the progress of all applications.</CardDescription>
           </CardHeader>
           <CardContent>
             <LoginForm />

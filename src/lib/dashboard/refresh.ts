@@ -21,37 +21,37 @@ export async function refreshSource(
   try {
     res = await fetchImpl(`/api/sync/${encodeURIComponent(id)}`, { method: "POST" });
   } catch {
-    return error("Tidak bisa menghubungi server. Periksa koneksi Anda.");
+    return error("Could not reach the server. Check your connection.");
   }
 
   if (res.status === 401) return error("Sesi berakhir. Silakan masuk kembali.");
-  if (res.status === 404) return error("Aplikasi tidak ditemukan.");
-  if (res.status === 409) return { tone: "info", message: "Aplikasi nonaktif, tidak disinkronkan.", changed: false };
-  if (res.status === 503) return error("Layanan penyimpanan sedang tidak tersedia.");
+  if (res.status === 404) return error("Application not found.");
+  if (res.status === 409) return { tone: "info", message: "Application is inactive; not synced.", changed: false };
+  if (res.status === 503) return error("The storage service is unavailable.");
 
   let body: unknown;
   try {
     body = await res.json();
   } catch {
-    return error(res.ok ? "Respons server tidak dikenali." : `Gagal menyegarkan (HTTP ${res.status}).`);
+    return error(res.ok ? "Unrecognized server response." : `Refresh failed (HTTP ${res.status}).`);
   }
-  if (!res.ok) return error(`Gagal menyegarkan (HTTP ${res.status}).`);
+  if (!res.ok) return error(`Refresh failed (HTTP ${res.status}).`);
 
   const b = body as {
     status?: string; taskCount?: number; error?: { message?: string };
   };
   switch (b.status) {
     case "success":
-      return { tone: "success", message: `Berhasil: ${b.taskCount ?? 0} task diperbarui.`, changed: true };
+      return { tone: "success", message: `Success: ${b.taskCount ?? 0} tasks updated.`, changed: true };
     case "not_modified":
-      return { tone: "info", message: "Sudah yang terbaru, tidak ada perubahan.", changed: true };
+      return { tone: "info", message: "Already up to date; no changes.", changed: true };
     case "failed":
       // Status sumber di database sudah ditandai gagal; halaman perlu dimuat ulang.
-      return error(`Gagal: ${b.error?.message ?? "alasan tidak diketahui."}`, true);
+      return error(`Failed: ${b.error?.message ?? "unknown reason."}`, true);
     case "skipped":
-      return { tone: "info", message: "Aplikasi nonaktif, tidak disinkronkan.", changed: false };
+      return { tone: "info", message: "Application is inactive; not synced.", changed: false };
     default:
-      return error("Respons server tidak dikenali.");
+      return error("Unrecognized server response.");
   }
 }
 

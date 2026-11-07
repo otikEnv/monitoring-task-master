@@ -49,7 +49,7 @@ describe.skipIf(!ENABLED)("detail task (Supabase asli, sesi viewer)", () => {
     await addSource("off", { is_active: false });
 
     await addTask("a", {
-      tag: "master", task_id: "1", title: "Task utama", description: "Deskripsi **uji**", status: "blocked", priority: "high",
+      tag: "master", task_id: "1", title: "Task utama", description: "Description **uji**", status: "blocked", priority: "high",
       details: BIG, test_strategy: null, dependencies: ["2", "3", "999", "bad,id", '(x)'],
       subtasks: [
         { id: "1", title: "Sub satu", description: "uraian", status: "done", details: "detail", dependencies: [] },
@@ -58,14 +58,14 @@ describe.skipIf(!ENABLED)("detail task (Supabase asli, sesi viewer)", () => {
       ],
       subtasks_total: 3, subtasks_done: 1,
     });
-    await addTask("a", { tag: "master", task_id: "2", title: "Dependensi dua (master)", status: "done" });
-    await addTask("a", { tag: "master", task_id: "3", title: "Dependensi tiga (master)", status: "pending" });
+    await addTask("a", { tag: "master", task_id: "2", title: "Dependencies dua (master)", status: "done" });
+    await addTask("a", { tag: "master", task_id: "3", title: "Dependencies tiga (master)", status: "pending" });
     // ID yang sama pada tag lain di sumber yang sama: TIDAK boleh dipakai sebagai dependensi task master
-    await addTask("a", { tag: "fitur", task_id: "2", title: "Dependensi dua (FITUR, salah tag)", status: "cancelled" });
+    await addTask("a", { tag: "fitur", task_id: "2", title: "Dependencies dua (FITUR, salah tag)", status: "cancelled" });
     await addTask("a", { tag: "fitur", task_id: "999", title: "Seribu (FITUR, salah tag)" });
     // Sumber lain dengan ID yang sama
     await addTask("b", { tag: "master", task_id: "1", title: "Task di sumber B", status: "done" });
-    await addTask("b", { tag: "master", task_id: "2", title: "Dependensi dua (sumber B, salah sumber)" });
+    await addTask("b", { tag: "master", task_id: "2", title: "Dependencies dua (sumber B, salah sumber)" });
     // Karakter khusus
     await addTask("a", { tag: "fitur x", task_id: "1/2", title: '<script>alert(1)</script> & "kutip"', details: "<img src=x onerror=alert(1)>" });
     // Sumber nonaktif
@@ -87,7 +87,7 @@ describe.skipIf(!ENABLED)("detail task (Supabase asli, sesi viewer)", () => {
     const d = (await get("a", "master", "1"))!;
     expect(d).toMatchObject({
       sourceId: ids.a, sourceName: `TMP-DET-${run}-a`, tag: "master", taskId: "1", title: "Task utama",
-      description: "Deskripsi **uji**", status: "blocked", priority: "high", testStrategy: null,
+      description: "Description **uji**", status: "blocked", priority: "high", testStrategy: null,
     });
     expect(d.updatedAt).toMatch(/^\d{4}-/);
   });
@@ -101,8 +101,8 @@ describe.skipIf(!ENABLED)("detail task (Supabase asli, sesi viewer)", () => {
   it("dependensi dicari hanya pada sumber DAN tag yang sama, dengan urutan asli", async () => {
     const d = (await get("a", "master", "1"))!;
     expect(d.dependencies.map((x) => x.id)).toEqual(["2", "3", "999", "bad,id", "(x)"]);
-    expect(d.dependencies[0]).toEqual({ id: "2", found: true, title: "Dependensi dua (master)", status: "done" });
-    expect(d.dependencies[1]).toEqual({ id: "3", found: true, title: "Dependensi tiga (master)", status: "pending" });
+    expect(d.dependencies[0]).toEqual({ id: "2", found: true, title: "Dependencies dua (master)", status: "done" });
+    expect(d.dependencies[1]).toEqual({ id: "3", found: true, title: "Dependencies tiga (master)", status: "pending" });
   });
 
   it("dependensi yang hanya ada di tag atau sumber lain dianggap tidak ditemukan (tidak bocor lintas batas)", async () => {

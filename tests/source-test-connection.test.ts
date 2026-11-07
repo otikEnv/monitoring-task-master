@@ -58,7 +58,7 @@ describe("uji koneksi", () => {
     const t = deps(async () => ({ status: "ok", content: '{"name":"x"}', etag: null, lastCommitAt: null, tokenExpiresAt: null }));
     const r = await runConnectionTest(input, t.deps);
     expect(r).toMatchObject({ ok: false, kind: "invalid_file" });
-    expect(!r.ok && r.message).toMatch(/bukan tasks\.json Taskmaster/);
+    expect(!r.ok && r.message).toMatch(/not a valid Taskmaster tasks\.json/);
   });
 
   it("JSON rusak -> invalid_file", async () => {

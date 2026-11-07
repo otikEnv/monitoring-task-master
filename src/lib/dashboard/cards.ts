@@ -117,7 +117,7 @@ export function buildCards(sources: SourceRow[], counts: CountsRow[], now: numbe
   });
 
   return cards.sort(
-    (a, b) => attentionRank(a) - attentionRank(b) || a.name.localeCompare(b.name, "id"),
+    (a, b) => attentionRank(a) - attentionRank(b) || a.name.localeCompare(b.name, "en"),
   );
 }
 

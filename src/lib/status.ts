@@ -17,14 +17,14 @@ export const STATUS_ORDER: readonly DisplayStatus[] = [
 
 /** Label bahasa sehari-hari untuk manajemen (nilai asli di tasks.json tetap bahasa Inggris). */
 export const STATUS_LABEL: Record<DisplayStatus, string> = {
-  pending: "Menunggu",
-  in_progress: "Dikerjakan",
-  review: "Ditinjau",
-  blocked: "Terhambat",
-  done: "Selesai",
-  deferred: "Ditunda",
-  cancelled: "Dibatalkan",
-  other: "Lainnya",
+  pending: "Pending",
+  in_progress: "In progress",
+  review: "In review",
+  blocked: "Blocked",
+  done: "Done",
+  deferred: "Deferred",
+  cancelled: "Cancelled",
+  other: "Other",
 };
 
 /** Nilai status di tasks.json untuk tiap kunci (dipakai untuk filter dan tooltip). */
@@ -66,9 +66,9 @@ export function displayStatus(raw: string): DisplayStatus {
 }
 
 export const PRIORITY_LABEL: Record<string, string> = {
-  high: "Tinggi",
-  medium: "Sedang",
-  low: "Rendah",
+  high: "High",
+  medium: "Medium",
+  low: "Low",
 };
 
 export const PRIORITY_TONE: Record<string, string> = {

@@ -36,51 +36,51 @@ export function parseSourceForm(fd: FormData, opts: { requireToken: boolean }): 
   const errors: FieldErrors = {};
 
   const name = text(fd, "name").trim();
-  if (!name) errors.name = "Nama aplikasi wajib diisi.";
-  else if (name.length > 100) errors.name = "Nama aplikasi maksimal 100 karakter.";
-  else if (HAS_CONTROL.test(name)) errors.name = "Nama aplikasi memuat karakter yang tidak valid.";
+  if (!name) errors.name = "Application name is required.";
+  else if (name.length > 100) errors.name = "Application name must be at most 100 characters.";
+  else if (HAS_CONTROL.test(name)) errors.name = "Application name contains invalid characters.";
 
   const providerRaw = text(fd, "provider");
   const provider = (PROVIDERS as readonly string[]).includes(providerRaw)
     ? (providerRaw as Provider)
     : null;
-  if (!provider) errors.provider = "Pilih penyedia repo.";
+  if (!provider) errors.provider = "Select a repo provider.";
 
   const repoUrl = text(fd, "repoUrl").trim();
-  if (!repoUrl) errors.repoUrl = "URL repo wajib diisi.";
-  else if (repoUrl.length > 500) errors.repoUrl = "URL repo terlalu panjang.";
+  if (!repoUrl) errors.repoUrl = "Repo URL is required.";
+  else if (repoUrl.length > 500) errors.repoUrl = "Repo URL is too long.";
   else if (provider) {
     const problem = getAdapter(provider).validateRepoUrl(repoUrl);
     if (problem) errors.repoUrl = problem;
   }
 
   const branch = text(fd, "branch").trim();
-  if (!branch) errors.branch = "Branch wajib diisi.";
-  else if (branch.length > 255) errors.branch = "Nama branch terlalu panjang.";
+  if (!branch) errors.branch = "Branch is required.";
+  else if (branch.length > 255) errors.branch = "Branch name is too long.";
   else if (/\s/.test(branch) || HAS_CONTROL.test(branch)) {
-    errors.branch = "Nama branch tidak boleh memuat spasi atau karakter kontrol.";
+    errors.branch = "Branch name cannot contain spaces or control characters.";
   }
 
   const filePath = text(fd, "filePath").trim().replace(/^\/+/, "");
-  if (!filePath) errors.filePath = "Path file wajib diisi.";
-  else if (filePath.length > 500) errors.filePath = "Path file terlalu panjang.";
-  else if (filePath.endsWith("/")) errors.filePath = "Path harus menunjuk ke file, bukan folder.";
-  else if (filePath.includes("\\")) errors.filePath = "Gunakan garis miring (/) pada path.";
-  else if (HAS_CONTROL.test(filePath)) errors.filePath = "Path memuat karakter yang tidak valid.";
+  if (!filePath) errors.filePath = "File path is required.";
+  else if (filePath.length > 500) errors.filePath = "File path is too long.";
+  else if (filePath.endsWith("/")) errors.filePath = "The path must point to a file, not a folder.";
+  else if (filePath.includes("\\")) errors.filePath = "Use forward slashes (/) in the path.";
+  else if (HAS_CONTROL.test(filePath)) errors.filePath = "The path contains invalid characters.";
   else if (filePath.split("/").some((s) => s === ".." || s === "." || s === "")) {
-    errors.filePath = "Path tidak boleh memuat segmen kosong, '.' atau '..'.";
+    errors.filePath = "The path cannot contain empty segments, '.' or '..'.";
   }
 
   const tokenRaw = text(fd, "token").trim();
   let token: string | null = null;
   if (tokenRaw === "") {
-    if (opts.requireToken) errors.token = "Token wajib diisi.";
+    if (opts.requireToken) errors.token = "Token is required.";
   } else if (tokenRaw.length < 8) {
-    errors.token = "Token terlalu pendek.";
+    errors.token = "Token is too short.";
   } else if (tokenRaw.length > 1000) {
-    errors.token = "Token terlalu panjang.";
+    errors.token = "Token is too long.";
   } else if (/\s/.test(tokenRaw)) {
-    errors.token = "Token tidak boleh memuat spasi atau baris baru.";
+    errors.token = "Token cannot contain spaces or line breaks.";
   } else {
     token = tokenRaw;
   }
@@ -93,7 +93,7 @@ export function parseSourceForm(fd: FormData, opts: { requireToken: boolean }): 
     const d = m ? new Date(`${expRaw}T23:59:59+07:00`) : null;
     // Date menggeser tanggal tidak valid (30 Feb -> 2 Mar); tolak bila bulan/harinya berubah.
     if (!m || !d || Number.isNaN(d.getTime()) || d.getUTCMonth() + 1 !== Number(m[2]) || d.getUTCDate() !== Number(m[3])) {
-      errors.tokenExpiresAt = "Tanggal tidak valid.";
+      errors.tokenExpiresAt = "Date is not valid.";
     } else {
       tokenExpiresAt = d.toISOString();
     }

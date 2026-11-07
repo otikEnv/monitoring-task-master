@@ -32,7 +32,7 @@ async function fetchFile(params: FetchFileParams, deps?: FetchDeps): Promise<Fet
   if (!ref) {
     throw new ProviderError(
       "invalid_url",
-      "URL repo Bitbucket tidak valid. Contoh: https://bitbucket.org/workspace/repo",
+      "Invalid Bitbucket repo URL. Example: https://bitbucket.org/workspace/repo",
     );
   }
   const base = `${API}/repositories/${ref.workspace}/${ref.repo}`;
@@ -84,6 +84,6 @@ export const bitbucketAdapter: ProviderAdapter = {
   validateRepoUrl: (url) =>
     parseBitbucketUrl(url)
       ? null
-      : "URL repo Bitbucket tidak valid. Contoh: https://bitbucket.org/workspace/repo",
+      : "Invalid Bitbucket repo URL. Example: https://bitbucket.org/workspace/repo",
   fetchFile,
 };

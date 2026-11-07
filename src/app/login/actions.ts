@@ -13,7 +13,7 @@ export async function login(
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
-    return { error: "Email dan password wajib diisi." };
+    return { error: "Email and password are required." };
   }
 
   const supabase = await createClient();
@@ -21,7 +21,7 @@ export async function login(
 
   // Pesan sama untuk email salah dan password salah agar akun tidak bisa ditebak.
   if (error) {
-    return { error: "Email atau password salah." };
+    return { error: "Incorrect email or password." };
   }
 
   // Tujuan tetap "/" (tanpa parameter next) untuk menghindari open redirect.

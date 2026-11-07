@@ -6,7 +6,7 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { requireAdmin } from "@/lib/auth";
 import { SourceForm } from "../source-form";
 
-export const metadata: Metadata = { title: "Tambah sumber" };
+export const metadata: Metadata = { title: "Add source" };
 // Uji koneksi berjalan sebagai server action di rute ini.
 export const maxDuration = 60;
 
@@ -22,7 +22,7 @@ async function NewSourceContent() {
   const user = await requireAdmin();
   return (
     <AppShell user={user} width="narrow">
-      <PageHeader title="Tambah sumber" description="Daftarkan repo yang file task master-nya akan dipantau." />
+      <PageHeader title="Add source" description="Register a repo whose task master file will be monitored." />
       <SourceForm
         initial={{
           name: "",

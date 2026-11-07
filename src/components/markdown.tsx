@@ -26,7 +26,7 @@ const components: Components = {
     );
   },
   img({ alt }) {
-    return <span className="italic text-muted-foreground">[gambar{alt ? `: ${alt}` : ""}]</span>;
+    return <span className="italic text-muted-foreground">[image{alt ? `: ${alt}` : ""}]</span>;
   },
   // Judul di dalam konten diturunkan agar tidak bersaing dengan judul halaman.
   h1: ({ children }) => <h3 className="mt-4 text-base font-semibold">{children}</h3>,

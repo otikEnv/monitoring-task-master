@@ -39,7 +39,7 @@ export function ReleaseProgress({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent ?? 0}
-        aria-valuetext={percent === null ? "Belum ada task" : `${percent}% selesai`}
+        aria-valuetext={percent === null ? "No tasks" : `${percent}% done`}
         className="flex h-2.5 gap-px overflow-hidden rounded-full bg-muted"
       >
         {total > 0 &&

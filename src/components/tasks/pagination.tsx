@@ -12,11 +12,11 @@ export function Pagination({
   if (pageCount <= 1) return null;
 
   return (
-    <nav aria-label="Halaman" className="flex flex-wrap items-center gap-1.5">
+    <nav aria-label="Pagination" className="flex flex-wrap items-center gap-1.5">
       {page > 1 ? (
-        <Link href={hrefFor(params, { page: page - 1 })} rel="prev" className={idle}>‹ Sebelumnya</Link>
+        <Link href={hrefFor(params, { page: page - 1 })} rel="prev" className={idle}>‹ Previous</Link>
       ) : (
-        <span aria-disabled="true" className={disabled}>‹ Sebelumnya</span>
+        <span aria-disabled="true" className={disabled}>‹ Previous</span>
       )}
 
       {pageWindow(page, pageCount).map((n, i) =>
@@ -30,9 +30,9 @@ export function Pagination({
       )}
 
       {page < pageCount ? (
-        <Link href={hrefFor(params, { page: page + 1 })} rel="next" className={idle}>Berikutnya ›</Link>
+        <Link href={hrefFor(params, { page: page + 1 })} rel="next" className={idle}>Next ›</Link>
       ) : (
-        <span aria-disabled="true" className={disabled}>Berikutnya ›</span>
+        <span aria-disabled="true" className={disabled}>Next ›</span>
       )}
     </nav>
   );

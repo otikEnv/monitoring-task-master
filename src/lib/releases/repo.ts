@@ -19,13 +19,13 @@ export type ReleaseRow = {
 
 export class DuplicateReleaseError extends Error {
   constructor() {
-    super("Release dengan nama yang sama sudah ada pada aplikasi ini.");
+    super("A release with this name already exists for this application.");
     this.name = "DuplicateReleaseError";
   }
 }
 export class ReleaseNotFoundError extends Error {
   constructor() {
-    super("Release tidak ditemukan.");
+    super("Release not found.");
     this.name = "ReleaseNotFoundError";
   }
 }
@@ -77,12 +77,12 @@ export async function assertSourceTag(
 ): Promise<void> {
   const { data: src, error } = await db.from("sources").select("id").eq("id", sourceId).maybeSingle();
   if (error) throw new Error(`Gagal membaca sumber: ${error.message}`);
-  if (!src) throw new SourceTagError("sourceId", "Aplikasi tidak ditemukan.");
+  if (!src) throw new SourceTagError("sourceId", "Application not found.");
 
   const { data: tags, error: tagError } = await db
     .from("source_tags").select("tag").eq("source_id", sourceId).eq("tag", tag).limit(1);
   if (tagError) throw new Error(`Gagal membaca tag: ${tagError.message}`);
-  if (!tags?.length) throw new SourceTagError("tag", "Tag tidak ada pada aplikasi ini.");
+  if (!tags?.length) throw new SourceTagError("tag", "This tag does not exist on this application.");
 }
 
 const payload = (input: ReleaseInput) => ({

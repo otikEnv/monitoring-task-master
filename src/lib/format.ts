@@ -3,7 +3,7 @@ export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString("id-ID", {
+  return d.toLocaleString("en-GB", {
     timeZone: "Asia/Jakarta",
     day: "2-digit",
     month: "short",
@@ -17,7 +17,7 @@ export function formatDate(iso: string | null | undefined): string {
   if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("id-ID", {
+  return d.toLocaleDateString("en-GB", {
     timeZone: "Asia/Jakarta",
     day: "2-digit",
     month: "short",

@@ -46,12 +46,12 @@ export type ReleaseTask = {
 export type RiskLevel = "released" | "empty" | "overdue" | "behind" | "at_risk" | "on_track";
 
 export const RISK_LABEL: Record<RiskLevel, string> = {
-  released: "Sudah rilis",
-  empty: "Belum ada task",
-  overdue: "Lewat target",
-  behind: "Tertinggal",
-  at_risk: "Berisiko",
-  on_track: "Sesuai jadwal",
+  released: "Released",
+  empty: "No tasks",
+  overdue: "Overdue",
+  behind: "Behind",
+  at_risk: "At risk",
+  on_track: "On track",
 };
 
 export type WaitingTask = {

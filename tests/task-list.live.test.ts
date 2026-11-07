@@ -186,14 +186,14 @@ describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
       expect(await master({ sort: "id", dir: "desc" })).toEqual(["20", "12", "11", "10", "3", "2", "1"]);
     });
 
-    it("ID non-angka selalu di akhir, naik maupun turun", async () => {
+    it("ID non-angka selalu di akhir, up maupun down", async () => {
       const asc = await idsOf({ ...A(), sort: "id", dir: "asc" });
       const desc = await idsOf({ ...A(), sort: "id", dir: "desc" });
       expect(asc[asc.length - 1]).toBe("abc");
       expect(desc[desc.length - 1]).toBe("abc");
     });
 
-    it("status: yang paling perlu perhatian dulu (terhambat, dikerjakan, ditinjau, menunggu, ditunda, selesai, dibatalkan)", async () => {
+    it("status: yang paling perlu perhatian dulu (blocked, in progress, ditinjau, pending, ditunda, selesai, dibatalkan)", async () => {
       const r = await list({ ...A(), tag: "master", sort: "status", dir: "asc" });
       expect(r.rows.map((x) => x.status)).toEqual(["blocked", "in-progress", "review", "pending", "deferred", "done", "cancelled"]);
       const d = await list({ ...A(), tag: "master", sort: "status", dir: "desc" });
@@ -216,8 +216,8 @@ describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
       expect(dr.slice(3).every((x) => x === null)).toBe(true);
     });
 
-    it("aplikasi: menurut nama, naik dan turun", async () => {
-      // Tidak bergantung pada data lain di database: telusuri halaman demi halaman sampai kedua sumber uji
+    it("aplikasi: menurut nama, up dan down", async () => {
+      // Tidak depends on data lain di database: telusuri halaman demi halaman sampai kedua sumber uji
       // (keduanya punya task berprioritas rendah) ditemukan, lalu catat urutan kemunculannya.
       const orderOf = async (dir: "asc" | "desc") => {
         const seen: string[] = [];
@@ -234,7 +234,7 @@ describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
       expect(await orderOf("desc")).toEqual([ids.a, ids.b]);
     });
 
-    it("judul: urutan menurun adalah kebalikan persis dari urutan naik", async () => {
+    it("judul: urutan menurun adalah kebalikan persis dari urutan up", async () => {
       // Pengurutan teks memakai collation database (bisa berbeda dari JavaScript), jadi yang diperiksa
       // adalah konsistensi: judul semuanya unik, sehingga desc harus tepat kebalikan asc.
       const asc = (await list({ ...A(), sort: "title", dir: "asc" })).rows.map((x) => `${x.tag}/${x.taskId}`);
@@ -243,7 +243,7 @@ describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
       expect(desc).toEqual([...asc].reverse());
     });
 
-    it("tag: naik dan turun", async () => {
+    it("tag: up dan down", async () => {
       const g = (await list({ ...A(), sort: "tag", dir: "asc" })).rows.map((x) => x.tag);
       expect(g[0]).toBe("fitur");
       expect(g.at(-1)).toBe("master");

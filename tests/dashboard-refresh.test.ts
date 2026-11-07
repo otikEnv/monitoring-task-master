@@ -15,7 +15,7 @@ describe("refreshSource", () => {
 
   it("success -> pesan jumlah task, changed", async () => {
     expect(await refreshSource("x", fetchOf(json({ status: "success", taskCount: 173 })))).toEqual({
-      tone: "success", message: "Berhasil: 173 task diperbarui.", changed: true,
+      tone: "success", message: "Success: 173 tasks updated.", changed: true,
     });
   });
 
@@ -25,11 +25,11 @@ describe("refreshSource", () => {
 
   it("failed -> galat dengan pesan sumber, changed (status gagal tersimpan di database)", async () => {
     const r = await refreshSource("x", fetchOf(json({ status: "failed", error: { kind: "unauthorized", message: "Token ditolak (401)." } })));
-    expect(r).toEqual({ tone: "error", message: "Gagal: Token ditolak (401).", changed: true });
+    expect(r).toEqual({ tone: "error", message: "Failed: Token ditolak (401).", changed: true });
   });
 
   it("failed tanpa pesan -> pesan cadangan", async () => {
-    expect((await refreshSource("x", fetchOf(json({ status: "failed" })))).message).toMatch(/alasan tidak diketahui/);
+    expect((await refreshSource("x", fetchOf(json({ status: "failed" })))).message).toMatch(/unknown reason/);
   });
 
   it("skipped dan 409 -> info nonaktif, tidak perlu muat ulang", async () => {
@@ -39,8 +39,8 @@ describe("refreshSource", () => {
 
   it.each([
     [401, /Sesi berakhir/],
-    [404, /tidak ditemukan/],
-    [503, /tidak tersedia/],
+    [404, /not found/],
+    [503, /unavailable/],
   ])("HTTP %i -> galat yang jelas", async (status, re) => {
     const r = await refreshSource("x", fetchOf(json({ error: "x" }, status)));
     expect(r).toMatchObject({ tone: "error", changed: false });

@@ -34,7 +34,7 @@ export async function saveRelease(formData: FormData): Promise<SaveReleaseResult
 
   const id = idFrom(formData);
   const editing = formData.get("id") !== null && formData.get("id") !== "";
-  if (editing && !id) return { ok: false, error: "ID release tidak valid." };
+  if (editing && !id) return { ok: false, error: "Invalid release ID." };
 
   const parsed = parseReleaseForm(formData);
   if (!parsed.ok) return { ok: false, fieldErrors: parsed.fieldErrors };
@@ -49,7 +49,7 @@ export async function saveRelease(formData: FormData): Promise<SaveReleaseResult
     if (e instanceof DuplicateReleaseError) return { ok: false, fieldErrors: { name: e.message } };
     if (e instanceof ReleaseNotFoundError) return { ok: false, error: e.message };
     fail("menyimpan", e);
-    return { ok: false, error: "Gagal menyimpan release. Coba lagi." };
+    return { ok: false, error: "Could not save the release. Try again." };
   }
 
   revalidatePath("/release");
@@ -59,13 +59,13 @@ export async function saveRelease(formData: FormData): Promise<SaveReleaseResult
 /** Menandai rilis (tanggal hari ini menurut WIB) atau membatalkan tandanya. */
 export async function markReleased(id: string, released: boolean): Promise<SimpleResult> {
   await requireAdmin();
-  if (!UUID.test(id)) return { ok: false, error: "ID release tidak valid." };
+  if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   try {
     await setReleasedOn(id, released ? wibDay(new Date()) : null);
   } catch (e) {
     if (e instanceof ReleaseNotFoundError) return { ok: false, error: e.message };
     fail("mengubah status rilis", e);
-    return { ok: false, error: "Gagal mengubah status rilis." };
+    return { ok: false, error: "Could not change the release status." };
   }
   revalidatePath("/release");
   revalidatePath(`/release/${id}`);
@@ -74,13 +74,13 @@ export async function markReleased(id: string, released: boolean): Promise<Simpl
 
 export async function removeRelease(id: string): Promise<SimpleResult> {
   await requireAdmin();
-  if (!UUID.test(id)) return { ok: false, error: "ID release tidak valid." };
+  if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   try {
     await deleteRelease(id);
   } catch (e) {
     if (e instanceof ReleaseNotFoundError) return { ok: false, error: e.message };
     fail("menghapus", e);
-    return { ok: false, error: "Gagal menghapus release." };
+    return { ok: false, error: "Could not delete the release." };
   }
   revalidatePath("/release");
   return { ok: true };
@@ -94,12 +94,12 @@ export async function previewRange(
   const start = parseRangeNumber(String(rangeStart));
   const end = parseRangeNumber(String(rangeEnd));
   if (!UUID.test(sourceId) || !tag || tag.length > 100 || start === null || end === null || start > end) {
-    return { ok: false, error: "Rentang belum valid." };
+    return { ok: false, error: "The range is not valid yet." };
   }
   try {
     return { ok: true, ...(await loadPreview(await createClient(), sourceId.toLowerCase(), tag, start, end)) };
   } catch (e) {
     fail("membuat pratinjau", e);
-    return { ok: false, error: "Pratinjau belum bisa dimuat." };
+    return { ok: false, error: "The preview could not be loaded." };
   }
 }

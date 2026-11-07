@@ -69,7 +69,7 @@ export async function loadTaskList(db: SupabaseClient, requested: TaskListParams
   if (tagRows.error) throw new Error(`Gagal membaca tag: ${tagRows.error.message}`);
 
   const tags = [...new Set((tagRows.data as { tag: string }[]).map((t) => t.tag))].sort((a, b) =>
-    a.localeCompare(b, "id"),
+    a.localeCompare(b, "en"),
   );
   const ignoredTag = requested.tag && !tags.includes(requested.tag) ? requested.tag : null;
   const params: TaskListParams = ignoredTag ? { ...requested, tag: null } : requested;

@@ -34,12 +34,12 @@ async function HomeContent() {
     <AppShell user={user}>
       <PageHeader
         title="Dashboard"
-        description="Progres task master semua aplikasi. Data dimutakhirkan lewat tombol Segarkan."
+        description="Task master progress for all applications. Data is updated with the Refresh button."
       />
       {data ? (
         <DashboardView cards={data.cards} summary={data.summary} isAdmin={user.role === "admin"} />
       ) : (
-        <LoadError title="Data dashboard belum bisa dimuat." />
+        <LoadError title="The dashboard data could not be loaded." />
       )}
     </AppShell>
   );

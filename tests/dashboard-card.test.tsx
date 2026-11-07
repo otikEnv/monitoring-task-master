@@ -33,7 +33,7 @@ describe("kartu aplikasi", () => {
     expect(html).toContain("GitHub");
     expect(html).toContain("<strong>stg</strong>");
     expect(html).toContain("82.1%");
-    expect(html).toContain("142 dari 173 task selesai");
+    expect(html).toContain("142 of 173 tasks done");
   });
 
   it("persentase bulat tanpa desimal", () => {
@@ -42,19 +42,19 @@ describe("kartu aplikasi", () => {
 
   it("menampilkan tiap status dengan label bahasa sehari-hari dan jumlahnya", () => {
     const html = render(card());
-    for (const label of ["Menunggu", "Dikerjakan", "Ditinjau", "Terhambat", "Selesai", "Ditunda", "Dibatalkan"]) {
+    for (const label of ["Pending", "In progress", "In review", "Blocked", "Done", "Deferred", "Cancelled"]) {
       expect(html).toContain(label);
     }
-    expect(html).toMatch(/Terhambat<\/span><span[^>]*>1</);
-    expect(html).toMatch(/Selesai<\/span><span[^>]*>142</);
+    expect(html).toMatch(/Blocked<\/span><span[^>]*>1</);
+    expect(html).toMatch(/Done<\/span><span[^>]*>142</);
   });
 
-  it("kategori 'Lainnya' hanya tampil bila ada status tak dikenal", () => {
-    expect(render(card())).not.toContain("Lainnya");
-    expect(render(card({ counts: { ...card().counts, other: 2 } }))).toContain("Lainnya");
+  it("kategori 'Other' hanya tampil bila ada status tak dikenal", () => {
+    expect(render(card())).not.toContain("Other");
+    expect(render(card({ counts: { ...card().counts, other: 2 } }))).toContain("Other");
   });
 
-  it("task terhambat diberi penanda visual", () => {
+  it("task blocked diberi penanda visual", () => {
     expect(render(card())).toContain("ring-red-500");
     expect(render(card({ counts: { ...card().counts, blocked: 0 } }))).not.toContain("ring-red-500");
   });
@@ -72,9 +72,9 @@ describe("kartu aplikasi", () => {
 
   it("menampilkan waktu sinkron terakhir dan waktu file diubah", () => {
     const html = render(card());
-    expect(html).toContain("Sinkron terakhir:");
-    expect(html).toContain("File diubah:");
-    expect(html).not.toContain("Sinkronisasi gagal");
+    expect(html).toContain("Last sync:");
+    expect(html).toContain("File changed:");
+    expect(html).not.toContain("Sync failed");
   });
 });
 
@@ -84,20 +84,20 @@ describe("sinkron gagal", () => {
   it("menampilkan penanda gagal, pesan galat, dan waktu data terakhir yang berhasil", () => {
     const html = render(failed);
     expect(html).toContain('role="alert"');
-    expect(html).toContain("Sinkronisasi gagal");
+    expect(html).toContain("Sync failed");
     expect(html).toContain("Token ditolak (401)");
-    expect(html).toContain("sinkronisasi terakhir yang berhasil");
+    expect(html).toContain("last successful sync");
   });
 
   it("data terakhir yang berhasil tetap ditampilkan (bukan dikosongkan)", () => {
     const html = render(failed);
     expect(html).toContain("82.1%");
-    expect(html).toContain("142 dari 173");
+    expect(html).toContain("142 of 173");
   });
 
   it("gagal sebelum pernah berhasil: tidak ada data, dan dikatakan belum pernah berhasil", () => {
     const html = render(card({ lastSyncStatus: "failed", lastError: "x", lastSyncedAt: null, hasData: false, total: 0, percentDone: 0 }));
-    expect(html).toContain("Belum pernah berhasil disinkronkan");
+    expect(html).toContain("never synced successfully");
     expect(html).not.toContain("0%");
   });
 
@@ -110,29 +110,29 @@ describe("sinkron gagal", () => {
 });
 
 describe("keadaan khusus", () => {
-  it("belum pernah disinkronkan: ajakan menekan Segarkan, tanpa persentase", () => {
+  it("belum pernah disinkronkan: ajakan menekan Refresh, tanpa persentase", () => {
     const html = render(card({ lastSyncStatus: "never", hasData: false, total: 0, percentDone: 0, lastSyncedAt: null, lastCommitAt: null }));
-    expect(html).toContain("Belum pernah disinkronkan");
-    expect(html).toContain("Segarkan");
+    expect(html).toContain("Never synced");
+    expect(html).toContain("Refresh");
     expect(html).not.toContain('role="progressbar"');
   });
 
   it("sukses tetapi 0 task: pesan file kosong, bukan 0%", () => {
     const html = render(card({ hasData: false, total: 0, percentDone: 0 }));
-    expect(html).toContain("Belum ada task pada file ini");
+    expect(html).toContain("No tasks in this file");
   });
 
-  it("sumber nonaktif: diberi label dan tidak punya tombol Segarkan", () => {
+  it("sumber nonaktif: diberi label dan tidak punya tombol Refresh", () => {
     const html = render(card({ isActive: false }));
-    expect(html).toContain("Nonaktif");
-    expect(html).not.toContain(">Segarkan<");
+    expect(html).toContain("Inactive");
+    expect(html).not.toContain(">Refresh<");
     expect(html).toContain("opacity-60");
   });
 
   it("peringatan token kedaluwarsa dan segera kedaluwarsa", () => {
-    expect(render(card({ tokenExpiry: "expired", tokenExpiresAt: "2026-11-01T00:00:00Z" }))).toContain("Token akses kedaluwarsa sejak");
-    expect(render(card({ tokenExpiry: "soon", tokenExpiresAt: "2026-11-10T00:00:00Z" }))).toContain("segera kedaluwarsa");
-    expect(render(card({ tokenExpiry: "ok", tokenExpiresAt: "2027-06-01T00:00:00Z" }))).not.toContain("kedaluwarsa");
+    expect(render(card({ tokenExpiry: "expired", tokenExpiresAt: "2026-11-01T00:00:00Z" }))).toContain("The access token expired on");
+    expect(render(card({ tokenExpiry: "soon", tokenExpiresAt: "2026-11-10T00:00:00Z" }))).toContain("expires soon");
+    expect(render(card({ tokenExpiry: "ok", tokenExpiresAt: "2027-06-01T00:00:00Z" }))).not.toContain("expire");
   });
 
   it("jumlah tag ditampilkan hanya bila lebih dari satu", () => {
@@ -145,16 +145,16 @@ describe("keadaan khusus", () => {
   });
 });
 
-describe("tombol Segarkan dan hasilnya", () => {
-  it("idle: tombol aktif dengan label Segarkan", () => {
+describe("tombol Refresh dan hasilnya", () => {
+  it("idle: tombol aktif dengan label Refresh", () => {
     const html = render(card());
-    expect(html).toContain(">Segarkan<");
+    expect(html).toContain(">Refresh<");
     expect(html).not.toContain('disabled=""'); // atribut, bukan kelas "disabled:opacity-60"
   });
 
   it("running: tombol nonaktif dan berlabel Menyegarkan", () => {
     const html = render(card(), { phase: "running" });
-    expect(html).toContain("Menyegarkan…");
+    expect(html).toContain("Refreshing…");
     expect(html).toContain('disabled=""');
   });
 
@@ -186,7 +186,7 @@ describe("baris release pada kartu", () => {
     for (const r of [undefined, null]) {
       const html = render(card({ release: r }));
       expect(html).not.toContain("Release v2.1");
-      expect(html).not.toContain("release lain");
+      expect(html).not.toContain("more releases");
     }
   });
 
@@ -194,26 +194,26 @@ describe("baris release pada kartu", () => {
     const html = render(card({ release }));
     expect(html).toContain("Release v2.1");
     expect(html).toContain("62%");
-    expect(html).toContain("13 hari lagi");
-    expect(html).toContain("Berisiko");
+    expect(html).toContain("13 days left");
+    expect(html).toContain("At risk");
     expect(html).toContain(`href="/release/${release.releaseId}"`);
-    expect(html).not.toContain("release lain");
+    expect(html).not.toContain("more releases");
   });
 
   it("baris release berada di atas tautan membentang (z-10) agar tetap bisa diklik", () => {
     expect(render(card({ release }))).toMatch(/relative z-10[^"]*"><a [^>]*href="\/release\//);
   });
 
-  it("lebih dari satu release: +N release lain menaut ke daftar terfilter aplikasi", () => {
+  it("lebih dari satu release: +N more releases menaut ke daftar terfilter aplikasi", () => {
     const html = render(card({ release: { ...release, extra: 2 } }));
-    expect(html).toContain("+2 release lain");
+    expect(html).toContain("+2 more releases");
     expect(html).toContain(`href="/release?source=${card().id}"`);
   });
 
   it("rentang tanpa task dan release lewat target", () => {
-    expect(render(card({ release: { ...release, percent: null, total: 0, risk: "empty" } }))).toContain("belum ada task");
+    expect(render(card({ release: { ...release, percent: null, total: 0, risk: "empty" } }))).toContain("no tasks");
     const late = render(card({ release: { ...release, daysLeft: -4, risk: "overdue" } }));
-    expect(late).toContain("lewat 4 hari");
-    expect(late).toContain("Lewat target");
+    expect(late).toContain("4 days overdue");
+    expect(late).toContain("Overdue");
   });
 });

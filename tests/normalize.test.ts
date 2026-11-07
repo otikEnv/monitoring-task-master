@@ -148,7 +148,7 @@ describe("normalisasi task", () => {
     });
     expect(r.tags[0].tasks).toHaveLength(1);
     expect(r.tags[0].tasks[0].title).toBe("pertama");
-    expect(r.warnings[0]).toMatch(/ganda/);
+    expect(r.warnings[0]).toMatch(/duplicate/);
   });
 
   it("dependensi bukan array menjadi daftar kosong; subtasks bukan array menjadi kosong", () => {
@@ -171,7 +171,7 @@ describe("normalisasi task", () => {
       ],
     });
     expect(r.tags[0].tasks[0].subtasks.map((s) => s.id)).toEqual(["1", "2", "3"]);
-    expect(r.warnings[0]).toMatch(/subtask tidak unik/);
+    expect(r.warnings[0]).toMatch(/subtask IDs are not unique/);
   });
 
   it("ID subtask yang sudah unik dipertahankan apa adanya", () => {
@@ -265,7 +265,7 @@ describe("fixture echoapp tersanitasi (struktur data asli)", () => {
       const ids = t.subtasks.map((s) => s.id);
       expect(new Set(ids).size).toBe(ids.length);
     }
-    expect(r.warnings.some((w) => /subtask tidak unik/.test(w))).toBe(true);
+    expect(r.warnings.some((w) => /subtask IDs are not unique/.test(w))).toBe(true);
   });
 });
 

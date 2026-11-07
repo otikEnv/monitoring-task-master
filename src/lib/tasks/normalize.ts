@@ -171,11 +171,11 @@ function normalizeTasks(rawTasks: unknown[], tag: string, warnings: string[]): N
     }
     const id = toId(raw.id);
     if (id === null) {
-      warnings.push(`${where}: tidak punya ID, dilewati.`);
+      warnings.push(`${where}: has no ID, skipped.`);
       return;
     }
     if (seen.has(id)) {
-      warnings.push(`tag "${tag}", task ${id}: ID ganda, yang pertama dipakai.`);
+      warnings.push(`tag "${tag}", task ${id}: duplicate ID, the first one is used.`);
       return;
     }
     seen.add(id);
@@ -201,7 +201,7 @@ function normalizeTasks(rawTasks: unknown[], tag: string, warnings: string[]): N
         s.id = String(si + 1);
       });
       warnings.push(
-        `tag "${tag}", task ${id}: ID subtask tidak unik, diganti nomor urut.`,
+        `tag "${tag}", task ${id}: subtask IDs are not unique, replaced with sequence numbers.`,
       );
     }
 
@@ -228,7 +228,7 @@ function normalizeTasks(rawTasks: unknown[], tag: string, warnings: string[]): N
 export function parseTasksFile(text: string): ParsedTasksFile {
   const body = text.replace(/^﻿/, "");
   if (body.trim() === "") {
-    throw new TasksFileError("invalid_json", "File kosong, bukan JSON yang valid.");
+    throw new TasksFileError("invalid_json", "The file is empty, not valid JSON.");
   }
 
   let json: unknown;
@@ -237,11 +237,11 @@ export function parseTasksFile(text: string): ParsedTasksFile {
   } catch (e) {
     throw new TasksFileError(
       "invalid_json",
-      `Isi file bukan JSON yang valid: ${(e as Error).message}`,
+      `The file content is not valid JSON: ${(e as Error).message}`,
     );
   }
   if (!isRec(json)) {
-    throw new TasksFileError("invalid_shape", "Bentuk file tidak dikenali: akar file bukan objek.");
+    throw new TasksFileError("invalid_shape", "Unrecognized file shape: the root is not an object.");
   }
 
   const warnings: string[] = [];
@@ -265,7 +265,7 @@ export function parseTasksFile(text: string): ParsedTasksFile {
   if (tags.length === 0) {
     throw new TasksFileError(
       "invalid_shape",
-      "Bentuk file tidak dikenali: tidak ada { tasks: [...] } maupun { <tag>: { tasks: [...] } }.",
+      "Unrecognized file shape: neither { tasks: [...] } nor { <tag>: { tasks: [...] } } was found.",
     );
   }
   return { shape: "per-tag", tags, warnings };

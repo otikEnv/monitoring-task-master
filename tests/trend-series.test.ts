@@ -216,7 +216,7 @@ describe("summarizeTrend", () => {
     expect(s.doneDelta).toBe(50);
     expect(s.blockedDelta).toBe(2);
   });
-  it("persentase bisa turun (selisih negatif)", () => {
+  it("persentase bisa down (selisih negatif)", () => {
     const s = summarizeTrend([p("2026-11-01T00:00:00Z", { total: 10, done: 10 }), p("2026-11-02T00:00:00Z", { total: 20, done: 10 })]);
     expect(s.percentDelta).toBe(-50);
   });

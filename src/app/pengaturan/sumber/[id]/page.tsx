@@ -9,7 +9,7 @@ import { formatDateInput } from "@/lib/format";
 import { getSourceView } from "@/lib/sources/repo";
 import { SourceForm } from "../source-form";
 
-export const metadata: Metadata = { title: "Ubah sumber" };
+export const metadata: Metadata = { title: "Edit source" };
 // Uji koneksi berjalan sebagai server action di rute ini.
 export const maxDuration = 60;
 
@@ -33,7 +33,7 @@ async function EditSourceContent({ params }: { params: Promise<{ id: string }> }
 
   return (
     <AppShell user={user} width="narrow">
-      <PageHeader title={`Ubah sumber: ${source.name}`} />
+      <PageHeader title={`Edit source: ${source.name}`} />
       {/* key: form dibangun ulang bila data sumber berubah. Token TIDAK ikut dikirim ke klien. */}
       <SourceForm
         key={`${source.id}-${source.branch}-${source.filePath}`}

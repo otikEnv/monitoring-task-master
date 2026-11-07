@@ -49,11 +49,11 @@ export function sortOverviews(list: ReleaseOverview[]): ReleaseOverview[] {
   return [...list].sort((a, b) => {
     const ar = a.release.releasedOn, br = b.release.releasedOn;
     if (!ar !== !br) return ar ? 1 : -1;
-    if (ar && br) return br.localeCompare(ar) || a.release.name.localeCompare(b.release.name, "id");
+    if (ar && br) return br.localeCompare(ar) || a.release.name.localeCompare(b.release.name, "en");
     return (
       a.release.targetDate.localeCompare(b.release.targetDate) ||
-      a.sourceName.localeCompare(b.sourceName, "id") ||
-      a.release.name.localeCompare(b.release.name, "id")
+      a.sourceName.localeCompare(b.sourceName, "en") ||
+      a.release.name.localeCompare(b.release.name, "en")
     );
   });
 }
@@ -99,7 +99,7 @@ export async function loadReleaseOverviews(
       const tasks = taskSets.get(`${release.sourceId}\u0000${release.tag}`) ?? [];
       return {
         release,
-        sourceName: s?.name ?? "(aplikasi tidak ditemukan)",
+        sourceName: s?.name ?? "(application not found)",
         sourceActive: s?.is_active ?? false,
         syncStatus: s?.last_sync_status ?? "never",
         lastSyncedAt: s?.last_synced_at ?? null,
@@ -149,7 +149,7 @@ export async function loadSourceOptions(db: SupabaseClient): Promise<SourceOptio
   return (src.data as { id: string; name: string }[]).map((s) => ({
     id: s.id,
     name: s.name,
-    tags: (bySource.get(s.id) ?? []).sort((a, b) => a.localeCompare(b, "id")),
+    tags: (bySource.get(s.id) ?? []).sort((a, b) => a.localeCompare(b, "en")),
   }));
 }
 

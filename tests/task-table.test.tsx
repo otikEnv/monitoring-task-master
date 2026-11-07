@@ -15,14 +15,14 @@ const row = (over: Partial<TaskListRow> = {}): TaskListRow => ({
 const table = (rows: TaskListRow[], p = P()) => renderToStaticMarkup(<TaskTable rows={rows} params={p} />);
 
 describe("tabel task", () => {
-  it("menampilkan aplikasi, tag, ID, judul, status, prioritas, dan subtask selesai dari total", () => {
+  it("menampilkan aplikasi, tag, ID, judul, status, prioritas, dan subtasks done dari total", () => {
     const html = table([row()]);
     expect(html).toContain("Echo App");
     expect(html).toContain(">master<");
     expect(html).toContain(">7<");
     expect(html).toContain("Judul task");
-    expect(html).toContain("Dikerjakan");
-    expect(html).toContain("Tinggi");
+    expect(html).toContain("In progress");
+    expect(html).toContain("High");
     expect(html).toContain("3/5");
   });
 
@@ -48,15 +48,15 @@ describe("tabel task", () => {
     expect(renderToStaticMarkup(<PriorityBadge priority="urgent" />)).toContain("urgent");
   });
 
-  it("status tak dikenal ditampilkan sebagai 'Lainnya (nilai asli)'", () => {
-    expect(renderToStaticMarkup(<StatusBadge status="aneh" />)).toContain("Lainnya (aneh)");
+  it("status tak dikenal ditampilkan sebagai 'Other (nilai asli)'", () => {
+    expect(renderToStaticMarkup(<StatusBadge status="aneh" />)).toContain("Other (aneh)");
   });
 
   it("tujuh status punya label sendiri", () => {
     const labels = ["pending", "in-progress", "review", "blocked", "done", "deferred", "cancelled"].map((s) =>
       renderToStaticMarkup(<StatusBadge status={s} />).replace(/<[^>]+>/g, ""),
     );
-    expect(labels).toEqual(["Menunggu", "Dikerjakan", "Ditinjau", "Terhambat", "Selesai", "Ditunda", "Dibatalkan"]);
+    expect(labels).toEqual(["Pending", "In progress", "In review", "Blocked", "Done", "Deferred", "Cancelled"]);
   });
 
   it("teks dari data di-escape (judul, nama aplikasi, tag, status)", () => {
@@ -76,7 +76,7 @@ describe("tabel task", () => {
 describe("urutan kolom", () => {
   it("semua tujuh kolom adalah tautan pengurut", () => {
     const html = table([row()]);
-    // Urutan bawaan (Aplikasi, naik) sedang aktif, jadi tautannya membalik ke menurun.
+    // Urutan bawaan (Application, up) sedang aktif, jadi tautannya membalik ke menurun.
     expect(html).toContain("sort=app&amp;dir=desc");
     for (const k of ["tag", "id", "title", "status", "priority", "subtasks"]) {
       expect(html).toContain(`sort=${k}&amp;dir=asc`);
@@ -113,16 +113,16 @@ describe("paginasi", () => {
     expect(nav(1, 1)).toBe("");
   });
 
-  it("halaman pertama: Sebelumnya nonaktif, Berikutnya menaut ke halaman 2", () => {
+  it("halaman pertama: Previous nonaktif, Next menaut ke halaman 2", () => {
     const html = nav(1, 5);
-    expect(html).toMatch(/aria-disabled="true"[^>]*>‹ Sebelumnya/);
+    expect(html).toMatch(/aria-disabled="true"[^>]*>‹ Previous/);
     expect(html).toContain('href="/tasks?page=2"');
     expect(html).toContain('rel="next"');
   });
 
-  it("halaman terakhir: Berikutnya nonaktif", () => {
+  it("halaman terakhir: Next nonaktif", () => {
     const html = nav(5, 5);
-    expect(html).toMatch(/aria-disabled="true"[^>]*>Berikutnya ›/);
+    expect(html).toMatch(/aria-disabled="true"[^>]*>Next ›/);
     expect(html).toContain('rel="prev"');
   });
 
@@ -132,7 +132,7 @@ describe("paginasi", () => {
     expect(html).not.toContain('href="/tasks?page=3"');
   });
 
-  it("filter dan urutan dipertahankan di SEMUA tautan, termasuk Sebelumnya dan Berikutnya", () => {
+  it("filter dan urutan dipertahankan di SEMUA tautan, termasuk Previous dan Next", () => {
     const html = nav(3, 5, P({ status: "done", sort: "id", dir: "desc" }));
     // Urutan atribut di HTML hasil render tidak dijamin: ambil tag <a> ber-rel lalu baca href-nya.
     const hrefOf = (rel: string) => {
@@ -164,16 +164,16 @@ describe("filter", () => {
     expect(html).toContain('name="tag"');
     expect(html).toContain(">fitur<");
     expect(html).toContain('name="status"');
-    for (const l of ["Menunggu", "Dikerjakan", "Ditinjau", "Terhambat", "Selesai", "Ditunda", "Dibatalkan", "Lainnya"]) expect(html).toContain(`>${l}<`);
+    for (const l of ["Pending", "In progress", "In review", "Blocked", "Done", "Deferred", "Cancelled", "Other"]) expect(html).toContain(`>${l}<`);
     expect(html).toContain('name="priority"');
-    for (const l of ["Tinggi", "Sedang", "Rendah"]) expect(html).toContain(`>${l}<`);
+    for (const l of ["High", "Medium", "Low"]) expect(html).toContain(`>${l}<`);
   });
 
-  it("bekerja tanpa JavaScript: <form method=get> dengan tombol Terapkan", () => {
+  it("bekerja tanpa JavaScript: <form method=get> dengan tombol Apply", () => {
     const html = bar();
     expect(html).toContain('method="get"');
     expect(html).toContain('action="/tasks"');
-    expect(html).toContain(">Terapkan<");
+    expect(html).toContain(">Apply<");
   });
 
   it("pilihan saat ini terpilih", () => {
@@ -198,10 +198,10 @@ describe("filter", () => {
     expect(bar(P({ page: 4 }))).not.toContain('name="page"');
   });
 
-  it("'Hapus semua filter' hanya muncul bila ada filter aktif", () => {
-    expect(bar()).not.toContain("Hapus semua filter");
-    expect(bar(P({ status: "done" }))).toContain("Hapus semua filter");
-    expect(bar(P({ sort: "id", page: 3 }))).not.toContain("Hapus semua filter");
+  it("'Clear all filters' hanya muncul bila ada filter aktif", () => {
+    expect(bar()).not.toContain("Clear all filters");
+    expect(bar(P({ status: "done" }))).toContain("Clear all filters");
+    expect(bar(P({ sort: "id", page: 3 }))).not.toContain("Clear all filters");
   });
 
   it("nama aplikasi dan tag di-escape", () => {

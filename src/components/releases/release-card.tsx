@@ -24,11 +24,11 @@ export function ReleaseCard({ overview }: { overview: ReleaseOverview }) {
           <RiskBadge risk={stats.risk} />
         </div>
         <p className="text-xs text-muted-foreground">
-          Tag <strong>{release.tag}</strong> · Rentang {formatRange(release.rangeStart, release.rangeEnd)} · {stats.total} task
+          Tag <strong>{release.tag}</strong> · Range {formatRange(release.rangeStart, release.rangeEnd)} · {stats.total} tasks
         </p>
         <p className="text-xs text-muted-foreground">
           {released ? (
-            <>Dirilis {formatYmd(release.releasedOn)} (target {formatYmd(release.targetDate)})</>
+            <>Released {formatYmd(release.releasedOn)} (target {formatYmd(release.targetDate)})</>
           ) : (
             <>
               Target {formatYmd(release.targetDate)} ·{" "}
@@ -42,31 +42,31 @@ export function ReleaseCard({ overview }: { overview: ReleaseOverview }) {
 
       {stats.total === 0 ? (
         <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-          {overview.tagFound ? "Belum ada task di rentang ini." : "Tag tidak ditemukan pada data terakhir."}
+          {overview.tagFound ? "No tasks in this range yet." : "Tag not found in the latest data."}
         </p>
       ) : (
         <>
           <div className="flex items-baseline justify-between gap-2">
             <p className="text-3xl font-semibold tabular-nums">{stats.percentDone}%</p>
             <p className="text-right text-xs text-muted-foreground">
-              {stats.done} dari {stats.total} selesai
-              {!released && <> · waktu berjalan {Math.round(stats.elapsedPercent)}%</>}
+              {stats.done} of {stats.total} done
+              {!released && <> · time elapsed {Math.round(stats.elapsedPercent)}%</>}
             </p>
           </div>
           <ReleaseProgress
-            label={`Progres ${sourceName} ${release.name}`}
+            label={`Progress ${sourceName} ${release.name}`}
             counts={stats.counts}
             total={stats.total}
             percent={stats.percentDone}
             legend={false}
           />
           <p className="text-xs text-muted-foreground">
-            {stats.inProgress} dikerjakan · {stats.counts.pending} menunggu
+            {stats.inProgress} in progress · {stats.counts.pending} pending
             {stats.counts.blocked > 0 && (
-              <> · <span className="font-medium text-red-700 dark:text-red-400">{stats.counts.blocked} terhambat</span></>
+              <> · <span className="font-medium text-red-700 dark:text-red-400">{stats.counts.blocked} blocked</span></>
             )}
             {evaluate > 0 && (
-              <> · <span className="font-medium text-amber-700 dark:text-amber-400">{evaluate} ditunda/dibatalkan</span></>
+              <> · <span className="font-medium text-amber-700 dark:text-amber-400">{evaluate} deferred/cancelled</span></>
             )}
           </p>
         </>
@@ -74,9 +74,9 @@ export function ReleaseCard({ overview }: { overview: ReleaseOverview }) {
 
       {(!overview.sourceActive || overview.syncStatus === "failed") && (
         <p className="text-xs text-muted-foreground">
-          {!overview.sourceActive && "Aplikasi nonaktif. "}
+          {!overview.sourceActive && "Application is inactive. "}
           {overview.syncStatus === "failed" &&
-            `Sinkronisasi terakhir gagal; data dari ${formatDateTime(overview.lastSyncedAt)}.`}
+            `The last sync failed; data is from ${formatDateTime(overview.lastSyncedAt)}.`}
         </p>
       )}
     </article>

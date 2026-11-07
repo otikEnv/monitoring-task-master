@@ -40,7 +40,7 @@ export async function runConnectionTest(
     });
     if (file.status !== "ok") {
       // Tanpa ETag, penyedia seharusnya selalu mengirim isi file.
-      return { ok: false, kind: "unexpected", message: "Penyedia tidak mengirim isi file." };
+      return { ok: false, kind: "unexpected", message: "The provider did not return the file content." };
     }
 
     const parsed = parseTasksFile(file.content);
@@ -60,10 +60,10 @@ export async function runConnectionTest(
       return {
         ok: false,
         kind: "invalid_file",
-        message: `File ditemukan, tetapi bukan tasks.json Taskmaster yang valid. ${e.message}`,
+        message: `The file was found, but it is not a valid Taskmaster tasks.json. ${e.message}`,
       };
     }
     console.error("[uji-koneksi] galat tak terduga", { error: (e as Error)?.name });
-    return { ok: false, kind: "internal", message: "Terjadi kesalahan internal saat menguji koneksi." };
+    return { ok: false, kind: "internal", message: "An internal error occurred while testing the connection." };
   }
 }

@@ -58,7 +58,7 @@ describe.skipIf(!ENABLED)("release (Supabase asli, sesi viewer)", () => {
 
     await addSource("a");
     await addSource("kosong");
-    // Aplikasi A, tag master: #1–#9 milik rilis lama; #10–#19 rilis v2.1; #20 dan seterusnya v2.2; task luar #5.
+    // Application A, tag master: #1–#9 milik rilis lama; #10–#19 rilis v2.1; #20 dan seterusnya v2.2; task luar #5.
     await addTasks("a", "master", [
       ...Array.from({ length: 9 }, (_, i) => ({ id: i + 1, status: "done" })),
       { id: 10, status: "done" }, { id: 11, status: "done" }, { id: 12, status: "done" }, { id: 13, status: "done" }, { id: 14, status: "done" },
@@ -98,7 +98,7 @@ describe.skipIf(!ENABLED)("release (Supabase asli, sesi viewer)", () => {
 
   it("viewer menghitung v2.1 sama dengan hitungan manual dari data sumber", async () => {
     const o = (await overview("a")).find((x) => x.release.id === relIds.v21)!;
-    // 10 task (#10–#19): 5 selesai, 1 dikerjakan, 1 ditinjau, 1 terhambat, 1 ditunda, 1 dibatalkan.
+    // 10 task (#10–#19): 5 selesai, 1 in progress, 1 ditinjau, 1 blocked, 1 ditunda, 1 dibatalkan.
     expect(o.stats.total).toBe(10);
     expect(o.stats.counts).toMatchObject({ done: 5, in_progress: 1, review: 1, blocked: 1, deferred: 1, cancelled: 1, pending: 0 });
     expect(o.stats.percentDone).toBe(50);
@@ -109,7 +109,7 @@ describe.skipIf(!ENABLED)("release (Supabase asli, sesi viewer)", () => {
     expect(o.tagFound).toBe(true);
   });
 
-  it("hambatan: terhambat, dependensi di luar rentang yang belum selesai, ditunda dan dibatalkan", async () => {
+  it("hambatan: blocked, dependensi di luar rentang yang belum selesai, ditunda dan dibatalkan", async () => {
     const o = (await overview("a")).find((x) => x.release.id === relIds.v21)!;
     expect(o.stats.attention.blocked.map((t) => t.taskId)).toEqual(["17"]);
     expect(o.stats.attention.waiting.map((w) => [w.task.taskId, w.deps.map((d) => d.id)])).toEqual([["15", ["8"]]]);
@@ -121,7 +121,7 @@ describe.skipIf(!ENABLED)("release (Supabase asli, sesi viewer)", () => {
   it("v2.2: dependensi selesai bukan hambatan, yang belum selesai menahan, yang tidak ditemukan dilaporkan terpisah", async () => {
     const o = (await overview("a")).find((x) => x.release.id === relIds.v22)!;
     expect(o.stats.total).toBe(2); // #20 dan #21
-    // #20 bergantung pada #4 (selesai, bukan hambatan) dan #99 (tidak ada); #21 bergantung pada #17 (di luar rentang, terhambat).
+    // #20 depends on #4 (selesai, bukan hambatan) dan #99 (tidak ada); #21 depends on #17 (di luar rentang, blocked).
     expect(o.stats.attention.waiting.map((w) => [w.task.taskId, w.deps.map((d) => d.id)])).toEqual([["21", ["17"]]]);
     expect(o.stats.attention.missingDeps.map((m) => [m.task.taskId, m.ids])).toEqual([["20", ["99"]]]);
   });
@@ -164,7 +164,7 @@ describe.skipIf(!ENABLED)("release (Supabase asli, sesi viewer)", () => {
     const id = (await createRelease({
       sourceId: ids.a, tag: "mobile", name: "v-sementara", rangeStart: 10, rangeEnd: 11, startDate: null, targetDate: "2026-12-01",
     }, admin)).id;
-    // tanggal mulai kosong memakai bawaan database (hari ini WIB)
+    // tanggal mulai kosong memakai bawaan database (today WIB)
     expect((await getRelease(viewer, id))?.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 
     await updateRelease(id, {

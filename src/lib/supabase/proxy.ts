@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
   if (!loggedIn && !isPublic) {
     // API mengembalikan JSON, bukan HTML hasil redirect.
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Belum login" }, { status: 401 });
+      return NextResponse.json({ error: "Not signed in" }, { status: 401 });
     }
     return redirectTo("/login");
   }

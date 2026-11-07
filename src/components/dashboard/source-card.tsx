@@ -54,7 +54,7 @@ export function SourceCard({
           </h2>
           {!card.isActive && (
             <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs">
-              Nonaktif
+              Inactive
             </span>
           )}
         </div>
@@ -65,12 +65,12 @@ export function SourceCard({
 
       {failed && (
         <div role="alert" className="space-y-1 rounded-md border border-red-300 bg-red-50 p-2.5 text-xs dark:border-red-900 dark:bg-red-950/40">
-          <p className="font-semibold text-red-800 dark:text-red-300">Sinkronisasi gagal</p>
+          <p className="font-semibold text-red-800 dark:text-red-300">Sync failed</p>
           {card.lastError && <p className="break-words text-red-800 dark:text-red-300">{card.lastError}</p>}
           <p className="text-muted-foreground">
             {card.lastSyncedAt
-              ? `Data di bawah berasal dari sinkronisasi terakhir yang berhasil: ${formatDateTime(card.lastSyncedAt)}.`
-              : "Belum pernah berhasil disinkronkan."}
+              ? `The data below comes from the last successful sync: ${formatDateTime(card.lastSyncedAt)}.`
+              : "Has never synced successfully."}
           </p>
         </div>
       )}
@@ -80,13 +80,13 @@ export function SourceCard({
           <div className="flex items-baseline justify-between gap-2">
             <p className="text-3xl font-semibold tabular-nums">{formatPercent(card.percentDone)}%</p>
             <p className="text-right text-xs text-muted-foreground">
-              {card.counts.done} dari {card.total} task selesai
-              {card.tagCount > 1 && ` · ${card.tagCount} tag`}
+              {card.counts.done} of {card.total} tasks done
+              {card.tagCount > 1 && ` · ${card.tagCount} tags`}
             </p>
           </div>
           <div
             role="progressbar"
-            aria-label={`Progres ${card.name}`}
+            aria-label={`Progress ${card.name}`}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={card.percentDone}
@@ -97,7 +97,7 @@ export function SourceCard({
         </div>
       ) : (
         <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-          {never ? "Belum pernah disinkronkan. Tekan Segarkan untuk mengambil data." : "Belum ada task pada file ini."}
+          {never ? "Never synced. Press Refresh to fetch data." : "No tasks in this file."}
         </p>
       )}
 
@@ -106,7 +106,7 @@ export function SourceCard({
           {STATUS_ORDER.filter((s) => s !== "other" || card.counts.other > 0).map((s) => (
             <li
               key={s}
-              title={s === "other" ? "Status lain yang tidak dikenal" : `Status "${STATUS_RAW[s]}" di tasks.json`}
+              title={s === "other" ? "Other, unrecognized status" : `Status "${STATUS_RAW[s]}" in tasks.json`}
               className={`flex items-center justify-between gap-1 rounded-md px-2.5 py-1 ${STATUS_TONE[s]} ${
                 s === "blocked" && card.counts.blocked > 0 ? "ring-1 ring-red-500" : ""
               }`}
@@ -123,13 +123,13 @@ export function SourceCard({
           <Link href={`/release/${card.release.releaseId}`} className="flex flex-wrap items-center gap-x-2 gap-y-1 hover:underline">
             <span className="font-medium">Release {card.release.name}</span>
             <span className="text-muted-foreground">
-              {card.release.percent === null ? "belum ada task" : `${card.release.percent}%`} · {formatDaysLeft(card.release.daysLeft)}
+              {card.release.percent === null ? "no tasks" : `${card.release.percent}%`} · {formatDaysLeft(card.release.daysLeft)}
             </span>
             <RiskBadge risk={card.release.risk} />
           </Link>
           {card.release.extra > 0 && (
             <Link href={releaseListHref({ source: card.id })} className="block text-muted-foreground hover:underline">
-              +{card.release.extra} release lain
+              +{card.release.extra} more {card.release.extra === 1 ? "release" : "releases"}
             </Link>
           )}
         </div>
@@ -138,21 +138,21 @@ export function SourceCard({
       {(card.tokenExpiry === "expired" || card.tokenExpiry === "soon") && (
         <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
           {card.tokenExpiry === "expired"
-            ? `Token akses kedaluwarsa sejak ${formatDate(card.tokenExpiresAt)}.`
-            : `Token akses segera kedaluwarsa: ${formatDate(card.tokenExpiresAt)}.`}
+            ? `The access token expired on ${formatDate(card.tokenExpiresAt)}.`
+            : `The access token expires soon: ${formatDate(card.tokenExpiresAt)}.`}
         </p>
       )}
 
       <footer className="mt-auto space-y-2">
         <p className="text-xs text-muted-foreground">
-          {card.lastSyncedAt ? `Sinkron terakhir: ${formatDateTime(card.lastSyncedAt)}` : "Belum pernah disinkronkan"}
-          {card.lastCommitAt && ` · File diubah: ${formatDateTime(card.lastCommitAt)}`}
+          {card.lastSyncedAt ? `Last sync: ${formatDateTime(card.lastSyncedAt)}` : "Never synced"}
+          {card.lastCommitAt && ` · File changed: ${formatDateTime(card.lastCommitAt)}`}
         </p>
         <div className="relative z-10 flex flex-wrap items-center gap-2">
           {card.isActive && (
             <Button type="button" variant="outline" size="sm" onClick={() => onRefresh(card.id)} disabled={running}>
               <RefreshCw aria-hidden="true" className={running ? "animate-spin" : ""} />
-              {running ? "Menyegarkan…" : "Segarkan"}
+              {running ? "Refreshing…" : "Refresh"}
             </Button>
           )}
           {refresh.phase === "done" && (

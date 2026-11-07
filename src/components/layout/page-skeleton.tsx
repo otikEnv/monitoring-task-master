@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Fallback Suspense: judul + blok konten (sidebar menyusul setelah sesi terbaca). */
 export function PageSkeleton({ cards = 0 }: { cards?: number }) {
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:px-8" aria-busy="true" aria-label="Memuat">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading">
       <div className="space-y-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-80 max-w-full" />

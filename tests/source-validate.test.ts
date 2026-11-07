@@ -59,7 +59,7 @@ describe("isian valid", () => {
 
 describe("nama aplikasi", () => {
   it("wajib dan maksimal 100 karakter", () => {
-    expect(errorsOf({ name: "   " }).name).toMatch(/wajib/i);
+    expect(errorsOf({ name: "   " }).name).toMatch(/required/i);
     expect(errorsOf({ name: "x".repeat(101) }).name).toMatch(/100/);
     expect(parse({ name: "x".repeat(100) }).ok).toBe(true);
   });
@@ -80,41 +80,41 @@ describe("penyedia dan URL repo", () => {
     expect(errorsOf({ repoUrl: "https://github.com.evil.com/a/b" }).repoUrl).toBeTruthy();
   });
   it("wajib diisi dan dibatasi panjangnya", () => {
-    expect(errorsOf({ repoUrl: "" }).repoUrl).toMatch(/wajib/i);
-    expect(errorsOf({ repoUrl: "https://github.com/a/" + "b".repeat(600) }).repoUrl).toMatch(/panjang/i);
+    expect(errorsOf({ repoUrl: "" }).repoUrl).toMatch(/required/i);
+    expect(errorsOf({ repoUrl: "https://github.com/a/" + "b".repeat(600) }).repoUrl).toMatch(/long/i);
   });
 });
 
 describe("branch dan path", () => {
   it("branch tidak boleh kosong, berspasi, atau terlalu panjang", () => {
-    expect(errorsOf({ branch: "" }).branch).toMatch(/wajib/i);
-    expect(errorsOf({ branch: "feature x" }).branch).toMatch(/spasi/i);
-    expect(errorsOf({ branch: "x".repeat(256) }).branch).toMatch(/panjang/i);
+    expect(errorsOf({ branch: "" }).branch).toMatch(/required/i);
+    expect(errorsOf({ branch: "feature x" }).branch).toMatch(/spaces/i);
+    expect(errorsOf({ branch: "x".repeat(256) }).branch).toMatch(/long/i);
   });
   it("path tidak boleh menunjuk folder, berisi '..', atau memakai backslash", () => {
-    expect(errorsOf({ filePath: "" }).filePath).toMatch(/wajib/i);
+    expect(errorsOf({ filePath: "" }).filePath).toMatch(/required/i);
     expect(errorsOf({ filePath: "dir/" }).filePath).toMatch(/folder/i);
     expect(errorsOf({ filePath: "../rahasia.json" }).filePath).toBeTruthy();
     expect(errorsOf({ filePath: "a/../b.json" }).filePath).toBeTruthy();
     expect(errorsOf({ filePath: "a//b.json" }).filePath).toBeTruthy();
-    expect(errorsOf({ filePath: "a\\b.json" }).filePath).toMatch(/garis miring/i);
+    expect(errorsOf({ filePath: "a\\b.json" }).filePath).toMatch(/forward slashes/i);
   });
 });
 
 describe("token", () => {
   it("wajib saat membuat sumber baru", () => {
-    expect(errorsOf({ token: "" }, true).token).toMatch(/wajib/i);
-    expect(errorsOf({ token: "   " }, true).token).toMatch(/wajib/i);
+    expect(errorsOf({ token: "" }, true).token).toMatch(/required/i);
+    expect(errorsOf({ token: "   " }, true).token).toMatch(/required/i);
   });
   it("boleh kosong saat mengedit (token tidak diubah -> null)", () => {
     const r = parse({ token: "" }, false);
     expect(r.ok && r.value.token).toBeNull();
   });
   it("menolak token terlalu pendek, terlalu panjang, atau berspasi", () => {
-    expect(errorsOf({ token: "abc" }).token).toMatch(/pendek/i);
-    expect(errorsOf({ token: "x".repeat(1001) }).token).toMatch(/panjang/i);
-    expect(errorsOf({ token: "abcdefgh ijklmnop" }).token).toMatch(/spasi/i);
-    expect(errorsOf({ token: "abcdefgh\nijklmnop" }).token).toMatch(/spasi|baris/i);
+    expect(errorsOf({ token: "abc" }).token).toMatch(/short/i);
+    expect(errorsOf({ token: "x".repeat(1001) }).token).toMatch(/long/i);
+    expect(errorsOf({ token: "abcdefgh ijklmnop" }).token).toMatch(/spaces/i);
+    expect(errorsOf({ token: "abcdefgh\nijklmnop" }).token).toMatch(/spaces|line breaks/i);
   });
   it("galat token tidak memuat isi token", () => {
     const secret = "rahasia berspasi 12345";
@@ -144,7 +144,7 @@ describe("tanggal kedaluwarsa token", () => {
       const [y, m, d] = typed.split("-").map(Number);
       expect(shown).toContain(String(y));
       expect(shown.startsWith(String(d).padStart(2, "0"))).toBe(true);
-      expect(shown).toContain(["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"][m - 1]);
+      expect(shown).toContain(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]);
     }
   });
 

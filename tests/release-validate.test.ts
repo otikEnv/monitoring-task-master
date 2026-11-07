@@ -75,7 +75,7 @@ describe("rentang task", () => {
   });
 
   it("awal tidak boleh lebih besar dari akhir", () => {
-    expect(errorsOf({ rangeStart: "201", rangeEnd: "200" }).rangeEnd).toContain("tidak boleh lebih kecil");
+    expect(errorsOf({ rangeStart: "201", rangeEnd: "200" }).rangeEnd).toContain("cannot be smaller");
   });
 });
 
@@ -91,7 +91,7 @@ describe("tanggal", () => {
 
   it("tanggal mulai harus valid dan tidak setelah target", () => {
     expect(errorsOf({ startDate: "2026-02-30" }).startDate).toBeTruthy();
-    expect(errorsOf({ startDate: "2026-11-21" }).startDate).toContain("setelah tanggal target");
+    expect(errorsOf({ startDate: "2026-11-21" }).startDate).toContain("after the target date");
   });
 
   it("target yang sudah lewat tetap diterima (pencatatan mundur)", () => {

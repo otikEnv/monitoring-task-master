@@ -25,7 +25,7 @@ function overview(tasks: TaskInput[], over: Partial<ReleaseOverview> = {}, relea
 }
 const html = (o: ReleaseOverview) => renderToStaticMarkup(<ReleaseCard overview={o} />);
 
-// 10 task (#100–#109): 5 selesai, 2 dikerjakan, 1 menunggu, 1 terhambat, 1 ditunda
+// 10 task (#100–#109): 5 selesai, 2 in progress, 1 pending, 1 blocked, 1 ditunda
 const mixed = [
   ...[100, 101, 102, 103, 104].map((i) => task(i, "done")), task(105, "in-progress"), task(106, "review"),
   task(107, "pending"), task(108, "blocked"), task(109, "deferred"),
@@ -36,80 +36,80 @@ describe("kartu release", () => {
     const out = html(overview(mixed));
     expect(out).toContain("Echo App · v2.1");
     expect(out).toContain("Tag <strong>master</strong>");
-    expect(out).toContain("Rentang #100–#200");
+    expect(out).toContain("Range #100–#200");
     expect(out).toContain("10 task");
     expect(out).toContain("Target 21 Nov 2026");
-    expect(out).toContain("10 hari lagi");
+    expect(out).toContain("10 days left");
     expect(out).toContain(">50%<");
-    expect(out).toContain("5 dari 10 selesai");
-    expect(out).toContain("waktu berjalan 50%");
+    expect(out).toContain("5 of 10 done");
+    expect(out).toContain("time elapsed 50%");
   });
 
   it("seluruh kartu menaut ke detail release", () => {
     expect(html(overview(mixed))).toContain('href="/release/22222222-2222-4222-8222-222222222222"');
   });
 
-  it("ringkasan status: dikerjakan (termasuk ditinjau), menunggu, terhambat, ditunda/dibatalkan terpisah", () => {
+  it("ringkasan status: in progress (termasuk ditinjau), pending, blocked, deferred/cancelled terpisah", () => {
     const out = html(overview(mixed));
-    expect(out).toContain("2 dikerjakan");
-    expect(out).toContain("1 menunggu");
-    expect(out).toContain("1 terhambat");
-    expect(out).toContain("1 ditunda/dibatalkan");
+    expect(out).toContain("2 in progress");
+    expect(out).toContain("1 pending");
+    expect(out).toContain("1 blocked");
+    expect(out).toContain("1 deferred/cancelled");
   });
 
-  it("tanpa terhambat dan ditunda: bagian itu tidak ditampilkan", () => {
+  it("tanpa blocked dan ditunda: bagian itu tidak ditampilkan", () => {
     const out = html(overview([task(100, "done"), task(101, "pending")]));
-    expect(out).not.toContain("terhambat");
-    expect(out).not.toContain("ditunda/dibatalkan");
+    expect(out).not.toContain("blocked");
+    expect(out).not.toContain("deferred/cancelled");
   });
 
   it("bar progres memakai role progressbar dengan nilai dan label", () => {
     const out = html(overview(mixed));
     expect(out).toContain('role="progressbar"');
-    expect(out).toContain('aria-label="Progres Echo App v2.1"');
+    expect(out).toContain('aria-label="Progress Echo App v2.1"');
     expect(out).toContain('aria-valuenow="50"');
-    expect(out).toContain('aria-valuetext="50% selesai"');
+    expect(out).toContain('aria-valuetext="50% done"');
   });
 
   it("total nol: pesan jelas, bukan 0%", () => {
     const out = html(overview([task(5, "done")]));
-    expect(out).toContain("Belum ada task di rentang ini.");
+    expect(out).toContain("No tasks in this range yet.");
     expect(out).not.toContain(">0%<");
     expect(out).not.toContain("progressbar");
   });
 
   it("tag hilang dari data: pesan khusus", () => {
     const out = html(overview([], { tagFound: false }));
-    expect(out).toContain("Tag tidak ditemukan pada data terakhir.");
+    expect(out).toContain("Tag not found in the latest data.");
   });
 
   it("sudah rilis: tanggal rilis dan target, tanpa sisa hari", () => {
     const out = html(overview(mixed, {}, "2026-11-19"));
-    expect(out).toContain("Dirilis 19 Nov 2026");
+    expect(out).toContain("Released 19 Nov 2026");
     expect(out).toContain("target 21 Nov 2026");
-    expect(out).not.toContain("hari lagi");
-    expect(out).not.toContain("waktu berjalan");
-    expect(out).toContain("Sudah rilis");
+    expect(out).not.toContain("days left");
+    expect(out).not.toContain("time elapsed");
+    expect(out).toContain("Released");
   });
 
-  it("lewat target: sisa hari negatif ditandai merah dan penanda Lewat target", () => {
+  it("lewat target: sisa hari negatif ditandai merah dan penanda Overdue", () => {
     const out = html(overview(mixed, {}, null, "2026-11-25"));
-    expect(out).toContain("lewat 4 hari");
+    expect(out).toContain("4 days overdue");
     expect(out).toContain("text-red-700");
-    expect(out).toContain("Lewat target");
+    expect(out).toContain("Overdue");
   });
 
   it("aplikasi nonaktif dan sinkron gagal diberi catatan", () => {
     const out = html(overview(mixed, { sourceActive: false, syncStatus: "failed" }));
-    expect(out).toContain("Aplikasi nonaktif.");
-    expect(out).toContain("Sinkronisasi terakhir gagal; data dari");
+    expect(out).toContain("Application is inactive.");
+    expect(out).toContain("The last sync failed; data is from");
   });
 });
 
 describe("penanda risiko", () => {
   it.each([
-    ["released", "Sudah rilis"], ["empty", "Belum ada task"], ["overdue", "Lewat target"],
-    ["behind", "Tertinggal"], ["at_risk", "Berisiko"], ["on_track", "Sesuai jadwal"],
+    ["released", "Released"], ["empty", "No tasks"], ["overdue", "Overdue"],
+    ["behind", "Behind"], ["at_risk", "At risk"], ["on_track", "On track"],
   ] as [RiskLevel, string][])("%s tampil dengan teks dan ikon", (risk, label) => {
     const out = renderToStaticMarkup(<RiskBadge risk={risk} />);
     expect(out).toContain(label);
@@ -123,9 +123,9 @@ describe("bar progres", () => {
 
   it("legenda memuat angka tiap status yang ada dan segmen punya judul", () => {
     const out = renderToStaticMarkup(<ReleaseProgress label="x" counts={counts} total={10} percent={50} />);
-    for (const t of ["Selesai", "Dikerjakan", "Menunggu", "Terhambat", "Ditunda"]) expect(out).toContain(t);
-    expect(out).not.toContain("Dibatalkan");
-    expect(out).toContain('title="Selesai: 5"');
+    for (const t of ["Done", "In progress", "Pending", "Blocked", "Deferred"]) expect(out).toContain(t);
+    expect(out).not.toContain("Cancelled");
+    expect(out).toContain('title="Done: 5"');
     expect(out).toContain("width:50%");
   });
 
@@ -138,7 +138,7 @@ describe("bar progres", () => {
 describe("format dan parameter", () => {
   it("sisa hari", () => {
     expect([formatDaysLeft(13), formatDaysLeft(1), formatDaysLeft(0), formatDaysLeft(-3)])
-      .toEqual(["13 hari lagi", "besok", "hari ini", "lewat 3 hari"]);
+      .toEqual(["13 days left", "tomorrow", "today", "3 days overdue"]);
   });
 
   it("rentang dan tanggal", () => {

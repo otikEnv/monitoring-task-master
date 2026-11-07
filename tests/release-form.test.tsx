@@ -15,13 +15,13 @@ const html = (initial: FormInitial, sources = SOURCES) => renderToStaticMarkup(<
 describe("form release (tambah)", () => {
   it("memuat semua isian dengan label", () => {
     const out = html(blank);
-    for (const label of ["Aplikasi", "Tag", "Nama/versi release", "Task awal", "Task akhir", "Tanggal mulai (opsional)", "Tanggal target"]) {
+    for (const label of ["Application", "Tag", "Release name/version", "Start task", "End task", "Start date (optional)", "Target date"]) {
       expect(out).toContain(label);
     }
     for (const name of ["sourceId", "tag", "name", "rangeStart", "rangeEnd", "startDate", "targetDate"]) {
       expect(out).toContain(`name="${name}"`);
     }
-    expect(out).toContain("Simpan release");
+    expect(out).toContain("Save release");
     expect(out).not.toContain('name="id"');
   });
 
@@ -29,28 +29,28 @@ describe("form release (tambah)", () => {
     const out = html(blank);
     expect(out).toContain("Echo App");
     expect(out).toContain("Beta");
-    expect(out).toContain("Pilih aplikasi dulu");
+    expect(out).toContain("Select an application first");
     expect(out).toContain('href="/release"');
   });
 
   it("petunjuk tanggal mulai bawaan dan batas rentang", () => {
     const out = html(blank);
-    expect(out).toContain("memakai tanggal release dibuat");
-    expect(out).toContain("Batas awal dan akhir ikut dihitung");
+    expect(out).toContain("the date the release is created is used");
+    expect(out).toContain("The start and end tasks are included");
   });
 
   it("aplikasi terpilih menampilkan tag-nya saja", () => {
     const out = html({ ...blank, sourceId: SOURCES[0].id });
     expect(out).toContain('value="master"');
     expect(out).toContain('value="mobile"');
-    expect(out).toContain("Pilih tag");
+    expect(out).toContain("Select a tag");
   });
 
   it("aplikasi tanpa tag memberi petunjuk menyegarkan data", () => {
     const out = html({ ...blank, sourceId: "33333333-3333-4333-8333-333333333333" }, [
       { id: "33333333-3333-4333-8333-333333333333", name: "Kosong", tags: [] },
     ]);
-    expect(out).toContain("belum punya task");
+    expect(out).toContain("has no tasks yet");
   });
 });
 
@@ -69,7 +69,7 @@ describe("form release (ubah)", () => {
     expect(out).toContain('value="200"');
     expect(out).toContain('value="2026-11-01"');
     expect(out).toContain('value="2026-11-20"');
-    expect(out).toContain("Simpan perubahan");
+    expect(out).toContain("Save changes");
     expect(out).toContain('href="/release/44444444-4444-4444-8444-444444444444"');
   });
 

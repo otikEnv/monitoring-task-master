@@ -10,7 +10,7 @@ import { getReleaseOverview, type ReleaseOverview } from "@/lib/releases/load";
 import { UUID } from "@/lib/releases/validate";
 import { ReleaseActions } from "../release-actions";
 
-export const metadata: Metadata = { title: "Detail release" };
+export const metadata: Metadata = { title: "Release detail" };
 
 type Params = Promise<{ id: string }>;
 
@@ -35,7 +35,7 @@ async function ReleaseDetailContent({ params }: { params: Params }) {
     console.error("[release] gagal memuat detail", { error: (e as Error)?.name });
     return (
       <AppShell user={user} width="normal">
-        <LoadError title="Detail release belum bisa dimuat." />
+        <LoadError title="The release detail could not be loaded." />
       </AppShell>
     );
   }

@@ -11,7 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth";
 import { listSources } from "@/lib/sources/repo";
 
-export const metadata: Metadata = { title: "Pengaturan sumber" };
+export const metadata: Metadata = { title: "Source settings" };
 
 // Cache Components aktif: bagian yang membaca sesi (cookies) harus di dalam Suspense.
 export default function SourcesPage() {
@@ -29,18 +29,18 @@ async function SourcesContent() {
   return (
     <AppShell user={user} width="normal">
       <PageHeader
-        title="Pengaturan sumber"
-        description="Repo yang dipantau. Token disimpan terenkripsi dan tidak pernah ditampilkan."
+        title="Source settings"
+        description="Monitored repos. Tokens are stored encrypted and never shown."
         actions={
           <Link href="/pengaturan/sumber/baru" className={buttonVariants()}>
-            <Plus aria-hidden="true" /> Tambah sumber
+            <Plus aria-hidden="true" /> Add source
           </Link>
         }
       />
 
       {sources.length === 0 ? (
         <EmptyState>
-          Belum ada sumber. Klik <strong>Tambah sumber</strong> untuk mendaftarkan repo pertama.
+          No sources yet. Click <strong>Add source</strong> to register the first repo.
         </EmptyState>
       ) : (
         <SourcesTable sources={sources} />

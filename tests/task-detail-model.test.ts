@@ -130,7 +130,7 @@ describe("LOOKUP_ID (ID yang aman dicari di database)", () => {
 });
 
 describe("subtaskProgress", () => {
-  it("menghitung subtask selesai dari total", () => {
+  it("menghitung subtasks done dari total", () => {
     const subs = parseSubtasks([{ status: "done" }, { status: "pending" }, { status: "done" }, { status: "blocked" }]);
     expect(subtaskProgress(subs)).toEqual({ done: 2, total: 4 });
   });

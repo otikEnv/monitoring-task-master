@@ -90,7 +90,7 @@ export function decryptToken(stored: string): string {
     ]).toString("utf8");
   } catch {
     throw new Error(
-      "Token tidak bisa didekripsi (data rusak atau kunci berbeda). Isi ulang token sumber.",
+      "The token could not be decrypted (corrupted data or a different key). Re-enter the source token.",
     );
   }
 }

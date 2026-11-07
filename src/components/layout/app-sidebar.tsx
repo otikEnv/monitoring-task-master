@@ -18,14 +18,14 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; exac
 
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/tasks", label: "Daftar task", icon: ListChecks },
+  { href: "/tasks", label: "Task list", icon: ListChecks },
   { href: "/release", label: "Release", icon: Rocket },
-  { href: "/tren", label: "Tren", icon: TrendingUp },
+  { href: "/tren", label: "Trend", icon: TrendingUp },
 ];
 
-const ADMIN_NAV: NavItem[] = [{ href: "/pengaturan/sumber", label: "Pengaturan sumber", icon: Settings2 }];
+const ADMIN_NAV: NavItem[] = [{ href: "/pengaturan/sumber", label: "Source settings", icon: Settings2 }];
 
-const ROLE_LABEL: Record<SessionUser["role"], string> = { admin: "Admin", viewer: "Penampil" };
+const ROLE_LABEL: Record<SessionUser["role"], string> = { admin: "Admin", viewer: "Viewer" };
 
 export function AppSidebar({ user }: { user: SessionUser }) {
   const pathname = usePathname();
@@ -62,7 +62,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
               </span>
               <span className="grid flex-1 text-left leading-tight">
                 <span className="truncate font-semibold">Task Master</span>
-                <span className="truncate text-xs text-muted-foreground">Monitoring progres</span>
+                <span className="truncate text-xs text-muted-foreground">Progress monitoring</span>
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -70,8 +70,8 @@ export function AppSidebar({ user }: { user: SessionUser }) {
       </SidebarHeader>
 
       <SidebarContent>
-        {group("Pantau", NAV)}
-        {user.role === "admin" && group("Kelola", ADMIN_NAV)}
+        {group("Monitor", NAV)}
+        {user.role === "admin" && group("Manage", ADMIN_NAV)}
       </SidebarContent>
 
       <SidebarFooter>
@@ -94,11 +94,11 @@ export function AppSidebar({ user }: { user: SessionUser }) {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem render={<Link href="/akun/password" />}>
-                  <KeyRound aria-hidden="true" /> Ganti password
+                  <KeyRound aria-hidden="true" /> Change password
                 </DropdownMenuItem>
                 <form action={logout}>
                   <DropdownMenuItem render={<button type="submit" className="w-full" />}>
-                    <LogOut aria-hidden="true" /> Keluar
+                    <LogOut aria-hidden="true" /> Sign out
                   </DropdownMenuItem>
                 </form>
               </DropdownMenuContent>

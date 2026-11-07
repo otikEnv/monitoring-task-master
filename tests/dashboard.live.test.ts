@@ -102,13 +102,13 @@ describe.skipIf(!ENABLED)("data dashboard (Supabase asli, sesi viewer)", () => {
     expect(g.lastSyncedAt).toBeTruthy();
   });
 
-  it("urutan: gagal sinkron dulu, lalu yang punya task terhambat, lalu belum disinkronkan, nonaktif terakhir", async () => {
-    // Catatan: sumber "ok" dan "multitag" sama-sama memuat task terhambat (blocked).
+  it("urutan: gagal sinkron dulu, lalu yang punya task blocked, lalu belum disinkronkan, nonaktif terakhir", async () => {
+    // Catatan: sumber "ok" dan "multitag" sama-sama memuat task blocked (blocked).
     const order = (await mine()).map((c) => c.name.replace(`TMP-DASH-${run}-`, ""));
     const at = (k: string) => order.indexOf(k);
-    expect(at("gagal")).toBeLessThan(at("ok")); // gagal sinkron > terhambat
+    expect(at("gagal")).toBeLessThan(at("ok")); // gagal sinkron > blocked
     expect(at("gagal")).toBeLessThan(at("multitag"));
-    expect(at("ok")).toBeLessThan(at("kosong")); // terhambat > belum disinkronkan
+    expect(at("ok")).toBeLessThan(at("kosong")); // blocked > belum disinkronkan
     expect(at("multitag")).toBeLessThan(at("kosong"));
     expect(order[order.length - 1]).toBe("off"); // nonaktif paling akhir
   });

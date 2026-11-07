@@ -30,12 +30,12 @@ describe("kolom repo", () => {
     expect(html).toContain("https://github.com/echoenvisions/echoapp");
     expect(html).toContain("<strong>stg</strong>");
     expect(html).toContain(".taskmaster/tasks/tasks.json");
-    expect(html).toContain("File diubah: ");
-    expect(html).toMatch(/File diubah: 06 Nov 2026,? 10[.:]52/); // 03:52 UTC = 10:52 WIB
+    expect(html).toContain("File changed: ");
+    expect(html).toMatch(/File changed: 06 Nov 2026,? 10[.:]52/); // 03:52 UTC = 10:52 WIB
   });
 
   it("tanpa waktu commit (belum pernah berhasil sinkron): baris itu tidak ditampilkan", () => {
-    expect(render(view({ lastCommitAt: null }))).not.toContain("File diubah");
+    expect(render(view({ lastCommitAt: null }))).not.toContain("File changed");
   });
 
   it("nama, penyedia, dan URL di-escape", () => {
@@ -53,38 +53,38 @@ describe("kolom repo", () => {
 describe("kolom token", () => {
   it("belum diisi: peringatan merah", () => {
     const html = render(view({ hasToken: false }));
-    expect(html).toContain("Belum diisi");
-    expect(html).not.toContain("Tersimpan");
+    expect(html).toContain("Not set");
+    expect(html).not.toContain("Stored");
   });
 
   it("tersimpan tanpa tanggal kedaluwarsa", () => {
     const html = render(view());
-    expect(html).toContain("Tersimpan");
-    expect(html).not.toMatch(/kedaluwarsa|Berlaku sampai/i);
+    expect(html).toContain("Stored");
+    expect(html).not.toMatch(/expire|Valid until/i);
   });
 
   it("berlaku sampai tanggal tertentu (jauh di depan)", () => {
     const html = render(view({ tokenExpiry: "ok", tokenExpiresAt: "2027-02-04T09:30:29Z" }));
-    expect(html).toContain("Berlaku sampai 04 Feb 2027");
+    expect(html).toContain("Valid until 04 Feb 2027");
     expect(html).not.toContain("Segera");
   });
 
   it("segera kedaluwarsa: peringatan kuning dengan tanggalnya", () => {
     const html = render(view({ tokenExpiry: "soon", tokenExpiresAt: "2026-11-10T09:00:00Z" }));
-    expect(html).toContain("Segera kedaluwarsa: 10 Nov 2026");
+    expect(html).toContain("Expires soon: 10 Nov 2026");
     expect(html).toContain("text-amber");
   });
 
   it("sudah kedaluwarsa: peringatan merah dengan tanggalnya", () => {
     const html = render(view({ tokenExpiry: "expired", tokenExpiresAt: "2026-11-01T09:00:00Z" }));
-    expect(html).toContain("Kedaluwarsa 01 Nov 2026");
-    expect(html).toMatch(/text-red[^"]*"[^>]*>Kedaluwarsa/);
+    expect(html).toContain("Expired 01 Nov 2026");
+    expect(html).toMatch(/text-red[^"]*"[^>]*>Expired/);
   });
 
   it("tanggal yang diketik admin tampil sama persis (tidak bergeser sehari karena zona waktu)", () => {
     // Form menyimpan akhir hari WIB: 4 Feb 2027 23:59:59 WIB = 16:59:59 UTC
     const html = render(view({ tokenExpiry: "ok", tokenExpiresAt: "2027-02-04T16:59:59.000Z" }));
-    expect(html).toContain("Berlaku sampai 04 Feb 2027");
+    expect(html).toContain("Valid until 04 Feb 2027");
     expect(html).not.toContain("05 Feb 2027");
   });
 
@@ -96,20 +96,20 @@ describe("kolom token", () => {
 
 describe("kolom sinkronisasi", () => {
   it("belum pernah", () => {
-    expect(render(view({ lastSyncStatus: "never", lastSyncedAt: null, lastCommitAt: null }))).toContain("Belum pernah");
+    expect(render(view({ lastSyncStatus: "never", lastSyncedAt: null, lastCommitAt: null }))).toContain("Never");
   });
 
   it("berhasil dengan waktunya", () => {
     const html = render(view());
-    expect(html).toContain("Berhasil");
+    expect(html).toContain("Succeeded");
     expect(html).toMatch(/06 Nov 2026,? 17[.:]00/); // 10:00 UTC = 17:00 WIB
   });
 
   it("gagal: pesan galat dan waktu data terakhir yang berhasil", () => {
-    const html = render(view({ lastSyncStatus: "failed", lastError: "Token kedaluwarsa pada 01 Nov 2026. Buat token baru lalu isi lewat Pengaturan sumber." }));
-    expect(html).toContain("Gagal");
-    expect(html).toContain("Token kedaluwarsa pada 01 Nov 2026");
-    expect(html).toContain("Data terakhir berhasil: ");
+    const html = render(view({ lastSyncStatus: "failed", lastError: "The token expired on 01 Nov 2026. Buat token baru lalu isi lewat Pengaturan sumber." }));
+    expect(html).toContain("Failed");
+    expect(html).toContain("The token expired on 01 Nov 2026");
+    expect(html).toContain("Last successful data: ");
   });
 
   it("pesan galat di-escape", () => {
@@ -121,24 +121,24 @@ describe("kolom sinkronisasi", () => {
 
 describe("status dan aksi", () => {
   it("aktif dan nonaktif", () => {
-    expect(render(view())).toContain(">Aktif<");
+    expect(render(view())).toContain(">Active<");
     const off = render(view({ isActive: false }));
-    expect(off).toContain("Nonaktif");
-    expect(off).not.toContain(">Aktif<");
+    expect(off).toContain("Inactive");
+    expect(off).not.toContain(">Active<");
   });
 
-  it("setiap baris punya aksi Ubah, Nonaktifkan atau Aktifkan, dan Hapus", () => {
+  it("setiap baris punya aksi Edit, Deactivate atau Activate, dan Delete", () => {
     const html = render(view());
-    expect(html).toContain("Ubah");
-    expect(html).toContain("Nonaktifkan");
-    expect(html).toContain("Hapus");
-    expect(render(view({ isActive: false }))).toContain("Aktifkan");
+    expect(html).toContain("Edit");
+    expect(html).toContain("Deactivate");
+    expect(html).toContain("Delete");
+    expect(render(view({ isActive: false }))).toContain("Activate");
     expect(html).toContain("/pengaturan/sumber/11111111-1111-4111-8111-111111111111");
   });
 
   it("satu baris per sumber dengan judul kolom lengkap", () => {
     const html = render(view(), view({ id: "22222222-2222-4222-8222-222222222222", name: "Beta" }));
     expect((html.match(/<tbody[\s\S]*<\/tbody>/)![0].match(/<tr/g) ?? []).length).toBe(2);
-    for (const h of ["Aplikasi", "Repo", "Token", "Sinkronisasi", "Status", "Aksi"]) expect(html).toContain(`>${h}</th>`);
+    for (const h of ["Application", "Repo", "Token", "Sync", "Status", "Actions"]) expect(html).toContain(`>${h}</th>`);
   });
 });

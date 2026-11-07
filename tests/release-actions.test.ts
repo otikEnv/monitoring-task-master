@@ -26,10 +26,10 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: m.createClient }));
 vi.mock("@/lib/releases/load", () => ({ previewRange: m.loadPreview }));
 vi.mock("@/lib/releases/repo", () => {
   class DuplicateReleaseError extends Error {
-    constructor() { super("Release dengan nama yang sama sudah ada pada aplikasi ini."); }
+    constructor() { super("A release with this name already exists for this application."); }
   }
   class ReleaseNotFoundError extends Error {
-    constructor() { super("Release tidak ditemukan."); }
+    constructor() { super("Release not found."); }
   }
   class SourceTagError extends Error {
     constructor(public field: "sourceId" | "tag", message: string) { super(message); }
@@ -104,38 +104,38 @@ describe("saveRelease", () => {
   });
 
   it("id ubah yang bukan UUID ditolak", async () => {
-    expect(await saveRelease(form({ id: "bukan-uuid" }))).toEqual({ ok: false, error: "ID release tidak valid." });
+    expect(await saveRelease(form({ id: "bukan-uuid" }))).toEqual({ ok: false, error: "Invalid release ID." });
     expect(m.updateRelease).not.toHaveBeenCalled();
   });
 
   it("tag tidak ada pada aplikasi: galat pada isian tag", async () => {
-    m.assertSourceTag.mockRejectedValue(new SourceTagError("tag", "Tag tidak ada pada aplikasi ini."));
-    expect(await saveRelease(form())).toEqual({ ok: false, fieldErrors: { tag: "Tag tidak ada pada aplikasi ini." } });
+    m.assertSourceTag.mockRejectedValue(new SourceTagError("tag", "This tag does not exist on this application."));
+    expect(await saveRelease(form())).toEqual({ ok: false, fieldErrors: { tag: "This tag does not exist on this application." } });
     expect(m.createRelease).not.toHaveBeenCalled();
   });
 
   it("nama ganda: galat pada isian nama", async () => {
     m.createRelease.mockRejectedValue(new DuplicateReleaseError());
     const r = await saveRelease(form());
-    expect(r).toEqual({ ok: false, fieldErrors: { name: expect.stringContaining("sudah ada") } });
+    expect(r).toEqual({ ok: false, fieldErrors: { name: expect.stringContaining("already exists") } });
   });
 
   it("release yang diubah sudah hilang: pesan jelas", async () => {
     m.updateRelease.mockRejectedValue(new ReleaseNotFoundError());
-    expect(await saveRelease(form({ id: ID }))).toEqual({ ok: false, error: "Release tidak ditemukan." });
+    expect(await saveRelease(form({ id: ID }))).toEqual({ ok: false, error: "Release not found." });
   });
 
   it("galat tak terduga tidak membocorkan pesan asli", async () => {
     m.createRelease.mockRejectedValue(new Error("password authentication failed for user postgres"));
     const r = await saveRelease(form());
-    expect(r).toEqual({ ok: false, error: "Gagal menyimpan release. Coba lagi." });
+    expect(r).toEqual({ ok: false, error: "Could not save the release. Try again." });
     expect(JSON.stringify(r)).not.toContain("password");
     expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain("password");
   });
 });
 
 describe("markReleased", () => {
-  it("menandai rilis dengan tanggal hari ini (yyyy-mm-dd)", async () => {
+  it("menandai rilis dengan tanggal today (yyyy-mm-dd)", async () => {
     expect(await markReleased(ID, true)).toEqual({ ok: true });
     expect(m.setReleasedOn).toHaveBeenCalledWith(ID, expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
     expect(m.revalidatePath).toHaveBeenCalledWith("/release");
@@ -148,9 +148,9 @@ describe("markReleased", () => {
   });
 
   it("id tidak valid dan release hilang", async () => {
-    expect(await markReleased("x", true)).toEqual({ ok: false, error: "ID release tidak valid." });
+    expect(await markReleased("x", true)).toEqual({ ok: false, error: "Invalid release ID." });
     m.setReleasedOn.mockRejectedValue(new ReleaseNotFoundError());
-    expect(await markReleased(ID, true)).toEqual({ ok: false, error: "Release tidak ditemukan." });
+    expect(await markReleased(ID, true)).toEqual({ ok: false, error: "Release not found." });
   });
 });
 
@@ -162,11 +162,11 @@ describe("removeRelease", () => {
   });
 
   it("id tidak valid, tidak ditemukan, dan galat tak terduga", async () => {
-    expect(await removeRelease("x")).toEqual({ ok: false, error: "ID release tidak valid." });
+    expect(await removeRelease("x")).toEqual({ ok: false, error: "Invalid release ID." });
     m.deleteRelease.mockRejectedValueOnce(new ReleaseNotFoundError());
-    expect(await removeRelease(ID)).toEqual({ ok: false, error: "Release tidak ditemukan." });
+    expect(await removeRelease(ID)).toEqual({ ok: false, error: "Release not found." });
     m.deleteRelease.mockRejectedValueOnce(new Error("rahasia internal"));
-    expect(await removeRelease(ID)).toEqual({ ok: false, error: "Gagal menghapus release." });
+    expect(await removeRelease(ID)).toEqual({ ok: false, error: "Could not delete the release." });
   });
 });
 
@@ -179,13 +179,13 @@ describe("previewRange", () => {
 
   it("rentang atau aplikasi belum valid: tidak membaca data", async () => {
     for (const args of [["x", "master", "1", "5"], [SRC, "", "1", "5"], [SRC, "master", "9", "5"], [SRC, "master", "a", "5"]] as [string, string, string, string][]) {
-      expect(await previewRange(...args)).toEqual({ ok: false, error: "Rentang belum valid." });
+      expect(await previewRange(...args)).toEqual({ ok: false, error: "The range is not valid yet." });
     }
     expect(m.loadPreview).not.toHaveBeenCalled();
   });
 
   it("galat pembacaan tidak membocorkan pesan asli", async () => {
     m.loadPreview.mockRejectedValue(new Error("detail internal"));
-    expect(await previewRange(SRC, "master", "1", "5")).toEqual({ ok: false, error: "Pratinjau belum bisa dimuat." });
+    expect(await previewRange(SRC, "master", "1", "5")).toEqual({ ok: false, error: "The preview could not be loaded." });
   });
 });

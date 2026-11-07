@@ -11,7 +11,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { markReleased, removeRelease } from "./actions";
 
-/** Tombol admin pada detail release: Ubah, Tandai rilis (atau batalkan), Hapus dengan konfirmasi. */
+/** Tombol admin pada detail release: Edit, Mark as released (or undo), Delete with confirmation. */
 export function ReleaseActions({ id, name, released }: { id: string; name: string; released: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -26,7 +26,7 @@ export function ReleaseActions({ id, name, released }: { id: string; name: strin
         toast.success(success);
         after?.();
       } else {
-        setError(res.error ?? "Gagal.");
+        setError(res.error ?? "Failed.");
       }
       setConfirming(false);
     });
@@ -35,22 +35,22 @@ export function ReleaseActions({ id, name, released }: { id: string; name: strin
     <div className="space-y-1">
       <div className="flex flex-wrap gap-1.5">
         <Link href={`/release/${id}/ubah`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-          Ubah
+          Edit
         </Link>
         <Button
           type="button" variant="outline" size="sm" disabled={pending}
           onClick={() =>
             run(
               () => markReleased(id, !released),
-              released ? `Tanda rilis ${name} dibatalkan.` : `${name} ditandai sudah rilis.`,
+              released ? `${name} is no longer marked as released.` : `${name} marked as released.`,
               () => router.refresh(),
             )
           }
         >
-          {released ? "Batalkan tanda rilis" : "Tandai rilis"}
+          {released ? "Unmark as released" : "Mark as released"}
         </Button>
         <Button type="button" variant="destructive" size="sm" disabled={pending} onClick={() => setConfirming(true)}>
-          Hapus
+          Delete
         </Button>
       </div>
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
@@ -58,18 +58,18 @@ export function ReleaseActions({ id, name, released }: { id: string; name: strin
       <AlertDialog open={confirming} onOpenChange={(o) => !pending && setConfirming(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus release {name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete release {name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hanya catatan release ini yang dihapus. Task di repo dan di dashboard tidak terpengaruh.
+              Only this release record is deleted. Tasks in the repo and on the dashboard are not affected.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <Button
               type="button" variant="destructive" disabled={pending}
-              onClick={() => run(() => removeRelease(id), `Release ${name} dihapus.`, () => router.push("/release"))}
+              onClick={() => run(() => removeRelease(id), `Release ${name} deleted.`, () => router.push("/release"))}
             >
-              {pending ? "Menghapus…" : "Ya, hapus"}
+              {pending ? "Deleting…" : "Yes, delete"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

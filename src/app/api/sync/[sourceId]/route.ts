@@ -22,7 +22,7 @@ export async function POST(
 
   const { sourceId } = await params;
   if (!UUID.test(sourceId)) {
-    return NextResponse.json({ error: "ID sumber tidak valid" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid source ID" }, { status: 400 });
   }
 
   try {
@@ -32,6 +32,6 @@ export async function POST(
   } catch (e) {
     // Hanya terjadi bila penyimpanan tidak bisa dihubungi. Jangan bocorkan detail ke klien.
     console.error("[sync] route gagal", { sourceId, error: (e as Error)?.name });
-    return NextResponse.json({ error: "Layanan penyimpanan tidak tersedia" }, { status: 503 });
+    return NextResponse.json({ error: "Storage service unavailable" }, { status: 503 });
   }
 }

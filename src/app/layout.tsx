@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: { default: "Monitoring Task Master", template: "%s · Monitoring Task Master" },
-  description: "Dashboard read-only progres task master semua aplikasi",
+  description: "Read-only dashboard of task master progress across all applications",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="id"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

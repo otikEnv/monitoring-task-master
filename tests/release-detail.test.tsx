@@ -33,30 +33,30 @@ describe("header dan ringkasan", () => {
     const out = html(overview(base));
     expect(out).toContain("Echo App · v2.1");
     expect(out).toContain('href="/release"');
-    expect(out).toContain("Rentang task: </dt>");
-    expect(out).toContain("#100–#109 (yang ada: #100–#107)");
-    expect(out).toContain("21 Nov 2026 (10 hari lagi)");
+    expect(out).toContain("Task range: </dt>");
+    expect(out).toContain("#100–#109 (existing: #100–#107)");
+    expect(out).toContain("21 Nov 2026 (10 days left)");
     expect(out).toContain("01 Nov 2026");
   });
 
   it("empat angka ringkas", () => {
     const out = html(overview([...base, task(108, "blocked"), task(109, "deferred")]));
-    expect(out).toContain("Total task");
-    expect(out).toContain("Dalam pengerjaan");
-    expect(out).toContain("Perlu perhatian");
-    expect(out).toMatch(/Total task<\/p><p[^>]*>10</);
-    expect(out).toMatch(/Selesai<\/p><p[^>]*>5</);
-    expect(out).toMatch(/Dalam pengerjaan<\/p><p[^>]*>2</);
-    expect(out).toMatch(/Perlu perhatian<\/p><p[^>]*>2</);
+    expect(out).toContain("Total tasks");
+    expect(out).toContain("In progress");
+    expect(out).toContain("Needs attention");
+    expect(out).toMatch(/Total tasks<\/p><p[^>]*>10</);
+    expect(out).toMatch(/Done<\/p><p[^>]*>5</);
+    expect(out).toMatch(/In progress<\/p><p[^>]*>2</);
+    expect(out).toMatch(/Needs attention<\/p><p[^>]*>2</);
   });
 
-  it("bar progres, persen, waktu berjalan, dan rumus risiko", () => {
+  it("bar progres, persen, time elapsed, dan rumus risiko", () => {
     const out = html(overview(base));
     expect(out).toContain('role="progressbar"');
-    expect(out).toContain("5 dari 8 selesai");
-    expect(out).toContain("waktu berjalan 50%");
-    expect(out).toContain("tertinggal lebih dari 10 poin = Berisiko");
-    expect(out).toContain("bukan prediksi pasti");
+    expect(out).toContain("5 of 8 done");
+    expect(out).toContain("time elapsed 50%");
+    expect(out).toContain("more than 10 points behind = At risk");
+    expect(out).toContain("not an exact prediction");
   });
 
   it("slot tombol admin hanya tampil bila diberikan", () => {
@@ -66,80 +66,80 @@ describe("header dan ringkasan", () => {
 });
 
 describe("perlu perhatian", () => {
-  it("terhambat, ditunda, dan dibatalkan tampil dengan tautan ke detail task", () => {
+  it("blocked, ditunda, dan dibatalkan tampil dengan tautan ke detail task", () => {
     const out = html(overview([...base, task(108, "blocked"), task(109, "deferred"), task(99, "cancelled")]));
-    expect(out).toContain("Terhambat (1)");
-    expect(out).toContain("Perlu dievaluasi: ditunda 1, dibatalkan 0");
+    expect(out).toContain("Blocked (1)");
+    expect(out).toContain("To evaluate: 1 deferred, 0 cancelled");
     expect(out).toContain(`href="/tasks/${SRC}/master/108"`);
-    expect(out).toContain("Tetap dihitung di total");
-    expect(out).not.toContain("Tidak ada hambatan");
+    expect(out).toContain("Still counted in the total");
+    expect(out).not.toContain("No blockers");
   });
 
   it("dependensi di luar rentang yang belum selesai disebut beserta statusnya", () => {
     const ext = task(50, "in-progress", { title: "Di luar rentang" });
     const out = html(overview([ext, task(100, "pending", { dependencies: [50] })]));
-    expect(out).toContain("Menunggu task di luar rentang (1)");
+    expect(out).toContain("Waiting on tasks outside the range (1)");
     expect(out).toContain("#50 Di luar rentang");
-    expect(out).toContain("Dikerjakan");
-    expect(out).toContain("Berisiko");
+    expect(out).toContain("In progress");
+    expect(out).toContain("At risk");
   });
 
   it("dependensi tidak ditemukan dilaporkan terpisah", () => {
     const out = html(overview([task(100, "pending", { dependencies: [777] })]));
-    expect(out).toContain("Dependensi tidak ditemukan (1)");
-    expect(out).toContain("bergantung pada #777");
+    expect(out).toContain("Dependencies not found (1)");
+    expect(out).toContain("depends on #777");
   });
 
-  it("tanpa hambatan: tampil 'Tidak ada hambatan' dan kelompok kosong tidak muncul", () => {
+  it("tanpa hambatan: tampil 'No blockers' dan kelompok kosong tidak muncul", () => {
     const out = html(overview(base));
-    expect(out).toContain("Tidak ada hambatan");
-    expect(out).not.toContain("Terhambat (");
+    expect(out).toContain("No blockers");
+    expect(out).not.toContain("Blocked (");
     expect(out).not.toContain("Perlu dievaluasi");
   });
 });
 
 describe("tabel task", () => {
-  it("terhambat lebih dulu, memuat status, prioritas, subtask, dan tautan", () => {
+  it("blocked lebih dulu, memuat status, prioritas, subtask, dan tautan", () => {
     const out = html(overview([...base, task(108, "blocked")]));
     const rows = out.slice(out.indexOf("<tbody"));
     expect(rows.indexOf("Judul 108")).toBeLessThan(rows.indexOf("Judul 100"));
     expect(out).toContain("3/4");
-    expect(out).toContain("Tinggi");
+    expect(out).toContain("High");
     expect(out).toContain(`href="/tasks/${SRC}/master/100"`);
-    expect(out).toContain("Task di rentang (9)");
+    expect(out).toContain("Tasks in range (9)");
   });
 
-  it("status 'dikerjakan' tampil dengan label yang benar (bukan Lainnya)", () => {
+  it("status 'in progress' tampil dengan label yang benar (bukan Other)", () => {
     const out = html(overview([task(100, "in-progress")]));
-    expect(out).toContain("Dikerjakan");
-    expect(out).not.toContain("Lainnya");
+    expect(out).toContain("In progress");
+    expect(out).not.toContain("Other");
   });
 });
 
 describe("kasus khusus", () => {
   it("rentang tanpa task: pesan kosong, tanpa tabel dan bar", () => {
     const out = html(overview([task(5, "done")], { tagFound: true }));
-    expect(out).toContain("Belum ada task di rentang ini.");
+    expect(out).toContain("No tasks in this range yet.");
     expect(out).not.toContain("<table");
     expect(out).not.toContain("progressbar");
   });
 
   it("tag hilang: pesan khusus", () => {
     const out = html(overview([], { tagFound: false }));
-    expect(out).toContain("tidak ditemukan pada data terakhir");
+    expect(out).toContain("was not found in the latest data");
   });
 
   it("sudah rilis: tanggal rilis dan progres saat ini, tanpa sisa hari", () => {
     const out = html(overview(base, {}, "2026-11-19"));
-    expect(out).toContain("Dirilis pada <strong>19 Nov 2026</strong>");
-    expect(out).toContain("progres task saat ini 63%");
-    expect(out).not.toContain("hari lagi");
-    expect(out).not.toContain("waktu berjalan");
+    expect(out).toContain("Released on <strong>19 Nov 2026</strong>");
+    expect(out).toContain("current task progress 63%");
+    expect(out).not.toContain("days left");
+    expect(out).not.toContain("time elapsed");
   });
 
   it("aplikasi nonaktif dan sinkron gagal: catatan data usang dengan waktu sinkron", () => {
     const out = html(overview(base, { sourceActive: false, syncStatus: "failed" }));
-    expect(out).toContain("Aplikasi ini nonaktif.");
-    expect(out).toContain("Sinkronisasi terakhir gagal; data berasal dari sinkronisasi yang berhasil pada");
+    expect(out).toContain("This application is inactive.");
+    expect(out).toContain("The last sync failed; the data comes from the last successful sync on");
   });
 });

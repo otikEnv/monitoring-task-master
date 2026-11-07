@@ -43,7 +43,7 @@ async function fetchFile(params: FetchFileParams, deps?: FetchDeps): Promise<Fet
   if (!ref) {
     throw new ProviderError(
       "invalid_url",
-      "URL repo GitLab tidak valid. Contoh: https://gitlab.com/grup/proyek",
+      "Invalid GitLab repo URL. Example: https://gitlab.com/group/project",
     );
   }
   const project = encodeURIComponent(ref.projectPath);
@@ -93,6 +93,6 @@ async function fetchFile(params: FetchFileParams, deps?: FetchDeps): Promise<Fet
 export const gitlabAdapter: ProviderAdapter = {
   provider: "gitlab",
   validateRepoUrl: (url) =>
-    parseGitlabUrl(url) ? null : "URL repo GitLab tidak valid. Contoh: https://gitlab.com/grup/proyek",
+    parseGitlabUrl(url) ? null : "Invalid GitLab repo URL. Example: https://gitlab.com/group/project",
   fetchFile,
 };

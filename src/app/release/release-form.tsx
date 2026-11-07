@@ -102,12 +102,12 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
           {initial.id && <input type="hidden" name="id" value={initial.id} />}
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Aplikasi" htmlFor="sourceId" error={errors.sourceId}>
+            <Field label="Application" htmlFor="sourceId" error={errors.sourceId}>
               <NativeSelect
                 id="sourceId" name="sourceId" value={sourceId} required className="w-full"
                 onChange={(e) => onSourceChange(e.target.value)}
               >
-                <option value="">Pilih aplikasi</option>
+                <option value="">Select an application</option>
                 {sources.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
@@ -115,10 +115,10 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
             </Field>
             <Field
               label="Tag" htmlFor="tag" error={errors.tag}
-              hint={source && source.tags.length === 0 ? "Aplikasi ini belum punya task. Segarkan dulu di Dashboard." : "Nomor task hanya unik di dalam satu tag."}
+              hint={source && source.tags.length === 0 ? "This application has no tasks yet. Refresh it on the Dashboard first." : "Task numbers are only unique within one tag."}
             >
               <NativeSelect id="tag" name="tag" value={tag} required className="w-full" onChange={(e) => setTag(e.target.value)}>
-                <option value="">{source ? "Pilih tag" : "Pilih aplikasi dulu"}</option>
+                <option value="">{source ? "Select a tag" : "Select an application first"}</option>
                 {tagOptions.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
@@ -126,18 +126,18 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
             </Field>
           </div>
 
-          <Field label="Nama/versi release" htmlFor="name" error={errors.name}>
-            <Input id="name" name="name" defaultValue={initial.name} required maxLength={100} placeholder="mis. v2.1" />
+          <Field label="Release name/version" htmlFor="name" error={errors.name}>
+            <Input id="name" name="name" defaultValue={initial.name} required maxLength={100} placeholder="e.g. v2.1" />
           </Field>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Task awal" htmlFor="rangeStart" error={errors.rangeStart}>
+            <Field label="Start task" htmlFor="rangeStart" error={errors.rangeStart}>
               <Input
                 id="rangeStart" name="rangeStart" inputMode="numeric" required placeholder="100"
                 value={rangeStart} onChange={(e) => setRangeStart(e.target.value)}
               />
             </Field>
-            <Field label="Task akhir" htmlFor="rangeEnd" error={errors.rangeEnd} hint="Batas awal dan akhir ikut dihitung.">
+            <Field label="End task" htmlFor="rangeEnd" error={errors.rangeEnd} hint="The start and end tasks are included.">
               <Input
                 id="rangeEnd" name="rangeEnd" inputMode="numeric" required placeholder="200"
                 value={rangeEnd} onChange={(e) => setRangeEnd(e.target.value)}
@@ -149,13 +149,13 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
             shown.ok ? (
               shown.count > 0 ? (
                 <p role="status" className="rounded-md bg-muted p-3 text-sm">
-                  Rentang ini memuat <strong>{shown.count} task</strong> (ID yang ada: #{shown.firstId}–#{shown.lastId}).
+                  This range contains <strong>{shown.count} tasks</strong> (existing IDs: #{shown.firstId}–#{shown.lastId}).
                 </p>
               ) : (
                 <Alert role="status">
                   <TriangleAlert aria-hidden="true" />
                   <AlertDescription>
-                    Belum ada task di rentang ini. Release tetap bisa disimpan; task yang muncul kemudian otomatis ikut terhitung.
+                    There are no tasks in this range yet. You can still save the release; tasks that appear later are counted automatically.
                   </AlertDescription>
                 </Alert>
               )
@@ -166,12 +166,12 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
-              label="Tanggal mulai (opsional)" htmlFor="startDate" error={errors.startDate}
-              hint="Bila kosong, memakai tanggal release dibuat. Isi bila pengerjaan sudah dimulai lebih awal."
+              label="Start date (optional)" htmlFor="startDate" error={errors.startDate}
+              hint="If empty, the date the release is created is used. Fill it in if work started earlier."
             >
               <Input id="startDate" name="startDate" type="date" defaultValue={initial.startDate} />
             </Field>
-            <Field label="Tanggal target" htmlFor="targetDate" error={errors.targetDate}>
+            <Field label="Target date" htmlFor="targetDate" error={errors.targetDate}>
               <Input id="targetDate" name="targetDate" type="date" defaultValue={initial.targetDate} required />
             </Field>
           </div>
@@ -179,12 +179,12 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
           {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="submit" disabled={saving}>{saving ? "Menyimpan…" : editing ? "Simpan perubahan" : "Simpan release"}</Button>
+            <Button type="submit" disabled={saving}>{saving ? "Saving…" : editing ? "Save changes" : "Save release"}</Button>
             <Link
               href={initial.id ? `/release/${initial.id}` : "/release"}
               className={buttonVariants({ variant: "ghost" })}
             >
-              Batal
+              Cancel
             </Link>
           </div>
         </form>

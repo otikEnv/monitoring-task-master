@@ -12,7 +12,7 @@ import { UUID } from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
 import { ReleaseForm } from "../../release-form";
 
-export const metadata: Metadata = { title: "Ubah release" };
+export const metadata: Metadata = { title: "Edit release" };
 
 export default function EditReleasePage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -35,7 +35,7 @@ async function EditReleaseContent({ params }: { params: Promise<{ id: string }> 
     console.error("[release] gagal memuat form ubah", { error: (e as Error)?.name });
     return (
       <AppShell user={user} width="narrow">
-        <LoadError title="Data release belum bisa dimuat." />
+        <LoadError title="The release data could not be loaded." />
       </AppShell>
     );
   }
@@ -43,7 +43,7 @@ async function EditReleaseContent({ params }: { params: Promise<{ id: string }> 
 
   return (
     <AppShell user={user} width="narrow">
-      <PageHeader title={`Ubah release: ${release.name}`} />
+      <PageHeader title={`Edit release: ${release.name}`} />
       {/* key: form dibangun ulang bila data release berubah */}
       <ReleaseForm
         key={`${release.id}-${release.tag}-${release.rangeStart}-${release.rangeEnd}-${release.targetDate}-${release.startDate}`}

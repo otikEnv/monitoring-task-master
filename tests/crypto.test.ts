@@ -47,7 +47,7 @@ describe("encryptToken / decryptToken", () => {
 });
 
 describe("integritas data", () => {
-  // Ubah satu karakter pada bagian tertentu (iv=1, ciphertext=2, tag=3).
+  // Edit satu karakter pada bagian tertentu (iv=1, ciphertext=2, tag=3).
   const tamper = (stored: string, index: number) => {
     const parts = stored.split(".");
     const chars = parts[index].split("");
@@ -63,7 +63,7 @@ describe("integritas data", () => {
   ])("menolak data yang %s-nya diubah", (_name, index) => {
     const stored = encryptToken("token-asli");
     expect(() => decryptToken(tamper(stored, index))).toThrow(
-      /tidak bisa didekripsi|Format/,
+      /could not be decrypted|Format/,
     );
   });
 
@@ -82,7 +82,7 @@ describe("integritas data", () => {
   it("menolak bila dibuka dengan kunci yang berbeda", () => {
     const stored = encryptToken("rahasia");
     process.env.TOKEN_ENCRYPTION_KEY = newKey();
-    expect(() => decryptToken(stored)).toThrow(/tidak bisa didekripsi/);
+    expect(() => decryptToken(stored)).toThrow(/could not be decrypted/);
   });
 
   it("pesan galat tidak memuat isi token", () => {

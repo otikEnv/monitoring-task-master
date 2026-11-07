@@ -26,9 +26,9 @@ export type FormInitial = {
 };
 
 const TOKEN_HINT: Record<FormInitial["provider"], string> = {
-  github: "Fine-grained token dengan izin Contents: Read-only pada repo ini. Hindari token classic scope repo (baca-tulis).",
-  gitlab: "Project/Personal Access Token dengan scope read_repository.",
-  bitbucket: "Repository Access Token dengan izin Repositories: Read.",
+  github: "A fine-grained token with Contents: Read-only permission on this repo. Avoid classic tokens with the repo scope (read-write).",
+  gitlab: "A Project/Personal Access Token with the read_repository scope.",
+  bitbucket: "A Repository Access Token with Repositories: Read permission.",
 };
 
 function Field({
@@ -89,12 +89,12 @@ export function SourceForm({ initial }: { initial: FormInitial }) {
     <form ref={formRef} onSubmit={onSave} className="space-y-5">
       {initial.id && <input type="hidden" name="id" value={initial.id} />}
 
-      <Field label="Nama aplikasi" htmlFor="name" error={errors.name}>
+      <Field label="Application name" htmlFor="name" error={errors.name}>
         <Input id="name" name="name" defaultValue={initial.name} required maxLength={100} />
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Penyedia repo" htmlFor="provider" error={errors.provider}>
+        <Field label="Repo provider" htmlFor="provider" error={errors.provider}>
           <NativeSelect
             id="provider" name="provider" value={provider}
             onChange={(e) => setProvider(e.target.value as FormInitial["provider"])}
@@ -105,42 +105,42 @@ export function SourceForm({ initial }: { initial: FormInitial }) {
             <option value="bitbucket">Bitbucket</option>
           </NativeSelect>
         </Field>
-        <Field label="Branch yang dipantau" htmlFor="branch" error={errors.branch} hint="Branch acuan ini ditampilkan di dashboard.">
+        <Field label="Monitored branch" htmlFor="branch" error={errors.branch} hint="This reference branch is shown on the dashboard.">
           <Input id="branch" name="branch" defaultValue={initial.branch} required />
         </Field>
       </div>
 
       <Field
         label="URL repo" htmlFor="repoUrl" error={errors.repoUrl}
-        hint={provider === "gitlab" ? "GitLab self-hosted didukung: pakai alamat repo di server Anda." : undefined}
+        hint={provider === "gitlab" ? "Self-hosted GitLab is supported: use the repo address on your server." : undefined}
       >
         <Input
           id="repoUrl" name="repoUrl" defaultValue={initial.repoUrl} required inputMode="url"
-          placeholder={provider === "github" ? "https://github.com/owner/repo" : provider === "gitlab" ? "https://gitlab.com/grup/proyek" : "https://bitbucket.org/workspace/repo"}
+          placeholder={provider === "github" ? "https://github.com/owner/repo" : provider === "gitlab" ? "https://gitlab.com/group/project" : "https://bitbucket.org/workspace/repo"}
         />
       </Field>
 
-      <Field label="Path file task master" htmlFor="filePath" error={errors.filePath}>
+      <Field label="Task master file path" htmlFor="filePath" error={errors.filePath}>
         <Input id="filePath" name="filePath" defaultValue={initial.filePath} required />
       </Field>
 
       <Field
-        label={editing ? "Token baru (opsional)" : "Token akses (baca-saja)"}
+        label={editing ? "New token (optional)" : "Access token (read-only)"}
         htmlFor="token" error={errors.token} hint={TOKEN_HINT[provider]}
       >
         <Input
           id="token" name="token" type="password" autoComplete="new-password" spellCheck={false}
-          placeholder={editing && initial.hasToken ? "••••••••  (tersimpan; kosongkan bila tidak diubah)" : ""}
+          placeholder={editing && initial.hasToken ? "••••••••  (stored; leave empty to keep it)" : ""}
           required={!editing}
         />
         <p className="text-xs text-muted-foreground">
-          Token disimpan terenkripsi dan tidak akan ditampilkan lagi.
+          The token is stored encrypted and will not be shown again.
         </p>
       </Field>
 
       <Field
-        label="Token kedaluwarsa pada (opsional)" htmlFor="tokenExpiresAt" error={errors.tokenExpiresAt}
-        hint="Untuk GitHub diisi otomatis saat sinkronisasi."
+        label="Token expires on (optional)" htmlFor="tokenExpiresAt" error={errors.tokenExpiresAt}
+        hint="For GitHub this is filled in automatically during sync."
       >
         <Input id="tokenExpiresAt" name="tokenExpiresAt" type="date" defaultValue={initial.tokenExpiresOn} className="sm:w-56" />
       </Field>
@@ -150,12 +150,12 @@ export function SourceForm({ initial }: { initial: FormInitial }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" disabled={saving || testing}>
-          {saving ? "Menyimpan…" : "Simpan"}
+          {saving ? "Saving…" : "Save"}
         </Button>
         <Button type="button" variant="outline" onClick={onTest} disabled={testing || saving}>
-          {testing ? "Menguji…" : "Uji koneksi"}
+          {testing ? "Testing…" : "Test connection"}
         </Button>
-        <Link href="/pengaturan/sumber" className={buttonVariants({ variant: "ghost" })}>Batal</Link>
+        <Link href="/pengaturan/sumber" className={buttonVariants({ variant: "ghost" })}>Cancel</Link>
       </div>
     </form>
       </CardContent>
@@ -168,16 +168,16 @@ function TestPanel({ result }: { result: TestResult }) {
     return (
       <Alert role="status">
         <CheckCircle2 className="text-green-600" aria-hidden="true" />
-        <AlertTitle>Koneksi berhasil</AlertTitle>
+        <AlertTitle>Connection successful</AlertTitle>
         <AlertDescription className="space-y-1">
           <p>
-            File ditemukan ({formatBytes(result.bytes)}), berisi <strong>{result.taskCount} task</strong> dalam{" "}
-            {result.tags.length} tag ({result.tags.map((t) => `${t.tag}: ${t.total}`).join(", ")}).
+            File found ({formatBytes(result.bytes)}), containing <strong>{result.taskCount} tasks</strong> in{" "}
+            {result.tags.length} {result.tags.length === 1 ? "tag" : "tags"} ({result.tags.map((t) => `${t.tag}: ${t.total}`).join(", ")}).
           </p>
           <p>
-            Commit terakhir file: {formatDateTime(result.lastCommitAt)}
-            {result.tokenExpiresAt && ` · Token kedaluwarsa: ${formatDateTime(result.tokenExpiresAt)}`}
-            {result.warnings > 0 && ` · ${result.warnings} catatan data (mis. ID subtask ganda, sudah ditangani)`}
+            Last commit of the file: {formatDateTime(result.lastCommitAt)}
+            {result.tokenExpiresAt && ` · Token expires: ${formatDateTime(result.tokenExpiresAt)}`}
+            {result.warnings > 0 && ` · ${result.warnings} data notes (e.g. duplicate subtask IDs, already handled)`}
           </p>
         </AlertDescription>
       </Alert>
@@ -186,7 +186,7 @@ function TestPanel({ result }: { result: TestResult }) {
   return (
     <Alert variant="destructive">
       <XCircle aria-hidden="true" />
-      <AlertTitle>{result.kind === "validation" ? "Isian belum lengkap" : "Koneksi gagal"}</AlertTitle>
+      <AlertTitle>{result.kind === "validation" ? "Incomplete form" : "Connection failed"}</AlertTitle>
       <AlertDescription>{result.message}</AlertDescription>
     </Alert>
   );

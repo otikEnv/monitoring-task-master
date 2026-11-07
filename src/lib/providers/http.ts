@@ -27,10 +27,10 @@ export async function request(
   } catch (e) {
     const name = (e as Error)?.name;
     if (name === "TimeoutError" || name === "AbortError") {
-      throw new ProviderError("timeout", `${LABEL[provider]} tidak menjawab dalam batas waktu.`);
+      throw new ProviderError("timeout", `${LABEL[provider]} did not respond in time.`);
     }
     // Pesan asli tidak diteruskan: bisa memuat URL, dan kita tidak ingin membocorkan detail.
-    throw new ProviderError("network", `Tidak bisa menjangkau ${LABEL[provider]}.`);
+    throw new ProviderError("network", `Could not reach ${LABEL[provider]}.`);
   }
 }
 
@@ -59,21 +59,21 @@ export function errorFromResponse(
     new ProviderError(kind, message, res.status, retry);
 
   if (res.status === 429 || (res.status === 403 && quotaExhausted)) {
-    return make("rate_limited", `Batas permintaan ${name} tercapai; coba lagi nanti.`);
+    return make("rate_limited", `${name} rate limit reached; try again later.`);
   }
   switch (res.status) {
     case 401:
-      return make("unauthorized", "Token ditolak (401): salah, dicabut, atau kedaluwarsa.");
+      return make("unauthorized", "Token rejected (401): wrong, revoked, or expired.");
     case 403:
       return make(
         "forbidden",
-        `Akses dilarang (403): token tidak punya izin baca ke repo ini di ${name}.`,
+        `Access forbidden (403): the token has no read permission for this repo on ${name}.`,
       );
     case 404:
       return make(
         "not_found",
-        `Tidak ditemukan (404): periksa URL repo, branch "${ctx.branch}", dan path "${ctx.path}". ` +
-          "Repo privat yang tidak boleh diakses token juga menghasilkan 404.",
+        `Not found (404): check the repo URL, branch "${ctx.branch}", and path "${ctx.path}". ` +
+          "A private repo the token cannot access also returns 404.",
       );
     default:
       if (res.status >= 500) {
@@ -87,11 +87,11 @@ export function errorFromResponse(
 export async function readText(provider: ProviderLabel, res: Response): Promise<string> {
   const declared = Number(res.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > MAX_FILE_BYTES) {
-    throw new ProviderError("too_large", `File terlalu besar (${declared} byte).`);
+    throw new ProviderError("too_large", `File is too large (${declared} bytes).`);
   }
   const text = await res.text();
   if (Buffer.byteLength(text) > MAX_FILE_BYTES) {
-    throw new ProviderError("too_large", `File dari ${LABEL[provider]} terlalu besar.`);
+    throw new ProviderError("too_large", `The file from ${LABEL[provider]} is too large.`);
   }
   return text;
 }

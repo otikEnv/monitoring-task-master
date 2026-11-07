@@ -12,7 +12,7 @@ import { requireUser } from "@/lib/auth";
 import { getTrend, type TrendData } from "@/lib/trend/data";
 import { RANGE_LABEL, parseTrendParams, summarizeTrend } from "@/lib/trend/series";
 
-export const metadata: Metadata = { title: "Tren" };
+export const metadata: Metadata = { title: "Trend" };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -37,48 +37,48 @@ async function TrendContent({ searchParams }: { searchParams: SearchParams }) {
   }
 
   const summary = data ? summarizeTrend(data.points) : null;
-  const rangeLabel = data ? (data.params.range === "all" ? "awal data" : `awal rentang (${RANGE_LABEL[data.params.range]})`) : "";
+  const rangeLabel = data ? (data.params.range === "all" ? "start of data" : `start of range (${RANGE_LABEL[data.params.range]})`) : "";
 
   return (
     <AppShell user={user} width="normal">
       <PageHeader
-        title="Tren progres"
-        description="Perkembangan jumlah task dan persentase selesai dari waktu ke waktu, dari snapshot tiap sinkronisasi."
+        title="Progress trend"
+        description="How the number of tasks and the completion percentage change over time, from the snapshot of each sync."
       />
 
       {!data ? (
-        <LoadError title="Data tren belum bisa dimuat." />
+        <LoadError title="The trend data could not be loaded." />
       ) : (
         <>
           <TrendControls params={data.params} sources={data.sources} />
 
           {data.ignoredSource && (
-            <Notice>Aplikasi yang dipilih tidak ditemukan, jadi yang ditampilkan adalah gabungan semua aplikasi.</Notice>
+            <Notice>The selected application was not found, so the combined view of all applications is shown.</Notice>
           )}
           {data.truncated && (
-            <Notice>Data pada rentang ini sangat banyak, jadi hanya sebagian yang terbaca. Pilih rentang yang lebih pendek.</Notice>
+            <Notice>There is a lot of data in this range, so only part of it was read. Choose a shorter range.</Notice>
           )}
 
           {data.sources.length === 0 ? (
             <EmptyState>
-              Belum ada aplikasi yang dipantau.{" "}
+              No applications are monitored yet.{" "}
               {user.role === "admin" ? (
-                <Link href="/pengaturan/sumber/baru" className="underline">Tambahkan sumber</Link>
+                <Link href="/pengaturan/sumber/baru" className="underline">Add a source</Link>
               ) : (
-                "Hubungi admin untuk mendaftarkan aplikasi."
+                "Ask an admin to register an application."
               )}
             </EmptyState>
           ) : data.points.length === 0 ? (
-            <EmptyState title="Belum ada data tren pada rentang ini.">
-              Snapshot terbentuk setiap kali Segarkan menemukan perubahan pada tasks.json. Coba rentang yang lebih
-              panjang, atau tekan Segarkan di <Link href="/" className="underline">Dashboard</Link>.
+            <EmptyState title="No trend data in this range yet.">
+              A snapshot is created whenever Refresh finds a change in tasks.json. Try a longer
+              range, or press Refresh on the <Link href="/" className="underline">Dashboard</Link>.
             </EmptyState>
           ) : (
             <>
               {summary && <TrendTiles summary={summary} period={rangeLabel} />}
               {data.points.length === 1 && (
                 <p role="status" className="text-sm text-muted-foreground">
-                  Baru ada satu titik data. Garis tren muncul setelah ada sinkronisasi berikutnya yang mengubah data.
+                  There is only one data point so far. The trend line appears after the next sync that changes the data.
                 </p>
               )}
               <TrendCharts points={data.points} start={data.start} end={data.end} downsampled={data.downsampled} />

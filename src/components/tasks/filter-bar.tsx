@@ -56,9 +56,9 @@ export function FilterBar({
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-1.5">
-          <Label htmlFor="f-source" className="text-xs text-muted-foreground">Aplikasi</Label>
+          <Label htmlFor="f-source" className="text-xs text-muted-foreground">Application</Label>
           <NativeSelect id="f-source" name="source" defaultValue={params.source ?? ""} className="w-full">
-            <option value="">Semua aplikasi</option>
+            <option value="">All applications</option>
             {sources.map((s) => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
@@ -68,7 +68,7 @@ export function FilterBar({
         <div className="space-y-1.5">
           <Label htmlFor="f-tag" className="text-xs text-muted-foreground">Tag</Label>
           <NativeSelect id="f-tag" name="tag" defaultValue={params.tag ?? ""} className="w-full">
-            <option value="">Semua tag</option>
+            <option value="">All tags</option>
             {tagOptions.map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
@@ -78,7 +78,7 @@ export function FilterBar({
         <div className="space-y-1.5">
           <Label htmlFor="f-status" className="text-xs text-muted-foreground">Status</Label>
           <NativeSelect id="f-status" name="status" defaultValue={params.status ?? ""} className="w-full">
-            <option value="">Semua status</option>
+            <option value="">All statuses</option>
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
@@ -86,9 +86,9 @@ export function FilterBar({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="f-priority" className="text-xs text-muted-foreground">Prioritas</Label>
+          <Label htmlFor="f-priority" className="text-xs text-muted-foreground">Priority</Label>
           <NativeSelect id="f-priority" name="priority" defaultValue={params.priority ?? ""} className="w-full">
-            <option value="">Semua prioritas</option>
+            <option value="">All priorities</option>
             {Object.entries(PRIORITY_LABEL).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
@@ -97,10 +97,10 @@ export function FilterBar({
       </div>
 
       <div className="flex items-center gap-3">
-        <Button type="submit" variant="outline" size="sm">Terapkan</Button>
+        <Button type="submit" variant="outline" size="sm">Apply</Button>
         {hasActiveFilters(params) && (
           <Link href="/tasks" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            Hapus semua filter
+            Clear all filters
           </Link>
         )}
       </div>

@@ -90,13 +90,13 @@ describe("keamanan: konten dari repo tidak tepercaya", () => {
       expect(html).not.toContain("<img");
       expect(html).not.toContain("tracker.example");
       expect(html).not.toContain('rel="preload"');
-      expect(html).toContain("[gambar: logo]");
+      expect(html).toContain("[image: logo]");
     });
 
     it("tanpa teks alternatif tetap aman", () => {
       const html = render("![](https://tracker.example/pixel.png)");
       expect(html).not.toContain("<img");
-      expect(html).toContain("[gambar]");
+      expect(html).toContain("[image]");
     });
 
     it("tautan berisi gambar tidak memuat gambarnya", () => {

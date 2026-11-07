@@ -20,8 +20,8 @@ import { STACK, percentDone, stackValues, type SeriesPoint } from "@/lib/trend/s
 const GAP = 2; // jeda permukaan antar segmen (px)
 const MAX_MARKERS = 60; // di atas ini penanda tiap titik disembunyikan (hanya yang aktif dan terakhir)
 const MARGIN = { top: 14, right: 64, bottom: 28, left: 44 };
-const nf = new Intl.NumberFormat("id-ID");
-const pf = (n: number) => `${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 }).format(n)}%`;
+const nf = new Intl.NumberFormat("en-GB");
+const pf = (n: number) => `${new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(n)}%`;
 
 type Active = { chart: "percent" | "stack"; i: number } | null;
 
@@ -71,13 +71,13 @@ export function TrendCharts({
       {/* Pengumuman untuk pembaca layar: nilai pada titik yang sedang dipilih dengan keyboard atau penunjuk. */}
       <p className="sr-only" aria-live="polite">
         {activePoint
-          ? `${formatFull(activePoint.t)}: ${pf(percentDone(activePoint))} selesai, ${nf.format(activePoint.done)} dari ${nf.format(activePoint.total)} task`
+          ? `${formatFull(activePoint.t)}: ${pf(percentDone(activePoint))} done, ${nf.format(activePoint.done)} of ${nf.format(activePoint.total)} tasks`
           : ""}
       </p>
 
       {downsampled && (
         <p className="text-xs" style={{ color: "var(--viz-text-secondary)" }}>
-          Data sangat banyak, jadi ditampilkan satu titik per hari (titik terakhir pada hari itu).
+          There is a lot of data, so one point per day is shown (the last point of that day).
         </p>
       )}
 
@@ -213,24 +213,24 @@ function PercentChart({ points, x, xs, width, plotW, ticks, span, gapMs, active,
 
   return (
     <Card
-      title="Persentase task selesai"
+      title="Percentage of tasks done"
       subtitle={
         <>
-          Tiap titik adalah satu sinkronisasi yang mengubah data.
+          Each point is one sync that changed the data.
           {dashed && (
             <>
               {" "}
               <svg width="22" height="8" aria-hidden="true" className="inline align-middle">
                 <line x1="0" y1="4" x2="22" y2="4" strokeWidth="2" strokeDasharray="4 3" style={{ stroke: "var(--viz-done)" }} />
               </svg>{" "}
-              Garis putus-putus: tidak ada sinkronisasi pada selang itu.
+              Dashed line: no sync in that interval.
             </>
           )}
         </>
       }
     >
       <div className="relative" style={{ height: H }}>
-        <svg width={width} height={H} role="img" aria-label={`Grafik garis persentase task selesai, ${points.length} titik data. Nilai lengkap ada pada tabel di bawah.`}>
+        <svg width={width} height={H} role="img" aria-label={`Line chart of the percentage of tasks done, ${points.length} data points. Full values are in the table below.`}>
           {/* gridline dan sumbu: hairline solid, redam */}
           {[0, 25, 50, 75, 100].map((v) => (
             <g key={v}>
@@ -269,7 +269,7 @@ function PercentChart({ points, x, xs, width, plotW, ticks, span, gapMs, active,
 
         <Overlay
           chart="percent" xs={xs} plotLeft={MARGIN.left} plotW={plotW} height={H} active={active} setActive={setActive}
-          label="Grafik persentase selesai. Gunakan panah kiri dan kanan untuk berpindah antar titik data."
+          label="Percentage done chart. Use the left and right arrow keys to move between data points."
         />
 
         {hovered && active && (
@@ -278,9 +278,9 @@ function PercentChart({ points, x, xs, width, plotW, ticks, span, gapMs, active,
             <p className="mt-1 flex items-center gap-2">
               <svg width="14" height="8" aria-hidden="true"><line x1="0" y1="4" x2="14" y2="4" strokeWidth="2" strokeLinecap="round" style={{ stroke: "var(--viz-done)" }} /></svg>
               <span className="text-sm font-semibold">{pf(percentDone(hovered))}</span>
-              <span style={{ color: "var(--viz-text-secondary)" }}>selesai</span>
+              <span style={{ color: "var(--viz-text-secondary)" }}>done</span>
             </p>
-            <p style={{ color: "var(--viz-text-secondary)" }}>{nf.format(hovered.done)} dari {nf.format(hovered.total)} task</p>
+            <p style={{ color: "var(--viz-text-secondary)" }}>{nf.format(hovered.done)} of {nf.format(hovered.total)} tasks</p>
           </Tooltip>
         )}
       </div>
@@ -302,9 +302,9 @@ function StackChart({ points, x, xs, width, plotW, ticks, span, active, setActiv
   const hovered = active?.chart === "stack" && active.i < points.length ? points[active.i] : null;
 
   return (
-    <Card title="Jumlah task per status" subtitle="Tiap kolom adalah keadaan pada satu sinkronisasi; ruang kosong di antaranya berarti tidak ada sinkronisasi.">
+    <Card title="Tasks per status" subtitle="Each column is the state at one sync; empty space between columns means there was no sync.">
       <div className="relative" style={{ height: H }}>
-        <svg width={width} height={H} role="img" aria-label={`Grafik kolom bertumpuk jumlah task per status, ${points.length} titik data. Nilai lengkap ada pada tabel di bawah.`}>
+        <svg width={width} height={H} role="img" aria-label={`Stacked column chart of tasks per status, ${points.length} data points. Full values are in the table below.`}>
           {yTicks(top).map((v) => (
             <g key={v}>
               <line x1={MARGIN.left} x2={MARGIN.left + plotW} y1={y(v)} y2={y(v)} strokeWidth={1} style={{ stroke: v === 0 ? "var(--viz-axis)" : "var(--viz-grid)" }} />
@@ -350,7 +350,7 @@ function StackChart({ points, x, xs, width, plotW, ticks, span, active, setActiv
 
         <Overlay
           chart="stack" xs={xs} plotLeft={MARGIN.left} plotW={plotW} height={H} active={active} setActive={setActive}
-          label="Grafik jumlah task per status. Gunakan panah kiri dan kanan untuk berpindah antar titik data."
+          label="Tasks per status chart. Use the left and right arrow keys to move between data points."
         />
 
         {hovered && active && (
@@ -370,14 +370,14 @@ function StackChart({ points, x, xs, width, plotW, ticks, span, active, setActiv
               })}
             </ul>
             <p className="mt-1 border-t pt-1" style={{ borderColor: "var(--viz-grid)", color: "var(--viz-text-secondary)" }}>
-              Total <strong style={{ color: "var(--viz-text-primary)" }}>{nf.format(hovered.total)}</strong> task
+              Total <strong style={{ color: "var(--viz-text-primary)" }}>{nf.format(hovered.total)}</strong> tasks
             </p>
           </Tooltip>
         )}
       </div>
 
       {/* Legenda selalu ada untuk >= 2 seri; kunci persegi mencerminkan kolom. Nama memakai warna teks, bukan warna seri. */}
-      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label="Legenda">
+      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label="Legend">
         {STACK.map((s) => (
           <li key={s.key} className="flex items-center gap-1.5">
             <span aria-hidden="true" className="inline-block size-2.5 rounded-sm" style={{ background: `var(${s.cssVar})` }} />
@@ -396,13 +396,13 @@ export function DataTable({ points }: { points: SeriesPoint[] }) {
   const rows = [...points].reverse(); // terbaru di atas
   return (
     <details className="rounded-lg border p-4 text-sm" style={{ background: "var(--viz-surface)", borderColor: "var(--viz-grid)", color: "var(--viz-text-primary)" }}>
-      <summary className="cursor-pointer font-medium">Lihat sebagai tabel ({nf.format(points.length)} titik data)</summary>
+      <summary className="cursor-pointer font-medium">View as table ({nf.format(points.length)} data points)</summary>
       <div className="mt-3 max-h-96 overflow-auto">
         <table className="w-full min-w-[40rem] border-collapse text-left text-xs">
-          <caption className="sr-only">Jumlah task per status pada setiap sinkronisasi yang mengubah data</caption>
+          <caption className="sr-only">Tasks per status at every sync that changed the data</caption>
           <thead style={{ color: "var(--viz-text-secondary)" }}>
             <tr>
-              {["Waktu", "Total", "Selesai", "% selesai", "Dikerjakan", "Terhambat", "Ditinjau", "Menunggu", "Ditunda", "Dibatalkan", "Lainnya"].map((h, i) => (
+              {["Time", "Total", "Done", "% done", "In progress", "Blocked", "In review", "Pending", "Deferred", "Cancelled", "Other"].map((h, i) => (
                 <th key={h} scope="col" className={`sticky top-0 border-b px-2 py-1.5 font-medium ${i === 0 ? "text-left" : "text-right"}`} style={{ background: "var(--viz-surface)", borderColor: "var(--viz-axis)" }}>{h}</th>
               ))}
             </tr>

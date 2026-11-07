@@ -82,21 +82,21 @@ describe("buildCards", () => {
 describe("urutan kartu: yang perlu perhatian lebih dulu", () => {
   const names = (sources: SourceRow[], counts: CountsRow[]) => buildCards(sources, counts, NOW).map((c) => c.name);
 
-  it("gagal sinkron > token kedaluwarsa > terhambat > belum disinkronkan > token segera > normal > nonaktif", () => {
+  it("gagal sinkron > token kedaluwarsa > blocked > belum disinkronkan > token segera > normal > nonaktif", () => {
     const at = (d: number) => new Date(NOW + d * DAY).toISOString();
     const sources = [
       src({ id: "ok", name: "Normal" }),
-      src({ id: "off", name: "Nonaktif", is_active: false, last_sync_status: "failed" }),
+      src({ id: "off", name: "Inactive", is_active: false, last_sync_status: "failed" }),
       src({ id: "soon", name: "TokenSegera", token_expires_at: at(3) }),
       src({ id: "never", name: "Belum", last_sync_status: "never" }),
-      src({ id: "blk", name: "Terhambat" }),
+      src({ id: "blk", name: "Blocked" }),
       src({ id: "exp", name: "TokenHabis", token_expires_at: at(-2) }),
       src({ id: "fail", name: "Gagal", last_sync_status: "failed" }),
     ];
     const counts = ["ok", "off", "soon", "blk", "exp", "fail"].map((id) =>
       cnt({ source_id: id, blocked: id === "blk" ? 2 : 0 }),
     );
-    expect(names(sources, counts)).toEqual(["Gagal", "TokenHabis", "Terhambat", "Belum", "TokenSegera", "Normal", "Nonaktif"]);
+    expect(names(sources, counts)).toEqual(["Gagal", "TokenHabis", "Blocked", "Belum", "TokenSegera", "Normal", "Inactive"]);
   });
 
   it("peringkat sama diurutkan menurut nama (bahasa Indonesia)", () => {

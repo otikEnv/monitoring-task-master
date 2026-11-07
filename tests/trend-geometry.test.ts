@@ -34,7 +34,7 @@ describe("niceMax", () => {
 });
 
 describe("yTicks", () => {
-  it("dimulai dari 0, berakhir di maks, naik, dan semuanya bilangan bulat", () => {
+  it("dimulai dari 0, berakhir di maks, up, dan semuanya bilangan bulat", () => {
     for (const max of [1, 2, 3, 5, 10, 25, 173, 200, 1000]) {
       const t = yTicks(max);
       expect(t[0]).toBe(0);

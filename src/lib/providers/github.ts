@@ -41,7 +41,7 @@ const headers = (token: string, accept: string) => ({
 async function fetchFile(params: FetchFileParams, deps?: FetchDeps): Promise<FetchFileResult> {
   const ref = parseGithubUrl(params.repoUrl);
   if (!ref) {
-    throw new ProviderError("invalid_url", "URL repo GitHub tidak valid. Contoh: https://github.com/owner/repo");
+    throw new ProviderError("invalid_url", "Invalid GitHub repo URL. Example: https://github.com/owner/repo");
   }
   const { owner, repo } = ref;
   const branch = encodeURIComponent(params.branch);
@@ -91,6 +91,6 @@ async function fetchFile(params: FetchFileParams, deps?: FetchDeps): Promise<Fet
 export const githubAdapter: ProviderAdapter = {
   provider: "github",
   validateRepoUrl: (url) =>
-    parseGithubUrl(url) ? null : "URL repo GitHub tidak valid. Contoh: https://github.com/owner/repo",
+    parseGithubUrl(url) ? null : "Invalid GitHub repo URL. Example: https://github.com/owner/repo",
   fetchFile,
 };

@@ -19,8 +19,8 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
 
   return (
     <div className="space-y-5">
-      <nav aria-label="Navigasi" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-        <Link href="/tasks" className="hover:underline">Daftar task</Link>
+      <nav aria-label="Navigation" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        <Link href="/tasks" className="hover:underline">Task list</Link>
         <span aria-hidden="true">›</span>
         <Link href={hrefFor(DEFAULT_PARAMS, { source: detail.sourceId })} className="hover:underline">{detail.sourceName}</Link>
         <span aria-hidden="true">›</span>
@@ -37,27 +37,27 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
           <StatusBadge status={detail.status} />
           <PriorityBadge priority={detail.priority} />
           {total > 0 && (
-            <span className="text-xs text-muted-foreground">{done} dari {total} subtask selesai</span>
+            <span className="text-xs text-muted-foreground">{done} of {total} subtasks done</span>
           )}
         </div>
         <dl className="grid gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-3">
-          <div><dt className="inline">Aplikasi: </dt><dd className="inline text-foreground">{detail.sourceName}</dd></div>
+          <div><dt className="inline">Application: </dt><dd className="inline text-foreground">{detail.sourceName}</dd></div>
           <div><dt className="inline">Tag: </dt><dd className="inline text-foreground">{detail.tag}</dd></div>
-          <div><dt className="inline">Data diperbarui: </dt><dd className="inline text-foreground">{formatDateTime(detail.updatedAt)}</dd></div>
+          <div><dt className="inline">Data updated: </dt><dd className="inline text-foreground">{formatDateTime(detail.updatedAt)}</dd></div>
         </dl>
       </header>
 
       {detail.description && (
         <section aria-labelledby="sec-deskripsi" className={section}>
-          <h2 id="sec-deskripsi" className={heading}>Deskripsi</h2>
+          <h2 id="sec-deskripsi" className={heading}>Description</h2>
           <Markdown>{detail.description}</Markdown>
         </section>
       )}
 
       <section aria-labelledby="sec-dependensi" className={section}>
-        <h2 id="sec-dependensi" className={heading}>Dependensi</h2>
+        <h2 id="sec-dependensi" className={heading}>Dependencies</h2>
         {detail.dependencies.length === 0 ? (
-          <Empty>Tidak bergantung pada task lain.</Empty>
+          <Empty>Does not depend on other tasks.</Empty>
         ) : (
           <ul className="space-y-1.5 text-sm">
             {detail.dependencies.map((d) => (
@@ -72,7 +72,7 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
                 ) : (
                   <>
                     <span>#{d.id}</span>
-                    <span className="text-xs text-muted-foreground">(tidak ditemukan pada tag ini)</span>
+                    <span className="text-xs text-muted-foreground">(not found in this tag)</span>
                   </>
                 )}
               </li>
@@ -82,22 +82,22 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
       </section>
 
       <section aria-labelledby="sec-detail" className={section}>
-        <h2 id="sec-detail" className={heading}>Detail implementasi</h2>
-        {detail.details ? <Markdown>{detail.details}</Markdown> : <Empty>Belum ada detail implementasi.</Empty>}
+        <h2 id="sec-detail" className={heading}>Implementation details</h2>
+        {detail.details ? <Markdown>{detail.details}</Markdown> : <Empty>No implementation details yet.</Empty>}
       </section>
 
       <section aria-labelledby="sec-uji" className={section}>
-        <h2 id="sec-uji" className={heading}>Strategi pengujian</h2>
-        {detail.testStrategy ? <Markdown>{detail.testStrategy}</Markdown> : <Empty>Belum ada strategi pengujian.</Empty>}
+        <h2 id="sec-uji" className={heading}>Test strategy</h2>
+        {detail.testStrategy ? <Markdown>{detail.testStrategy}</Markdown> : <Empty>No test strategy yet.</Empty>}
       </section>
 
       <section aria-labelledby="sec-subtask" className={section}>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 id="sec-subtask" className={heading}>Subtask</h2>
-          {total > 0 && <span className="text-xs text-muted-foreground">{done} dari {total} selesai</span>}
+          {total > 0 && <span className="text-xs text-muted-foreground">{done} of {total} done</span>}
         </div>
         {total === 0 ? (
-          <Empty>Tidak ada subtask.</Empty>
+          <Empty>No subtasks.</Empty>
         ) : (
           <ol className="space-y-3">
             {detail.subtasks.map((s) => (
@@ -108,13 +108,13 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
                   <StatusBadge status={s.status} />
                 </div>
                 {s.dependencies.length > 0 && (
-                  <p className="text-xs text-muted-foreground">Bergantung pada: {s.dependencies.join(", ")}</p>
+                  <p className="text-xs text-muted-foreground">Depends on: {s.dependencies.join(", ")}</p>
                 )}
                 {s.description && <Markdown>{s.description}</Markdown>}
                 {s.details && (
                   <details className="text-sm">
                     <summary className="cursor-pointer text-xs text-muted-foreground hover:underline">
-                      Lihat detail
+                      Show details
                     </summary>
                     <div className="mt-2"><Markdown>{s.details}</Markdown></div>
                   </details>
@@ -127,7 +127,7 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
 
       <p>
         <Link href={backToList} className="text-sm text-muted-foreground hover:underline">
-          ← Kembali ke daftar task
+          ← Back to task list
         </Link>
       </p>
     </div>

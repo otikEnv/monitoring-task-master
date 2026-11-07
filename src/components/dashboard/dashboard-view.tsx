@@ -47,14 +47,14 @@ export function DashboardView({
 
   if (cards.length === 0) {
     return (
-      <EmptyState title="Belum ada aplikasi yang dipantau.">
+      <EmptyState title="No applications are monitored yet.">
         {isAdmin ? (
           <>
-            Daftarkan repo pertama di{" "}
-            <Link href="/pengaturan/sumber/baru" className="underline">Pengaturan sumber</Link>.
+            Register the first repo in{" "}
+            <Link href="/pengaturan/sumber/baru" className="underline">Source settings</Link>.
           </>
         ) : (
-          "Hubungi admin untuk mendaftarkan aplikasi."
+          "Ask an admin to register an application."
         )}
       </EmptyState>
     );
@@ -63,25 +63,25 @@ export function DashboardView({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm" aria-label="Ringkasan">
-          <span className="text-sm font-medium">{summary.apps} aplikasi</span>
+        <div className="flex flex-wrap items-center gap-2 text-sm" aria-label="Summary">
+          <span className="text-sm font-medium">{summary.apps} {summary.apps === 1 ? "application" : "applications"}</span>
           {problems === 0 ? (
             <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-900 dark:bg-green-950 dark:text-green-200">
-              Semua berjalan baik
+              All running well
             </span>
           ) : (
             <>
-              {summary.failed > 0 && <Chip tone="red">{summary.failed} gagal sinkron</Chip>}
-              {summary.blocked > 0 && <Chip tone="red">{summary.blocked} punya task terhambat</Chip>}
-              {summary.tokenIssues > 0 && <Chip tone="amber">{summary.tokenIssues} token bermasalah</Chip>}
-              {summary.neverSynced > 0 && <Chip tone="neutral">{summary.neverSynced} belum disinkronkan</Chip>}
+              {summary.failed > 0 && <Chip tone="red">{summary.failed} failed to sync</Chip>}
+              {summary.blocked > 0 && <Chip tone="red">{summary.blocked} with blocked tasks</Chip>}
+              {summary.tokenIssues > 0 && <Chip tone="amber">{summary.tokenIssues} with token issues</Chip>}
+              {summary.neverSynced > 0 && <Chip tone="neutral">{summary.neverSynced} never synced</Chip>}
             </>
           )}
         </div>
 
         <Button type="button" onClick={() => refresh(activeIds)} disabled={busy > 0 || activeIds.length === 0}>
           <RefreshCw aria-hidden="true" className={busy > 0 ? "animate-spin" : ""} />
-          {busy > 0 ? `Menyegarkan… (${busy} tersisa)` : "Segarkan semua"}
+          {busy > 0 ? `Refreshing… (${busy} left)` : "Refresh all"}
         </Button>
       </div>
 

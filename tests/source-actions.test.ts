@@ -24,10 +24,10 @@ vi.mock("next/navigation", () => ({ redirect: m.redirect }));
 vi.mock("@/lib/sources/test-connection", () => ({ runConnectionTest: m.runConnectionTest }));
 vi.mock("@/lib/sources/repo", () => {
   class DuplicateSourceError extends Error {
-    constructor() { super("Sumber dengan URL repo, branch, dan path yang sama sudah terdaftar."); }
+    constructor() { super("A source with the same repo URL, branch, and path is already registered."); }
   }
   class SourceNotFoundError extends Error {
-    constructor() { super("Sumber tidak ditemukan."); }
+    constructor() { super("Source not found."); }
   }
   return {
     DuplicateSourceError, SourceNotFoundError,
@@ -119,7 +119,7 @@ describe("saveSource", () => {
   });
 
   it("ID bukan UUID -> galat, tanpa menulis", async () => {
-    expect(await saveSource(form({ id: "bukan-uuid" }))).toMatchObject({ ok: false, error: expect.stringMatching(/tidak valid/i) });
+    expect(await saveSource(form({ id: "bukan-uuid" }))).toMatchObject({ ok: false, error: expect.stringMatching(/invalid/i) });
     expect(m.updateSource).not.toHaveBeenCalled();
     expect(m.createSource).not.toHaveBeenCalled();
   });
@@ -127,19 +127,19 @@ describe("saveSource", () => {
   it("duplikat -> pesan yang ramah, tanpa redirect", async () => {
     m.createSource.mockRejectedValue(new DuplicateSourceError());
     const r = await saveSource(form());
-    expect(r).toMatchObject({ ok: false, error: expect.stringMatching(/sudah terdaftar/) });
+    expect(r).toMatchObject({ ok: false, error: expect.stringMatching(/already registered/) });
     expect(m.redirect).not.toHaveBeenCalled();
   });
 
   it("sumber hilang saat diubah -> pesan tidak ditemukan", async () => {
     m.updateSource.mockRejectedValue(new SourceNotFoundError());
-    expect(await saveSource(form({ id: ID }))).toMatchObject({ ok: false, error: "Sumber tidak ditemukan." });
+    expect(await saveSource(form({ id: ID }))).toMatchObject({ ok: false, error: "Source not found." });
   });
 
   it("galat database tak terduga -> pesan generik; detail dan token tidak bocor ke klien maupun log", async () => {
     m.createSource.mockRejectedValue(new Error(`insert gagal: ${TOKEN} kolom rahasia`));
     const r = await saveSource(form());
-    expect(r).toMatchObject({ ok: false, error: "Gagal menyimpan sumber. Coba lagi." });
+    expect(r).toMatchObject({ ok: false, error: "Could not save the source. Try again." });
     expect(JSON.stringify(r)).not.toContain(TOKEN);
     expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain(TOKEN);
     expect(m.redirect).not.toHaveBeenCalled();
@@ -234,12 +234,12 @@ describe("setActive dan removeSource", () => {
 
   it("sumber tidak ada -> pesan tidak ditemukan", async () => {
     m.deleteSource.mockRejectedValue(new SourceNotFoundError());
-    expect(await removeSource(ID)).toEqual({ ok: false, error: "Sumber tidak ditemukan." });
+    expect(await removeSource(ID)).toEqual({ ok: false, error: "Source not found." });
   });
 
   it("galat tak terduga -> pesan generik", async () => {
     m.setSourceActive.mockRejectedValue(new Error("db rahasia"));
     const r = await setActive(ID, true);
-    expect(r).toEqual({ ok: false, error: "Gagal mengubah status sumber." });
+    expect(r).toEqual({ ok: false, error: "Could not change the source status." });
   });
 });
