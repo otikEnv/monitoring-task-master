@@ -10,7 +10,8 @@
     "seed:users": "node scripts/seed-users.mjs",
     "test": "vitest run",
     "aggregate": "node scripts/aggregate.mjs",
-    "test:live": "node scripts/test-live.mjs"
+    "test:live": "node scripts/test-live.mjs",
+    "db:run": "node scripts/db-run.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -42,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
     "jsdom": "^31.0.0",
+    "pg": "^8.23.1",
     "tailwindcss": "^4",
     "task-master-ai": "^0.43.1",
     "typescript": "^5",

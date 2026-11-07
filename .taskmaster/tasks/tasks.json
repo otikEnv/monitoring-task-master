@@ -925,7 +925,7 @@
         "id": "22",
         "title": "Release: skema database dan akses (tabel releases)",
         "description": "Tabel releases dengan constraint, RLS, dan uji SQL.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "3"
@@ -937,36 +937,40 @@
             "id": 1,
             "title": "Migrasi tabel releases",
             "description": "File 20261107040000_releases.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Kolom: id uuid pk default gen_random_uuid(); source_id uuid not null references sources(id) on delete cascade; tag text not null; name text not null; range_start bigint not null; range_end bigint not null; start_date date not null default (now() at time zone 'Asia/Jakarta')::date; target_date date not null; released_on date null; created_at timestamptz; updated_at timestamptz.\n\nConstraint: nama tidak kosong dan maksimal 100 karakter; tag tidak kosong dan maksimal 100 karakter; range_start > 0; range_start <= range_end; start_date <= target_date; unique (source_id, name). Index pada source_id dan target_date. Trigger set_updated_at (fungsi sudah ada dari migrasi awal).",
-            "parentId": "22"
+            "parentId": "22",
+            "updatedAt": "2026-11-07T01:23:36.972Z"
           },
           {
             "id": 2,
             "title": "Hak akses dan RLS",
             "description": "Hanya SELECT untuk pengguna login.",
-            "status": "pending",
+            "status": "done",
             "details": "revoke all on public.releases from anon, authenticated; grant select to authenticated; enable row level security; policy releases_select for select to authenticated using (true). Tidak ada policy atau grant INSERT/UPDATE/DELETE untuk peran klien.",
-            "parentId": "22"
+            "parentId": "22",
+            "updatedAt": "2026-11-07T01:23:36.972Z"
           },
           {
             "id": 3,
             "title": "Uji SQL releases_test.sql",
             "description": "Skrip uji di supabase/tests.",
-            "status": "pending",
+            "status": "done",
             "details": "Di dalam begin … rollback, notice 'UJI RELEASES LOLOS' bila sukses. Kasus: insert valid berhasil; range_start > range_end, range_start 0, start_date setelah target_date, nama kosong, dan nama ganda pada aplikasi yang sama ditolak; nama sama pada aplikasi berbeda diterima; authenticated bisa SELECT tetapi INSERT/UPDATE/DELETE ditolak; anon tidak bisa SELECT; menghapus sumber ikut menghapus release.",
-            "parentId": "22"
+            "parentId": "22",
+            "updatedAt": "2026-11-07T01:23:36.972Z"
           },
           {
             "id": 4,
             "title": "Catat di supabase/README",
             "description": "Daftar migrasi dan cara menjalankan uji.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambahkan baris migrasi baru dan skrip uji pada daftar di supabase/README.md. Migrasi dijalankan oleh pengguna lewat SQL editor (tidak idempoten, jalankan sekali).",
-            "parentId": "22"
+            "parentId": "22",
+            "updatedAt": "2026-11-07T01:23:36.972Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:23:36.972Z"
       },
       {
         "id": "23",
@@ -1359,9 +1363,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:11:01.413Z",
+      "lastModified": "2026-11-07T01:23:36.972Z",
       "taskCount": 31,
-      "completedCount": 14,
+      "completedCount": 15,
       "tags": [
         "master"
       ]
