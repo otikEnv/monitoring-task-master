@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, Settings2, TrendingUp } from "lucide-react";
+import { ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, Rocket, Settings2, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
@@ -19,6 +19,7 @@ type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; exac
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/tasks", label: "Daftar task", icon: ListChecks },
+  { href: "/release", label: "Release", icon: Rocket },
   { href: "/tren", label: "Tren", icon: TrendingUp },
 ];
 

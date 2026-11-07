@@ -1099,7 +1099,7 @@
         "id": "25",
         "title": "Release: halaman Daftar release dan menu sidebar",
         "description": "Halaman /release berisi kartu per release.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "24"
@@ -1111,36 +1111,40 @@
             "id": 1,
             "title": "Menu Release di sidebar",
             "description": "Item baru di grup Pantau.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambahkan 'Release' (ikon Rocket dari lucide) di NAV pada src/components/layout/app-sidebar.tsx, terlihat oleh semua pengguna. Aktif untuk /release dan turunannya.",
-            "parentId": "25"
+            "parentId": "25",
+            "updatedAt": "2026-11-07T01:31:10.350Z"
           },
           {
             "id": 2,
             "title": "Komponen kartu, bar progres, dan penanda risiko",
             "description": "src/components/releases/*.",
-            "status": "pending",
+            "status": "done",
             "details": "ReleaseCard: nama, aplikasi, tag, rentang task, jumlah task, tanggal target dan sisa hari, penanda risiko, bar progres, ringkasan status, jumlah ditunda/dibatalkan. Bar progres bertingkat per status dengan role=progressbar dan legenda angka (tidak mengandalkan warna saja). RiskBadge: teks + ikon untuk lima penanda. Tampilkan angka mentah (persen progres dan persen waktu) berdampingan dengan penanda.",
-            "parentId": "25"
+            "parentId": "25",
+            "updatedAt": "2026-11-07T01:31:10.350Z"
           },
           {
             "id": 3,
             "title": "Halaman /release",
             "description": "Daftar, filter, dan keadaan kosong.",
-            "status": "pending",
+            "status": "done",
             "details": "requireUser, dibungkus Suspense. Urut dari tanggal target terdekat; yang sudah rilis disembunyikan secara bawaan dan muncul lewat pilihan 'tampilkan yang sudah rilis' (parameter URL). Filter aplikasi lewat ?source=<id> dengan nilai tidak valid diabaikan. EmptyState bila belum ada release (admin melihat petunjuk Tambah release). LoadError bila pemuatan gagal. Tombol Tambah release hanya untuk admin.",
-            "parentId": "25"
+            "parentId": "25",
+            "updatedAt": "2026-11-07T01:31:10.350Z"
           },
           {
             "id": 4,
             "title": "Tes tampilan",
             "description": "tests/release-card.test.tsx.",
-            "status": "pending",
+            "status": "done",
             "details": "Kartu dengan setiap penanda risiko, total nol ('Belum ada task di rentang ini'), release sudah rilis, bar progres memiliki atribut aria yang benar dan legenda memuat angka, ditunda/dibatalkan tampil terpisah.",
-            "parentId": "25"
+            "parentId": "25",
+            "updatedAt": "2026-11-07T01:31:10.350Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:31:10.350Z"
       },
       {
         "id": "26",
@@ -1373,9 +1377,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:28:49.299Z",
+      "lastModified": "2026-11-07T01:31:10.350Z",
       "taskCount": 31,
-      "completedCount": 17,
+      "completedCount": 18,
       "tags": [
         "master"
       ]
