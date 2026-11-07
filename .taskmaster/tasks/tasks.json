@@ -1304,7 +1304,7 @@
         "id": "29",
         "title": "Release: verifikasi dan dokumentasi Tahap 1",
         "description": "Terapkan migrasi, uji live, periksa sampel, dan dokumentasi.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "25",
@@ -1319,44 +1319,49 @@
             "id": 1,
             "title": "Terapkan migrasi dan uji SQL",
             "description": "Dilakukan pengguna di SQL editor Supabase.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan 20261107040000_releases.sql lalu supabase/tests/releases_test.sql; harapannya notice 'UJI RELEASES LOLOS'. Jangan lanjut ke tes live bila ada baris FAIL.",
-            "parentId": "29"
+            "parentId": "29",
+            "updatedAt": "2026-11-07T01:43:56.717Z"
           },
           {
             "id": 2,
             "title": "Tes live terhadap Supabase",
             "description": "tests/releases.live.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Pola sama dengan tes live yang ada (dijalankan lewat npm run test:live): buat release sementara, baca lewat sesi pengguna, pastikan hitungan sama dengan hitungan manual pada data nyata, lalu bersihkan.",
-            "parentId": "29"
+            "parentId": "29",
+            "updatedAt": "2026-11-07T01:43:56.717Z"
           },
           {
             "id": 3,
             "title": "Pemeriksaan sampel manual",
             "description": "Cocokkan minimal tiga release dengan data sumber.",
-            "status": "pending",
+            "status": "done",
             "details": "Metrik PRD: kesesuaian jumlah task dan progres 100% pada pemeriksaan sampel untuk minimal tiga release. Bandingkan dengan tasks.json di repo asal.",
-            "parentId": "29"
+            "parentId": "29",
+            "updatedAt": "2026-11-07T01:43:56.717Z"
           },
           {
             "id": 4,
             "title": "Pemeriksaan visual dan kualitas kode",
             "description": "Tangkapan layar dan seluruh pemeriksaan.",
-            "status": "pending",
+            "status": "done",
             "details": "Tangkapan layar desktop dan ponsel, mode terang dan gelap, untuk Daftar release, Detail release, Form, dan Dashboard; tsc, eslint, vitest, dan npm run build bersih; tidak ada galat konsol; waktu muat halaman Release di bawah 2 detik.",
-            "parentId": "29"
+            "parentId": "29",
+            "updatedAt": "2026-11-07T01:43:56.717Z"
           },
           {
             "id": 5,
             "title": "Dokumentasi",
             "description": "README dan PRD.",
-            "status": "pending",
+            "status": "done",
             "details": "Perbarui README proyek (fitur Release, cara membuat release, aturan hitung ringkas) dan catat keputusan akhir pada PRD-Fitur-Release-Tracking.md bila ada yang berubah selama pembuatan.",
-            "parentId": "29"
+            "parentId": "29",
+            "updatedAt": "2026-11-07T01:43:56.717Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:43:56.717Z"
       },
       {
         "id": "30",
@@ -1389,9 +1394,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:38:22.958Z",
+      "lastModified": "2026-11-07T01:43:56.717Z",
       "taskCount": 31,
-      "completedCount": 21,
+      "completedCount": 22,
       "tags": [
         "master"
       ]
