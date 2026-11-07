@@ -1150,7 +1150,7 @@
         "id": "26",
         "title": "Release: halaman Detail release",
         "description": "Ringkasan, progres, hambatan, dan tabel task per release.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "24"
@@ -1162,44 +1162,49 @@
             "id": 1,
             "title": "Rute dan header",
             "description": "/release/[id] dengan judul dan metadata.",
-            "status": "pending",
+            "status": "done",
             "details": "Judul 'Aplikasi · nama release', tag, rentang task ('task #100 sampai #200', plus ID terkecil dan terbesar yang ada), tanggal mulai, target, dan rilis, sisa hari, penanda risiko. Breadcrumb Release > nama. Dibungkus Suspense dan requireUser; galat pemuatan menampilkan LoadError.",
-            "parentId": "26"
+            "parentId": "26",
+            "updatedAt": "2026-11-07T01:33:00.778Z"
           },
           {
             "id": 2,
             "title": "Angka ringkas dan bar progres",
             "description": "Empat angka plus bar bertingkat.",
-            "status": "pending",
+            "status": "done",
             "details": "Empat angka: total, selesai, dalam pengerjaan (in-progress dan review), perlu perhatian (terhambat, ditunda, dibatalkan). Bar progres bertingkat per status dengan legenda angka. Tampilkan persen progres dan persen waktu berdampingan, dan jelaskan rumus risiko singkat (teks bantuan) agar penanda tidak dianggap prediksi pasti.",
-            "parentId": "26"
+            "parentId": "26",
+            "updatedAt": "2026-11-07T01:33:00.778Z"
           },
           {
             "id": 3,
             "title": "Bagian Perlu perhatian",
             "description": "Terhambat, dependensi luar rentang, ditunda/dibatalkan.",
-            "status": "pending",
+            "status": "done",
             "details": "Tiga kelompok dengan daftar task yang menaut ke detail task: (1) task terhambat; (2) task yang menunggu dependensi di luar rentang yang belum selesai, menyebut dependensinya dan statusnya; (3) 'Perlu dievaluasi': task ditunda dan dibatalkan, dengan jumlah. Dependensi yang tidak ditemukan dilaporkan terpisah. Kelompok kosong tidak ditampilkan; bila semuanya kosong tampil 'Tidak ada hambatan'.",
-            "parentId": "26"
+            "parentId": "26",
+            "updatedAt": "2026-11-07T01:33:00.778Z"
           },
           {
             "id": 4,
             "title": "Tabel task di rentang",
             "description": "Semua task release, paling perlu perhatian dulu.",
-            "status": "pending",
+            "status": "done",
             "details": "Kolom: ID, judul, status, prioritas, subtask selesai/total. Urut status_rank (terhambat, dikerjakan, ditinjau, menunggu, ditunda, selesai, dibatalkan, lainnya) lalu ID angka. Memakai StatusBadge dan PriorityBadge yang ada; tiap baris menaut ke detail task (taskHref).",
-            "parentId": "26"
+            "parentId": "26",
+            "updatedAt": "2026-11-07T01:33:00.778Z"
           },
           {
             "id": 5,
             "title": "Kasus khusus dan tombol admin",
             "description": "Data usang, tag hilang, aplikasi nonaktif, rilis.",
-            "status": "pending",
+            "status": "done",
             "details": "Penanda data usang dengan waktu sinkron terakhir bila sinkron gagal; pesan 'Tag tidak ditemukan pada data terakhir' dengan angka nol; penanda aplikasi nonaktif; release sudah rilis menampilkan 'dirilis pada [tanggal], progres saat ini N%'. Tombol admin: Ubah, Tandai rilis atau Batalkan tanda rilis, Hapus.",
-            "parentId": "26"
+            "parentId": "26",
+            "updatedAt": "2026-11-07T01:33:00.778Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:33:00.778Z"
       },
       {
         "id": "27",
@@ -1377,9 +1382,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:31:10.350Z",
+      "lastModified": "2026-11-07T01:33:00.778Z",
       "taskCount": 31,
-      "completedCount": 18,
+      "completedCount": 19,
       "tags": [
         "master"
       ]
