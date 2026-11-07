@@ -1261,7 +1261,7 @@
         "id": "28",
         "title": "Release: baris release di kartu Dashboard",
         "description": "Release terdekat yang belum rilis tampil di kartu aplikasi.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "24",
@@ -1274,28 +1274,31 @@
             "id": 1,
             "title": "Data ringkas per aplikasi",
             "description": "Release terdekat dan jumlah lainnya.",
-            "status": "pending",
+            "status": "done",
             "details": "Muat release belum rilis per aplikasi (urut target terdekat), hitung progres dan penanda risiko dengan model task 23, dan sertakan jumlah release aktif lainnya pada DashboardCard (field opsional agar tes lama tidak pecah). Kegagalan memuat release tidak boleh menggagalkan seluruh dashboard.",
-            "parentId": "28"
+            "parentId": "28",
+            "updatedAt": "2026-11-07T01:38:22.958Z"
           },
           {
             "id": 2,
             "title": "Tampilan di SourceCard",
             "description": "Satu baris: nama, persen, sisa hari, penanda.",
-            "status": "pending",
+            "status": "done",
             "details": "Contoh 'v2.1 · 62% · 13 hari lagi · Berisiko', menaut ke /release/[id]. Bila ada lebih dari satu: '+N release lain' menaut ke /release?source=<id>. Penanda memakai teks dan ikon. Baris berada di dalam area kartu yang bisa diklik; pastikan tautan tetap bisa diklik (z-10 seperti tombol Segarkan).",
-            "parentId": "28"
+            "parentId": "28",
+            "updatedAt": "2026-11-07T01:38:22.958Z"
           },
           {
             "id": 3,
             "title": "Tes dashboard",
             "description": "Perbarui tests/dashboard-card dan dashboard-cards.",
-            "status": "pending",
+            "status": "done",
             "details": "Kartu tanpa release tidak berubah; kartu dengan satu dan beberapa release; release terlewat target; sumber nonaktif.",
-            "parentId": "28"
+            "parentId": "28",
+            "updatedAt": "2026-11-07T01:38:22.958Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:38:22.958Z"
       },
       {
         "id": "29",
@@ -1386,9 +1389,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:35:10.601Z",
+      "lastModified": "2026-11-07T01:38:22.958Z",
       "taskCount": 31,
-      "completedCount": 20,
+      "completedCount": 21,
       "tags": [
         "master"
       ]

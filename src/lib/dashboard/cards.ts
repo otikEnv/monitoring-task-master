@@ -1,5 +1,6 @@
 import { tokenExpiryState, type TokenExpiry } from "@/lib/format";
 import type { Provider } from "@/lib/providers/types";
+import type { ReleaseSummary } from "@/lib/releases/summary";
 import type { DisplayStatus } from "@/lib/status";
 
 /** Baris dari tabel sources (hanya kolom yang boleh dibaca klien; tanpa token). */
@@ -52,6 +53,8 @@ export type DashboardCard = {
   lastCommitAt: string | null;
   tokenExpiresAt: string | null;
   tokenExpiry: TokenExpiry;
+  /** Release belum rilis dengan target terdekat; kosong bila aplikasi tidak punya release aktif. */
+  release?: ReleaseSummary | null;
 };
 
 export type DashboardSummary = {

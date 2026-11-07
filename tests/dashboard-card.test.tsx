@@ -178,3 +178,42 @@ describe("tombol Segarkan dan hasilnya", () => {
     expect(render(card())).toMatch(/relative z-10[^"]*"><button/);
   });
 });
+
+describe("baris release pada kartu", () => {
+  const release = { releaseId: "22222222-2222-4222-8222-222222222222", name: "v2.1", percent: 62, total: 87, daysLeft: 13, risk: "at_risk" as const, extra: 0 };
+
+  it("tanpa release aktif: tidak ada baris tambahan", () => {
+    for (const r of [undefined, null]) {
+      const html = render(card({ release: r }));
+      expect(html).not.toContain("Release v2.1");
+      expect(html).not.toContain("release lain");
+    }
+  });
+
+  it("menampilkan nama, persen, sisa hari, dan penanda risiko, menaut ke detail release", () => {
+    const html = render(card({ release }));
+    expect(html).toContain("Release v2.1");
+    expect(html).toContain("62%");
+    expect(html).toContain("13 hari lagi");
+    expect(html).toContain("Berisiko");
+    expect(html).toContain(`href="/release/${release.releaseId}"`);
+    expect(html).not.toContain("release lain");
+  });
+
+  it("baris release berada di atas tautan membentang (z-10) agar tetap bisa diklik", () => {
+    expect(render(card({ release }))).toMatch(/relative z-10[^"]*"><a [^>]*href="\/release\//);
+  });
+
+  it("lebih dari satu release: +N release lain menaut ke daftar terfilter aplikasi", () => {
+    const html = render(card({ release: { ...release, extra: 2 } }));
+    expect(html).toContain("+2 release lain");
+    expect(html).toContain(`href="/release?source=${card().id}"`);
+  });
+
+  it("rentang tanpa task dan release lewat target", () => {
+    expect(render(card({ release: { ...release, percent: null, total: 0, risk: "empty" } }))).toContain("belum ada task");
+    const late = render(card({ release: { ...release, daysLeft: -4, risk: "overdue" } }));
+    expect(late).toContain("lewat 4 hari");
+    expect(late).toContain("Lewat target");
+  });
+});

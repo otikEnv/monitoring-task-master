@@ -1,8 +1,11 @@
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { RiskBadge } from "@/components/releases/risk-badge";
 import { Button } from "@/components/ui/button";
 import type { DashboardCard } from "@/lib/dashboard/cards";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDaysLeft } from "@/lib/releases/format";
+import { releaseListHref } from "@/lib/releases/params";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_RAW, STATUS_TONE } from "@/lib/status";
 
 export type RefreshUi =
@@ -113,6 +116,23 @@ export function SourceCard({
             </li>
           ))}
         </ul>
+      )}
+
+      {card.release && (
+        <div className="relative z-10 space-y-1 rounded-md border bg-muted/40 p-2.5 text-xs">
+          <Link href={`/release/${card.release.releaseId}`} className="flex flex-wrap items-center gap-x-2 gap-y-1 hover:underline">
+            <span className="font-medium">Release {card.release.name}</span>
+            <span className="text-muted-foreground">
+              {card.release.percent === null ? "belum ada task" : `${card.release.percent}%`} · {formatDaysLeft(card.release.daysLeft)}
+            </span>
+            <RiskBadge risk={card.release.risk} />
+          </Link>
+          {card.release.extra > 0 && (
+            <Link href={releaseListHref({ source: card.id })} className="block text-muted-foreground hover:underline">
+              +{card.release.extra} release lain
+            </Link>
+          )}
+        </div>
       )}
 
       {(card.tokenExpiry === "expired" || card.tokenExpiry === "soon") && (
