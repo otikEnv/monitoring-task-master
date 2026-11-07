@@ -40,14 +40,14 @@ export const STATUS_RAW: Record<Exclude<DisplayStatus, "other">, string> = {
 
 /** Warna lencana. Selalu dipasangkan dengan teks label, tidak mengandalkan warna saja. */
 export const STATUS_TONE: Record<DisplayStatus, string> = {
-  pending: "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200",
+  pending: "bg-muted text-foreground",
   in_progress: "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
   review: "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
   blocked: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
   done: "bg-green-100 text-green-900 dark:bg-green-950 dark:text-green-200",
   deferred: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  cancelled: "bg-neutral-100 text-neutral-500 line-through dark:bg-neutral-900 dark:text-neutral-500",
-  other: "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
+  cancelled: "bg-muted text-muted-foreground line-through",
+  other: "bg-muted text-muted-foreground",
 };
 
 const RAW_TO_KEY: Record<string, DisplayStatus> = {
@@ -74,5 +74,5 @@ export const PRIORITY_LABEL: Record<string, string> = {
 export const PRIORITY_TONE: Record<string, string> = {
   high: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
   medium: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  low: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
+  low: "bg-muted text-muted-foreground",
 };

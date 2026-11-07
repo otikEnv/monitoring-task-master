@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRef } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
+import { cn } from "@/lib/utils";
 import { DEFAULT_RANGE, RANGES, RANGE_LABEL, trendHref, type TrendParams } from "@/lib/trend/series";
-
-const select =
-  "rounded-md border border-neutral-300 bg-transparent px-2.5 py-1.5 text-sm outline-none focus:border-neutral-500 dark:border-neutral-700 dark:bg-neutral-950 dark:focus:border-neutral-400";
 
 /**
  * Satu baris filter di atas semua grafik (tidak per grafik): rentang waktu dan aplikasi.
@@ -18,10 +19,10 @@ export function TrendControls({
   const form = useRef<HTMLFormElement>(null);
 
   return (
-    <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
-      <div>
-        <p className="mb-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">Rentang waktu</p>
-        <div role="group" aria-label="Rentang waktu" className="inline-flex overflow-hidden rounded-md border border-neutral-300 text-sm dark:border-neutral-700">
+    <div className="flex flex-wrap items-end gap-x-6 gap-y-3 rounded-xl border bg-card p-4">
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground">Rentang waktu</p>
+        <div role="group" aria-label="Rentang waktu" className="inline-flex gap-1 rounded-lg bg-muted p-1">
           {RANGES.map((r) => {
             const on = params.range === r;
             return (
@@ -29,11 +30,10 @@ export function TrendControls({
                 key={r}
                 href={trendHref(params, { range: r })}
                 aria-current={on ? "true" : undefined}
-                className={`px-3 py-1.5 ${
-                  on
-                    ? "bg-neutral-900 font-medium text-white dark:bg-neutral-100 dark:text-neutral-900"
-                    : "hover:bg-neutral-100 dark:hover:bg-neutral-900"
-                } ${r !== RANGES[0] ? "border-l border-neutral-300 dark:border-neutral-700" : ""}`}
+                className={cn(
+                  buttonVariants({ variant: on ? "default" : "ghost", size: "sm" }),
+                  !on && "hover:bg-background",
+                )}
               >
                 {RANGE_LABEL[r]}
               </Link>
@@ -44,9 +44,9 @@ export function TrendControls({
 
       <form ref={form} method="get" action="/tren" onChange={() => form.current?.requestSubmit()} className="flex items-end gap-2">
         {params.range !== DEFAULT_RANGE && <input type="hidden" name="range" value={params.range} />}
-        <label className="space-y-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">
-          Aplikasi
-          <select name="source" defaultValue={params.source ?? ""} className={`${select} block min-w-56`}>
+        <div className="space-y-1.5">
+          <Label htmlFor="trend-source" className="text-xs text-muted-foreground">Aplikasi</Label>
+          <NativeSelect id="trend-source" name="source" defaultValue={params.source ?? ""} className="min-w-56">
             <option value="">Semua aplikasi (gabungan)</option>
             {sources.map((s) => (
               <option key={s.id} value={s.id}>
@@ -54,11 +54,9 @@ export function TrendControls({
                 {s.isActive ? "" : " (nonaktif)"}
               </option>
             ))}
-          </select>
-        </label>
-        <button type="submit" className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900">
-          Terapkan
-        </button>
+          </NativeSelect>
+        </div>
+        <Button type="submit" variant="outline">Terapkan</Button>
       </form>
     </div>
   );

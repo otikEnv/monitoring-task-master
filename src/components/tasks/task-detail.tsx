@@ -5,11 +5,11 @@ import { formatDateTime } from "@/lib/format";
 import { hrefFor, DEFAULT_PARAMS, taskHref } from "@/lib/tasks/list-params";
 import { subtaskProgress, type TaskDetail } from "@/lib/tasks/detail-model";
 
-const section = "space-y-3 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800";
-const heading = "text-sm font-semibold uppercase tracking-wide text-neutral-500";
+const section = "space-y-3 rounded-xl border bg-card p-5";
+const heading = "text-sm font-semibold uppercase tracking-wide text-muted-foreground";
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-neutral-500">{children}</p>;
+  return <p className="text-sm text-muted-foreground">{children}</p>;
 }
 
 /** Tampilan detail satu task. Presentasional dan hanya-baca: tidak ada aksi yang mengubah task. */
@@ -19,7 +19,7 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
 
   return (
     <div className="space-y-5">
-      <nav aria-label="Navigasi" className="flex flex-wrap items-center gap-1.5 text-sm text-neutral-500">
+      <nav aria-label="Navigasi" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
         <Link href="/tasks" className="hover:underline">Daftar task</Link>
         <span aria-hidden="true">›</span>
         <Link href={hrefFor(DEFAULT_PARAMS, { source: detail.sourceId })} className="hover:underline">{detail.sourceName}</Link>
@@ -30,20 +30,20 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
       </nav>
 
       <header className="space-y-2">
-        <h1 className="text-xl font-semibold leading-snug break-words">
-          <span className="text-neutral-500">#{detail.taskId}</span> {detail.title}
+        <h1 className="text-2xl font-semibold leading-snug tracking-tight break-words">
+          <span className="text-muted-foreground">#{detail.taskId}</span> {detail.title}
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={detail.status} />
           <PriorityBadge priority={detail.priority} />
           {total > 0 && (
-            <span className="text-xs text-neutral-500">{done} dari {total} subtask selesai</span>
+            <span className="text-xs text-muted-foreground">{done} dari {total} subtask selesai</span>
           )}
         </div>
-        <dl className="grid gap-x-6 gap-y-1 text-xs text-neutral-500 sm:grid-cols-3">
-          <div><dt className="inline">Aplikasi: </dt><dd className="inline text-neutral-800 dark:text-neutral-200">{detail.sourceName}</dd></div>
-          <div><dt className="inline">Tag: </dt><dd className="inline text-neutral-800 dark:text-neutral-200">{detail.tag}</dd></div>
-          <div><dt className="inline">Data diperbarui: </dt><dd className="inline text-neutral-800 dark:text-neutral-200">{formatDateTime(detail.updatedAt)}</dd></div>
+        <dl className="grid gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-3">
+          <div><dt className="inline">Aplikasi: </dt><dd className="inline text-foreground">{detail.sourceName}</dd></div>
+          <div><dt className="inline">Tag: </dt><dd className="inline text-foreground">{detail.tag}</dd></div>
+          <div><dt className="inline">Data diperbarui: </dt><dd className="inline text-foreground">{formatDateTime(detail.updatedAt)}</dd></div>
         </dl>
       </header>
 
@@ -72,7 +72,7 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
                 ) : (
                   <>
                     <span>#{d.id}</span>
-                    <span className="text-xs text-neutral-500">(tidak ditemukan pada tag ini)</span>
+                    <span className="text-xs text-muted-foreground">(tidak ditemukan pada tag ini)</span>
                   </>
                 )}
               </li>
@@ -94,26 +94,26 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
       <section aria-labelledby="sec-subtask" className={section}>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 id="sec-subtask" className={heading}>Subtask</h2>
-          {total > 0 && <span className="text-xs text-neutral-500">{done} dari {total} selesai</span>}
+          {total > 0 && <span className="text-xs text-muted-foreground">{done} dari {total} selesai</span>}
         </div>
         {total === 0 ? (
           <Empty>Tidak ada subtask.</Empty>
         ) : (
           <ol className="space-y-3">
             {detail.subtasks.map((s) => (
-              <li key={s.id} className="space-y-1.5 rounded-md border border-neutral-200 p-3 dark:border-neutral-800">
+              <li key={s.id} className="space-y-1.5 rounded-lg border p-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs tabular-nums text-neutral-500">{detail.taskId}.{s.id}</span>
+                  <span className="text-xs tabular-nums text-muted-foreground">{detail.taskId}.{s.id}</span>
                   <span className="text-sm font-medium break-words">{s.title}</span>
                   <StatusBadge status={s.status} />
                 </div>
                 {s.dependencies.length > 0 && (
-                  <p className="text-xs text-neutral-500">Bergantung pada: {s.dependencies.join(", ")}</p>
+                  <p className="text-xs text-muted-foreground">Bergantung pada: {s.dependencies.join(", ")}</p>
                 )}
                 {s.description && <Markdown>{s.description}</Markdown>}
                 {s.details && (
                   <details className="text-sm">
-                    <summary className="cursor-pointer text-xs text-neutral-600 hover:underline dark:text-neutral-400">
+                    <summary className="cursor-pointer text-xs text-muted-foreground hover:underline">
                       Lihat detail
                     </summary>
                     <div className="mt-2"><Markdown>{s.details}</Markdown></div>
@@ -126,7 +126,7 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
       </section>
 
       <p>
-        <Link href={backToList} className="text-sm text-neutral-600 hover:underline dark:text-neutral-400">
+        <Link href={backToList} className="text-sm text-muted-foreground hover:underline">
           ← Kembali ke daftar task
         </Link>
       </p>

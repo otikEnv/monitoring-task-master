@@ -160,7 +160,7 @@ describe("tombol Segarkan dan hasilnya", () => {
 
   it.each([
     ["success", "text-green-700"],
-    ["info", "text-neutral-600"],
+    ["info", "text-muted-foreground"],
     ["error", "text-red-700"],
   ] as const)("hasil %s ditampilkan sebagai status dengan warna sesuai", (tone, cls) => {
     const html = render(card(), { phase: "done", tone, message: "Pesan hasil" });

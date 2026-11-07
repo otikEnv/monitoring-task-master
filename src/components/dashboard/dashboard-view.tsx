@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/layout/notices";
 import type { DashboardCard, DashboardSummary } from "@/lib/dashboard/cards";
 import { REFRESH_CONCURRENCY, refreshSource, runPool } from "@/lib/dashboard/refresh";
 import { SourceCard, type RefreshUi } from "./source-card";
@@ -44,19 +47,16 @@ export function DashboardView({
 
   if (cards.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-neutral-300 p-10 text-center dark:border-neutral-700">
-        <p className="font-medium">Belum ada aplikasi yang dipantau.</p>
-        <p className="mt-1 text-sm text-neutral-500">
-          {isAdmin ? (
-            <>
-              Daftarkan repo pertama di{" "}
-              <Link href="/pengaturan/sumber/baru" className="underline">Pengaturan sumber</Link>.
-            </>
-          ) : (
-            "Hubungi admin untuk mendaftarkan aplikasi."
-          )}
-        </p>
-      </div>
+      <EmptyState title="Belum ada aplikasi yang dipantau.">
+        {isAdmin ? (
+          <>
+            Daftarkan repo pertama di{" "}
+            <Link href="/pengaturan/sumber/baru" className="underline">Pengaturan sumber</Link>.
+          </>
+        ) : (
+          "Hubungi admin untuk mendaftarkan aplikasi."
+        )}
+      </EmptyState>
     );
   }
 
@@ -64,9 +64,9 @@ export function DashboardView({
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-sm" aria-label="Ringkasan">
-          <span className="font-medium">{summary.apps} aplikasi</span>
+          <span className="text-sm font-medium">{summary.apps} aplikasi</span>
           {problems === 0 ? (
-            <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-900 dark:bg-green-950 dark:text-green-200">
+            <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-900 dark:bg-green-950 dark:text-green-200">
               Semua berjalan baik
             </span>
           ) : (
@@ -79,14 +79,10 @@ export function DashboardView({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => refresh(activeIds)}
-          disabled={busy > 0 || activeIds.length === 0}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
-        >
+        <Button type="button" onClick={() => refresh(activeIds)} disabled={busy > 0 || activeIds.length === 0}>
+          <RefreshCw aria-hidden="true" className={busy > 0 ? "animate-spin" : ""} />
           {busy > 0 ? `Menyegarkan… (${busy} tersisa)` : "Segarkan semua"}
-        </button>
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -107,7 +103,7 @@ function Chip({ tone, children }: { tone: "red" | "amber" | "neutral"; children:
   const cls = {
     red: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
     amber: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-    neutral: "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200",
+    neutral: "bg-muted text-foreground",
   }[tone];
-  return <span className={`rounded px-2 py-0.5 text-xs ${cls}`}>{children}</span>;
+  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>{children}</span>;
 }

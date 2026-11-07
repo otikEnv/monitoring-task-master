@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { AppHeader } from "@/components/app-header";
+import { AppShell } from "@/components/layout/app-shell";
+import { LoadError } from "@/components/layout/notices";
+import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { TaskDetailView } from "@/components/tasks/task-detail";
 import { requireUser } from "@/lib/auth";
 import { getTaskDetail } from "@/lib/tasks/detail";
@@ -11,10 +13,10 @@ export const metadata: Metadata = { title: "Detail task" };
 
 type Params = Promise<{ sourceId: string; tag: string; taskId: string }>;
 
-// Cache Components aktif: bagian yang membaca sesi dan params harus di dalam <Suspense>.
+// Cache Components aktif: bagian yang membaca sesi dan params harus di dalam Suspense.
 export default function TaskDetailPage({ params }: { params: Params }) {
   return (
-    <Suspense fallback={<p className="px-4 py-8 text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageSkeleton />}>
       <TaskDetailContent params={params} />
     </Suspense>
   );
@@ -32,26 +34,17 @@ async function TaskDetailContent({ params }: { params: Params }) {
   } catch (e) {
     console.error("[detail-task] gagal memuat data", { error: (e as Error)?.name });
     return (
-      <>
-        <AppHeader user={user} />
-        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
-          <div role="alert" className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm dark:border-red-900 dark:bg-red-950/40">
-            <p className="font-medium text-red-800 dark:text-red-300">Detail task belum bisa dimuat.</p>
-            <p className="mt-1 text-neutral-600 dark:text-neutral-400">Coba muat ulang halaman ini. Bila terus terjadi, hubungi admin.</p>
-          </div>
-        </main>
-      </>
+      <AppShell user={user} width="narrow">
+        <LoadError title="Detail task belum bisa dimuat." />
+      </AppShell>
     );
   }
 
   if (!detail) notFound();
 
   return (
-    <>
-      <AppHeader user={user} />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
-        <TaskDetailView detail={detail} />
-      </main>
-    </>
+    <AppShell user={user} width="narrow">
+      <TaskDetailView detail={detail} />
+    </AppShell>
   );
 }

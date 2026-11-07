@@ -26,7 +26,7 @@ const components: Components = {
     );
   },
   img({ alt }) {
-    return <span className="italic text-neutral-500">[gambar{alt ? `: ${alt}` : ""}]</span>;
+    return <span className="italic text-muted-foreground">[gambar{alt ? `: ${alt}` : ""}]</span>;
   },
   // Judul di dalam konten diturunkan agar tidak bersaing dengan judul halaman.
   h1: ({ children }) => <h3 className="mt-4 text-base font-semibold">{children}</h3>,
@@ -41,18 +41,18 @@ const components: Components = {
   ol: ({ children }) => <ol className="list-decimal space-y-1 pl-5">{children}</ol>,
   li: ({ children }) => <li className="whitespace-pre-line break-words">{children}</li>,
   blockquote: ({ children }) => (
-    <blockquote className="border-l-2 border-neutral-300 pl-3 text-neutral-600 dark:border-neutral-700 dark:text-neutral-400">
+    <blockquote className="border-l-2 border-border pl-3 text-muted-foreground">
       {children}
     </blockquote>
   ),
-  hr: () => <hr className="border-neutral-200 dark:border-neutral-800" />,
+  hr: () => <hr className="border" />,
   pre: ({ children }) => (
-    <pre className="overflow-x-auto rounded-md bg-neutral-100 p-3 text-xs dark:bg-neutral-900 [&_code]:bg-transparent [&_code]:p-0">
+    <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs [&_code]:bg-transparent [&_code]:p-0">
       {children}
     </pre>
   ),
   code: ({ className, children }) => (
-    <code className={`rounded bg-neutral-100 px-1 py-0.5 font-mono text-[0.85em] dark:bg-neutral-900 ${className ?? ""}`}>
+    <code className={`rounded bg-muted px-1 py-0.5 font-mono text-[0.85em] ${className ?? ""}`}>
       {children}
     </code>
   ),
@@ -61,8 +61,8 @@ const components: Components = {
       <table className="w-full border-collapse text-left text-xs">{children}</table>
     </div>
   ),
-  th: ({ children }) => <th className="border border-neutral-300 px-2 py-1 font-semibold dark:border-neutral-700">{children}</th>,
-  td: ({ children }) => <td className="border border-neutral-300 px-2 py-1 align-top dark:border-neutral-700">{children}</td>,
+  th: ({ children }) => <th className="border border-border px-2 py-1 font-semibold">{children}</th>,
+  td: ({ children }) => <td className="border border-border px-2 py-1 align-top">{children}</td>,
 };
 
 export function Markdown({ children }: { children: string }) {

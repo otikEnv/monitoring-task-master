@@ -1,10 +1,10 @@
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 import { hrefFor, pageWindow, type TaskListParams } from "@/lib/tasks/list-params";
 
-const base = "rounded-md border px-3 py-1 text-sm";
-const idle = `${base} border-neutral-300 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900`;
-const current = `${base} border-neutral-900 bg-neutral-900 text-white dark:border-neutral-100 dark:bg-neutral-100 dark:text-neutral-900`;
-const disabled = `${base} border-neutral-200 text-neutral-400 dark:border-neutral-800`;
+const idle = buttonVariants({ variant: "outline", size: "sm" });
+const current = buttonVariants({ variant: "default", size: "sm" });
+const disabled = `${buttonVariants({ variant: "outline", size: "sm" })} pointer-events-none opacity-50`;
 
 export function Pagination({
   params, page, pageCount,
@@ -21,7 +21,7 @@ export function Pagination({
 
       {pageWindow(page, pageCount).map((n, i) =>
         n === "gap" ? (
-          <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-neutral-400">…</span>
+          <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-muted-foreground">…</span>
         ) : n === page ? (
           <span key={n} aria-current="page" className={current}>{n}</span>
         ) : (

@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 import { formatBytes, formatDateTime } from "@/lib/format";
 import type { FieldErrors } from "@/lib/sources/validate";
 import { saveSource, testConnection, type TestResult } from "./actions";
@@ -18,9 +25,6 @@ export type FormInitial = {
   tokenExpiresOn: string;
 };
 
-const input =
-  "w-full rounded-md border border-neutral-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-neutral-500 dark:border-neutral-700 dark:focus:border-neutral-400";
-
 const TOKEN_HINT: Record<FormInitial["provider"], string> = {
   github: "Fine-grained token dengan izin Contents: Read-only pada repo ini. Hindari token classic scope repo (baca-tulis).",
   gitlab: "Project/Personal Access Token dengan scope read_repository.",
@@ -31,11 +35,11 @@ function Field({
   label, htmlFor, error, hint, children,
 }: { label: string; htmlFor: string; error?: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1">
-      <label htmlFor={htmlFor} className="text-sm font-medium">{label}</label>
+    <div className="space-y-1.5">
+      <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {hint && !error && <p className="text-xs text-neutral-500">{hint}</p>}
-      {error && <p role="alert" className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+      {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -80,27 +84,29 @@ export function SourceForm({ initial }: { initial: FormInitial }) {
   }
 
   return (
-    <form ref={formRef} onSubmit={onSave} className="max-w-2xl space-y-5">
+    <Card>
+      <CardContent>
+    <form ref={formRef} onSubmit={onSave} className="space-y-5">
       {initial.id && <input type="hidden" name="id" value={initial.id} />}
 
       <Field label="Nama aplikasi" htmlFor="name" error={errors.name}>
-        <input id="name" name="name" defaultValue={initial.name} required maxLength={100} className={input} />
+        <Input id="name" name="name" defaultValue={initial.name} required maxLength={100} />
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Penyedia repo" htmlFor="provider" error={errors.provider}>
-          <select
+          <NativeSelect
             id="provider" name="provider" value={provider}
             onChange={(e) => setProvider(e.target.value as FormInitial["provider"])}
-            className={input}
+            className="w-full"
           >
             <option value="github">GitHub</option>
             <option value="gitlab">GitLab</option>
             <option value="bitbucket">Bitbucket</option>
-          </select>
+          </NativeSelect>
         </Field>
         <Field label="Branch yang dipantau" htmlFor="branch" error={errors.branch} hint="Branch acuan ini ditampilkan di dashboard.">
-          <input id="branch" name="branch" defaultValue={initial.branch} required className={input} />
+          <Input id="branch" name="branch" defaultValue={initial.branch} required />
         </Field>
       </div>
 
@@ -108,27 +114,26 @@ export function SourceForm({ initial }: { initial: FormInitial }) {
         label="URL repo" htmlFor="repoUrl" error={errors.repoUrl}
         hint={provider === "gitlab" ? "GitLab self-hosted didukung: pakai alamat repo di server Anda." : undefined}
       >
-        <input
+        <Input
           id="repoUrl" name="repoUrl" defaultValue={initial.repoUrl} required inputMode="url"
           placeholder={provider === "github" ? "https://github.com/owner/repo" : provider === "gitlab" ? "https://gitlab.com/grup/proyek" : "https://bitbucket.org/workspace/repo"}
-          className={input}
         />
       </Field>
 
       <Field label="Path file task master" htmlFor="filePath" error={errors.filePath}>
-        <input id="filePath" name="filePath" defaultValue={initial.filePath} required className={input} />
+        <Input id="filePath" name="filePath" defaultValue={initial.filePath} required />
       </Field>
 
       <Field
         label={editing ? "Token baru (opsional)" : "Token akses (baca-saja)"}
         htmlFor="token" error={errors.token} hint={TOKEN_HINT[provider]}
       >
-        <input
+        <Input
           id="token" name="token" type="password" autoComplete="new-password" spellCheck={false}
           placeholder={editing && initial.hasToken ? "••••••••  (tersimpan; kosongkan bila tidak diubah)" : ""}
-          required={!editing} className={input}
+          required={!editing}
         />
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted-foreground">
           Token disimpan terenkripsi dan tidak akan ditampilkan lagi.
         </p>
       </Field>
@@ -137,54 +142,52 @@ export function SourceForm({ initial }: { initial: FormInitial }) {
         label="Token kedaluwarsa pada (opsional)" htmlFor="tokenExpiresAt" error={errors.tokenExpiresAt}
         hint="Untuk GitHub diisi otomatis saat sinkronisasi."
       >
-        <input id="tokenExpiresAt" name="tokenExpiresAt" type="date" defaultValue={initial.tokenExpiresOn} className={`${input} sm:w-56`} />
+        <Input id="tokenExpiresAt" name="tokenExpiresAt" type="date" defaultValue={initial.tokenExpiresOn} className="sm:w-56" />
       </Field>
 
       {test && <TestPanel result={test} />}
-      {formError && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{formError}</p>}
+      {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button" onClick={onTest} disabled={testing || saving}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium hover:bg-neutral-100 disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-900"
-        >
-          {testing ? "Menguji…" : "Uji koneksi"}
-        </button>
-        <button
-          type="submit" disabled={saving || testing}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
-        >
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="submit" disabled={saving || testing}>
           {saving ? "Menyimpan…" : "Simpan"}
-        </button>
-        <Link href="/pengaturan/sumber" className="text-sm text-neutral-500 hover:underline">Batal</Link>
+        </Button>
+        <Button type="button" variant="outline" onClick={onTest} disabled={testing || saving}>
+          {testing ? "Menguji…" : "Uji koneksi"}
+        </Button>
+        <Link href="/pengaturan/sumber" className={buttonVariants({ variant: "ghost" })}>Batal</Link>
       </div>
     </form>
+      </CardContent>
+    </Card>
   );
 }
 
 function TestPanel({ result }: { result: TestResult }) {
   if (result.ok) {
     return (
-      <div role="status" className="space-y-1 rounded-md border border-green-600/40 bg-green-600/10 p-3 text-sm">
-        <p className="font-medium text-green-800 dark:text-green-300">Koneksi berhasil</p>
-        <p>
-          File ditemukan ({formatBytes(result.bytes)}), berisi <strong>{result.taskCount} task</strong> dalam{" "}
-          {result.tags.length} tag ({result.tags.map((t) => `${t.tag}: ${t.total}`).join(", ")}).
-        </p>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          Commit terakhir file: {formatDateTime(result.lastCommitAt)}
-          {result.tokenExpiresAt && ` · Token kedaluwarsa: ${formatDateTime(result.tokenExpiresAt)}`}
-          {result.warnings > 0 && ` · ${result.warnings} catatan data (mis. ID subtask ganda, sudah ditangani)`}
-        </p>
-      </div>
+      <Alert role="status">
+        <CheckCircle2 className="text-green-600" aria-hidden="true" />
+        <AlertTitle>Koneksi berhasil</AlertTitle>
+        <AlertDescription className="space-y-1">
+          <p>
+            File ditemukan ({formatBytes(result.bytes)}), berisi <strong>{result.taskCount} task</strong> dalam{" "}
+            {result.tags.length} tag ({result.tags.map((t) => `${t.tag}: ${t.total}`).join(", ")}).
+          </p>
+          <p>
+            Commit terakhir file: {formatDateTime(result.lastCommitAt)}
+            {result.tokenExpiresAt && ` · Token kedaluwarsa: ${formatDateTime(result.tokenExpiresAt)}`}
+            {result.warnings > 0 && ` · ${result.warnings} catatan data (mis. ID subtask ganda, sudah ditangani)`}
+          </p>
+        </AlertDescription>
+      </Alert>
     );
   }
   return (
-    <div role="alert" className="rounded-md border border-red-600/40 bg-red-600/10 p-3 text-sm">
-      <p className="font-medium text-red-800 dark:text-red-300">
-        {result.kind === "validation" ? "Isian belum lengkap" : "Koneksi gagal"}
-      </p>
-      <p>{result.message}</p>
-    </div>
+    <Alert variant="destructive">
+      <XCircle aria-hidden="true" />
+      <AlertTitle>{result.kind === "validation" ? "Isian belum lengkap" : "Koneksi gagal"}</AlertTitle>
+      <AlertDescription>{result.message}</AlertDescription>
+    </Alert>
   );
 }

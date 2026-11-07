@@ -1,4 +1,6 @@
+import { RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import type { DashboardCard } from "@/lib/dashboard/cards";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_RAW, STATUS_TONE } from "@/lib/status";
@@ -12,7 +14,7 @@ const PROVIDER_LABEL = { github: "GitHub", gitlab: "GitLab", bitbucket: "Bitbuck
 
 const MESSAGE_TONE = {
   success: "text-green-700 dark:text-green-400",
-  info: "text-neutral-600 dark:text-neutral-400",
+  info: "text-muted-foreground",
   error: "text-red-700 dark:text-red-400",
 } as const;
 
@@ -32,10 +34,8 @@ export function SourceCard({
 
   return (
     <article
-      className={`relative flex flex-col gap-4 rounded-lg border p-4 transition-colors hover:border-neutral-400 dark:hover:border-neutral-500 ${
-        failed
-          ? "border-red-400 dark:border-red-800"
-          : "border-neutral-200 dark:border-neutral-800"
+      className={`relative flex flex-col gap-4 rounded-xl border bg-card p-5 text-card-foreground shadow-xs transition-all hover:shadow-md ${
+        failed ? "border-red-400 dark:border-red-800" : "hover:border-foreground/30"
       } ${card.isActive ? "" : "opacity-60"}`}
     >
       <header className="space-y-0.5">
@@ -44,18 +44,18 @@ export function SourceCard({
             {/* Tautan "membentang" menutupi seluruh kartu; tombol di bawah diberi z-10 agar tetap bisa diklik. */}
             <Link
               href={`/tasks?source=${encodeURIComponent(card.id)}`}
-              className="after:absolute after:inset-0 after:rounded-lg hover:underline"
+              className="after:absolute after:inset-0 after:rounded-xl hover:underline"
             >
               {card.name}
             </Link>
           </h2>
           {!card.isActive && (
-            <span className="shrink-0 rounded bg-neutral-200 px-1.5 py-0.5 text-xs dark:bg-neutral-800">
+            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs">
               Nonaktif
             </span>
           )}
         </div>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted-foreground">
           {PROVIDER_LABEL[card.provider]} · Branch <strong>{card.branch}</strong>
         </p>
       </header>
@@ -64,7 +64,7 @@ export function SourceCard({
         <div role="alert" className="space-y-1 rounded-md border border-red-300 bg-red-50 p-2.5 text-xs dark:border-red-900 dark:bg-red-950/40">
           <p className="font-semibold text-red-800 dark:text-red-300">Sinkronisasi gagal</p>
           {card.lastError && <p className="break-words text-red-800 dark:text-red-300">{card.lastError}</p>}
-          <p className="text-neutral-600 dark:text-neutral-400">
+          <p className="text-muted-foreground">
             {card.lastSyncedAt
               ? `Data di bawah berasal dari sinkronisasi terakhir yang berhasil: ${formatDateTime(card.lastSyncedAt)}.`
               : "Belum pernah berhasil disinkronkan."}
@@ -76,7 +76,7 @@ export function SourceCard({
         <div className="space-y-2">
           <div className="flex items-baseline justify-between gap-2">
             <p className="text-3xl font-semibold tabular-nums">{formatPercent(card.percentDone)}%</p>
-            <p className="text-right text-xs text-neutral-500">
+            <p className="text-right text-xs text-muted-foreground">
               {card.counts.done} dari {card.total} task selesai
               {card.tagCount > 1 && ` · ${card.tagCount} tag`}
             </p>
@@ -87,24 +87,24 @@ export function SourceCard({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={card.percentDone}
-            className="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"
+            className="h-2 overflow-hidden rounded-full bg-muted"
           >
             <div className="h-full rounded-full bg-green-600" style={{ width: `${card.percentDone}%` }} />
           </div>
         </div>
       ) : (
-        <p className="rounded-md bg-neutral-100 p-3 text-sm text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
+        <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
           {never ? "Belum pernah disinkronkan. Tekan Segarkan untuk mengambil data." : "Belum ada task pada file ini."}
         </p>
       )}
 
       {card.hasData && (
-        <ul className="grid grid-cols-2 gap-1.5 text-xs sm:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-1.5 text-xs">
           {STATUS_ORDER.filter((s) => s !== "other" || card.counts.other > 0).map((s) => (
             <li
               key={s}
               title={s === "other" ? "Status lain yang tidak dikenal" : `Status "${STATUS_RAW[s]}" di tasks.json`}
-              className={`flex items-center justify-between gap-1 rounded px-2 py-1 ${STATUS_TONE[s]} ${
+              className={`flex items-center justify-between gap-1 rounded-md px-2.5 py-1 ${STATUS_TONE[s]} ${
                 s === "blocked" && card.counts.blocked > 0 ? "ring-1 ring-red-500" : ""
               }`}
             >
@@ -124,20 +124,16 @@ export function SourceCard({
       )}
 
       <footer className="mt-auto space-y-2">
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted-foreground">
           {card.lastSyncedAt ? `Sinkron terakhir: ${formatDateTime(card.lastSyncedAt)}` : "Belum pernah disinkronkan"}
           {card.lastCommitAt && ` · File diubah: ${formatDateTime(card.lastCommitAt)}`}
         </p>
         <div className="relative z-10 flex flex-wrap items-center gap-2">
           {card.isActive && (
-            <button
-              type="button"
-              onClick={() => onRefresh(card.id)}
-              disabled={running}
-              className="rounded-md border border-neutral-300 px-3 py-1 text-xs font-medium hover:bg-neutral-100 disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-900"
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => onRefresh(card.id)} disabled={running}>
+              <RefreshCw aria-hidden="true" className={running ? "animate-spin" : ""} />
               {running ? "Menyegarkan…" : "Segarkan"}
-            </button>
+            </Button>
           )}
           {refresh.phase === "done" && (
             <p role="status" className={`text-xs ${MESSAGE_TONE[refresh.tone]}`}>
