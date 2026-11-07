@@ -131,3 +131,28 @@ export async function previewRange(
     lastId: inRange.at(-1)?.taskId ?? null,
   };
 }
+
+export type SourceOption = { id: string; name: string; tags: string[] };
+
+/** Aplikasi beserta tag-nya, untuk pilihan pada form release. Klien HARUS membawa sesi pengguna. */
+export async function loadSourceOptions(db: SupabaseClient): Promise<SourceOption[]> {
+  const [src, tags] = await Promise.all([
+    db.from("sources").select("id, name").order("name", { ascending: true }),
+    db.from("source_tags").select("source_id, tag"),
+  ]);
+  if (src.error) throw new Error(`Gagal membaca sumber: ${src.error.message}`);
+  if (tags.error) throw new Error(`Gagal membaca tag: ${tags.error.message}`);
+  const bySource = new Map<string, string[]>();
+  for (const t of tags.data as { source_id: string; tag: string }[]) {
+    bySource.set(t.source_id, [...(bySource.get(t.source_id) ?? []), t.tag]);
+  }
+  return (src.data as { id: string; name: string }[]).map((s) => ({
+    id: s.id,
+    name: s.name,
+    tags: (bySource.get(s.id) ?? []).sort((a, b) => a.localeCompare(b, "id")),
+  }));
+}
+
+export async function getSourceOptions(): Promise<SourceOption[]> {
+  return loadSourceOptions(await createClient());
+}

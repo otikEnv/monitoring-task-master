@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 
-import { fetchTagTasks, loadReleaseOverviews, sortOverviews, type ReleaseOverview } from "@/lib/releases/load";
+import { fetchTagTasks, loadReleaseOverviews, loadSourceOptions, sortOverviews, type ReleaseOverview } from "@/lib/releases/load";
 
 const SRC = "11111111-1111-4111-8111-111111111111";
 
@@ -114,5 +114,26 @@ describe("sortOverviews", () => {
       ov("nov-a", "A", "2026-11-20", null),
     ]);
     expect(sorted.map((o) => o.release.name)).toEqual(["nov-a", "nov", "des", "baru", "lama"]);
+  });
+});
+
+describe("loadSourceOptions", () => {
+  it("menggabungkan aplikasi dengan tag-nya (urut), aplikasi tanpa tag tetap ada", async () => {
+    const { db } = fakeDb({
+      sources: () => ({ data: [{ id: "a", name: "Alfa" }, { id: "b", name: "Beta" }], error: null }),
+      source_tags: () => ({ data: [{ source_id: "a", tag: "mobile" }, { source_id: "a", tag: "master" }], error: null }),
+    });
+    expect(await loadSourceOptions(db)).toEqual([
+      { id: "a", name: "Alfa", tags: ["master", "mobile"] },
+      { id: "b", name: "Beta", tags: [] },
+    ]);
+  });
+
+  it("galat database dilaporkan", async () => {
+    const { db } = fakeDb({
+      sources: () => ({ data: [], error: null }),
+      source_tags: () => ({ data: null, error: { message: "boom" } }),
+    });
+    await expect(loadSourceOptions(db)).rejects.toThrow("Gagal membaca tag");
   });
 });

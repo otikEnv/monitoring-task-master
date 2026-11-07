@@ -1210,7 +1210,7 @@
         "id": "27",
         "title": "Release: form tambah/ubah, tandai rilis, dan hapus (admin)",
         "description": "Form release dan aksi admin dengan dialog konfirmasi.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "24"
@@ -1222,36 +1222,40 @@
             "id": 1,
             "title": "Rute tambah dan ubah",
             "description": "/release/baru dan /release/[id]/ubah.",
-            "status": "pending",
+            "status": "done",
             "details": "requireAdmin, Suspense, lebar narrow. Halaman ubah memvalidasi UUID (404 bila tidak ada) dan mengisi form dari data release; key form mengikuti data agar dibangun ulang saat berubah.",
-            "parentId": "27"
+            "parentId": "27",
+            "updatedAt": "2026-11-07T01:35:10.601Z"
           },
           {
             "id": 2,
             "title": "Form release",
             "description": "src/app/release/release-form.tsx (komponen klien).",
-            "status": "pending",
+            "status": "done",
             "details": "Isian: aplikasi (select), tag (select, daftar dari data aplikasi terpilih; otomatis terisi bila hanya satu tag), nama/versi, task awal, task akhir, tanggal mulai (opsional, petunjuk 'bawaan: tanggal release dibuat'), tanggal target. Galat validasi di bawah isian; galat umum sebagai alert; tombol Simpan dan Batal.",
-            "parentId": "27"
+            "parentId": "27",
+            "updatedAt": "2026-11-07T01:35:10.601Z"
           },
           {
             "id": 3,
             "title": "Pratinjau jumlah task",
             "description": "'Rentang ini memuat N task' saat mengisi.",
-            "status": "pending",
+            "status": "done",
             "details": "Setelah aplikasi, tag, dan rentang terisi valid, panggil previewRange (debounce) dan tampilkan jumlah task serta ID terkecil dan terbesar yang ada. Rentang tanpa task menampilkan peringatan tetapi tetap boleh disimpan. Pratinjau hanya informasi; tidak menyimpan apa pun.",
-            "parentId": "27"
+            "parentId": "27",
+            "updatedAt": "2026-11-07T01:35:10.601Z"
           },
           {
             "id": 4,
             "title": "Tandai rilis dan hapus",
             "description": "Aksi di detail dan kartu release.",
-            "status": "pending",
+            "status": "done",
             "details": "Tandai rilis mengisi tanggal rilis dengan hari ini (WIB); Batalkan tanda rilis mengosongkannya. Hapus memakai AlertDialog konfirmasi (task tidak terpengaruh) dan notifikasi sonner. Pola mengikuti row-actions.tsx pada Pengaturan sumber.",
-            "parentId": "27"
+            "parentId": "27",
+            "updatedAt": "2026-11-07T01:35:10.601Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:35:10.601Z"
       },
       {
         "id": "28",
@@ -1382,9 +1386,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:33:00.778Z",
+      "lastModified": "2026-11-07T01:35:10.601Z",
       "taskCount": 31,
-      "completedCount": 19,
+      "completedCount": 20,
       "tags": [
         "master"
       ]
