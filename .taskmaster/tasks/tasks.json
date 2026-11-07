@@ -976,7 +976,7 @@
         "id": "23",
         "title": "Release: model hitung (isi rentang, progres, hambatan, risiko)",
         "description": "Fungsi murni di src/lib/releases/model.ts beserta tes unit.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "7",
@@ -989,44 +989,49 @@
             "id": 1,
             "title": "Isi rentang",
             "description": "Pilih task yang masuk release.",
-            "status": "pending",
+            "status": "done",
             "details": "Task masuk bila tag sama dan ID cocok ^[0-9]{1,15}$ dan range_start <= ID <= range_end (inklusif). ID non-angka dan ID yang tidak ada di dalam rentang tidak dihitung. Keluaran juga memuat ID terkecil dan terbesar yang benar-benar ada, untuk teks 'mulai dari task #X sampai #Y'.",
-            "parentId": "23"
+            "parentId": "23",
+            "updatedAt": "2026-11-07T01:25:49.546Z"
           },
           {
             "id": 2,
             "title": "Total, progres, dan rincian status",
             "description": "Hitungan per status dan persen selesai.",
-            "status": "pending",
+            "status": "done",
             "details": "Total memuat semua status, termasuk ditunda dan dibatalkan (keputusan PRD). Rincian memakai displayStatus() dan STATUS_ORDER yang ada (tujuh status baku plus 'other'). Progres = done / total dibulatkan ke persen terdekat; total nol menghasilkan keadaan 'tidak ada task' (bukan 0%). Kelompok 'perlu dievaluasi' = task deferred dan cancelled, lengkap dengan daftarnya.",
-            "parentId": "23"
+            "parentId": "23",
+            "updatedAt": "2026-11-07T01:25:49.546Z"
           },
           {
             "id": 3,
             "title": "Hambatan",
             "description": "Task terhambat dan dependensi di luar rentang.",
-            "status": "pending",
+            "status": "done",
             "details": "Hambatan = (1) task berstatus blocked di dalam rentang; (2) task di dalam rentang yang bergantung pada task di luar rentang (tag yang sama) yang statusnya belum done. Dependensi di dalam rentang yang belum selesai bukan hambatan luar. Dependensi yang tidak ditemukan pada tag itu dilaporkan terpisah. Dependensi dibaca dengan parseDependencyIds() dari detail-model.",
-            "parentId": "23"
+            "parentId": "23",
+            "updatedAt": "2026-11-07T01:25:49.546Z"
           },
           {
             "id": 4,
             "title": "Waktu dan penanda risiko",
             "description": "Persen waktu, sisa hari, dan lima penanda.",
-            "status": "pending",
+            "status": "done",
             "details": "Persen waktu = (hari ini - tanggal mulai) / (tanggal target - tanggal mulai), dibatasi 0 sampai 100; bila mulai = target, 0 sebelum target dan 100 sesudahnya. Sisa hari dihitung per tanggal kalender WIB (bisa negatif). Selisih = persen waktu - persen progres. Urutan penilaian: sudah rilis (released_on terisi) -> belum ada task -> lewat target (target lewat dan progres < 100) -> tertinggal (selisih > 25) -> berisiko (selisih 10 sampai 25, atau ada task terhambat, atau ada dependensi luar rentang yang belum selesai) -> sesuai jadwal. Konstanta AMBANG_BERISIKO = 10 dan AMBANG_TERTINGGAL = 25.",
-            "parentId": "23"
+            "parentId": "23",
+            "updatedAt": "2026-11-07T01:25:49.546Z"
           },
           {
             "id": 5,
             "title": "Tes unit model",
             "description": "tests/release-model.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Cakup: batas rentang inklusif, ID bolong dan non-angka, tag berbeda diabaikan, total nol, ditunda dan dibatalkan ikut total dan masuk 'perlu dievaluasi', status tak dikenal dihitung 'other' dan bukan selesai, setiap penanda risiko termasuk nilai batas 10 dan 25, mulai = target, target sudah lewat tetapi progres 100, dependensi dalam versus luar rentang, dependensi tidak ditemukan.",
-            "parentId": "23"
+            "parentId": "23",
+            "updatedAt": "2026-11-07T01:25:49.546Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:25:49.546Z"
       },
       {
         "id": "24",
@@ -1363,9 +1368,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:23:36.972Z",
+      "lastModified": "2026-11-07T01:25:49.546Z",
       "taskCount": 31,
-      "completedCount": 15,
+      "completedCount": 16,
       "tags": [
         "master"
       ]
