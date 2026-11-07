@@ -920,12 +920,447 @@
         "testStrategy": "Tanda tangan salah ditolak; push relevan memicu sinkron; push lain diabaikan.",
         "subtasks": [],
         "updatedAt": "2026-11-06T10:59:04.253Z"
+      },
+      {
+        "id": "22",
+        "title": "Release: skema database dan akses (tabel releases)",
+        "description": "Tabel releases dengan constraint, RLS, dan uji SQL.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "3"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, bagian Model data. Satu tabel baru public.releases; tabel sources, tasks, snapshots tidak berubah. Migrasi baru di supabase/migrations (jangan mengubah migrasi lama). Peran klien hanya SELECT; penulisan lewat service role di kode server, sama dengan tabel lain.",
+        "testStrategy": "Uji SQL di dalam transaksi yang di-ROLLBACK: constraint menolak data tidak valid, viewer tidak bisa menulis, hapus sumber ikut menghapus release.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Migrasi tabel releases",
+            "description": "File 20261107040000_releases.sql.",
+            "status": "pending",
+            "details": "Kolom: id uuid pk default gen_random_uuid(); source_id uuid not null references sources(id) on delete cascade; tag text not null; name text not null; range_start bigint not null; range_end bigint not null; start_date date not null default (now() at time zone 'Asia/Jakarta')::date; target_date date not null; released_on date null; created_at timestamptz; updated_at timestamptz.\n\nConstraint: nama tidak kosong dan maksimal 100 karakter; tag tidak kosong dan maksimal 100 karakter; range_start > 0; range_start <= range_end; start_date <= target_date; unique (source_id, name). Index pada source_id dan target_date. Trigger set_updated_at (fungsi sudah ada dari migrasi awal).",
+            "parentId": "22"
+          },
+          {
+            "id": 2,
+            "title": "Hak akses dan RLS",
+            "description": "Hanya SELECT untuk pengguna login.",
+            "status": "pending",
+            "details": "revoke all on public.releases from anon, authenticated; grant select to authenticated; enable row level security; policy releases_select for select to authenticated using (true). Tidak ada policy atau grant INSERT/UPDATE/DELETE untuk peran klien.",
+            "parentId": "22"
+          },
+          {
+            "id": 3,
+            "title": "Uji SQL releases_test.sql",
+            "description": "Skrip uji di supabase/tests.",
+            "status": "pending",
+            "details": "Di dalam begin … rollback, notice 'UJI RELEASES LOLOS' bila sukses. Kasus: insert valid berhasil; range_start > range_end, range_start 0, start_date setelah target_date, nama kosong, dan nama ganda pada aplikasi yang sama ditolak; nama sama pada aplikasi berbeda diterima; authenticated bisa SELECT tetapi INSERT/UPDATE/DELETE ditolak; anon tidak bisa SELECT; menghapus sumber ikut menghapus release.",
+            "parentId": "22"
+          },
+          {
+            "id": 4,
+            "title": "Catat di supabase/README",
+            "description": "Daftar migrasi dan cara menjalankan uji.",
+            "status": "pending",
+            "details": "Tambahkan baris migrasi baru dan skrip uji pada daftar di supabase/README.md. Migrasi dijalankan oleh pengguna lewat SQL editor (tidak idempoten, jalankan sekali).",
+            "parentId": "22"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "23",
+        "title": "Release: model hitung (isi rentang, progres, hambatan, risiko)",
+        "description": "Fungsi murni di src/lib/releases/model.ts beserta tes unit.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "7",
+          "11"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, bagian Konsep dan aturan. Semua aturan hitung ada di satu modul murni (tanpa server, React, atau database) supaya mudah diuji. Waktu dihitung menurut WIB (konsisten dengan seluruh tampilan). Ambang risiko disimpan sebagai konstanta yang mudah diubah.",
+        "testStrategy": "Tes unit untuk setiap aturan dan kasus tepi: ID bolong, ID non-angka, rentang kosong, batas inklusif, tanggal target lewat, release sudah rilis, status tak dikenal.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Isi rentang",
+            "description": "Pilih task yang masuk release.",
+            "status": "pending",
+            "details": "Task masuk bila tag sama dan ID cocok ^[0-9]{1,15}$ dan range_start <= ID <= range_end (inklusif). ID non-angka dan ID yang tidak ada di dalam rentang tidak dihitung. Keluaran juga memuat ID terkecil dan terbesar yang benar-benar ada, untuk teks 'mulai dari task #X sampai #Y'.",
+            "parentId": "23"
+          },
+          {
+            "id": 2,
+            "title": "Total, progres, dan rincian status",
+            "description": "Hitungan per status dan persen selesai.",
+            "status": "pending",
+            "details": "Total memuat semua status, termasuk ditunda dan dibatalkan (keputusan PRD). Rincian memakai displayStatus() dan STATUS_ORDER yang ada (tujuh status baku plus 'other'). Progres = done / total dibulatkan ke persen terdekat; total nol menghasilkan keadaan 'tidak ada task' (bukan 0%). Kelompok 'perlu dievaluasi' = task deferred dan cancelled, lengkap dengan daftarnya.",
+            "parentId": "23"
+          },
+          {
+            "id": 3,
+            "title": "Hambatan",
+            "description": "Task terhambat dan dependensi di luar rentang.",
+            "status": "pending",
+            "details": "Hambatan = (1) task berstatus blocked di dalam rentang; (2) task di dalam rentang yang bergantung pada task di luar rentang (tag yang sama) yang statusnya belum done. Dependensi di dalam rentang yang belum selesai bukan hambatan luar. Dependensi yang tidak ditemukan pada tag itu dilaporkan terpisah. Dependensi dibaca dengan parseDependencyIds() dari detail-model.",
+            "parentId": "23"
+          },
+          {
+            "id": 4,
+            "title": "Waktu dan penanda risiko",
+            "description": "Persen waktu, sisa hari, dan lima penanda.",
+            "status": "pending",
+            "details": "Persen waktu = (hari ini - tanggal mulai) / (tanggal target - tanggal mulai), dibatasi 0 sampai 100; bila mulai = target, 0 sebelum target dan 100 sesudahnya. Sisa hari dihitung per tanggal kalender WIB (bisa negatif). Selisih = persen waktu - persen progres. Urutan penilaian: sudah rilis (released_on terisi) -> belum ada task -> lewat target (target lewat dan progres < 100) -> tertinggal (selisih > 25) -> berisiko (selisih 10 sampai 25, atau ada task terhambat, atau ada dependensi luar rentang yang belum selesai) -> sesuai jadwal. Konstanta AMBANG_BERISIKO = 10 dan AMBANG_TERTINGGAL = 25.",
+            "parentId": "23"
+          },
+          {
+            "id": 5,
+            "title": "Tes unit model",
+            "description": "tests/release-model.test.ts.",
+            "status": "pending",
+            "details": "Cakup: batas rentang inklusif, ID bolong dan non-angka, tag berbeda diabaikan, total nol, ditunda dan dibatalkan ikut total dan masuk 'perlu dievaluasi', status tak dikenal dihitung 'other' dan bukan selesai, setiap penanda risiko termasuk nilai batas 10 dan 25, mulai = target, target sudah lewat tetapi progres 100, dependensi dalam versus luar rentang, dependensi tidak ditemukan.",
+            "parentId": "23"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "24",
+        "title": "Release: validasi, akses data, dan aksi admin",
+        "description": "validate.ts, repo.ts, pemuat data, dan server actions.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "22",
+          "23",
+          "4"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, bagian Kebutuhan non-fungsional (Keamanan). Pola mengikuti Pengaturan sumber: validasi murni di server, penulisan lewat service role setelah requireAdmin() di baris pertama setiap action, galat internal tidak diteruskan ke klien. Pembacaan memakai klien bersesi (RLS berlaku).",
+        "testStrategy": "Tes unit validasi dan server action (pola tests/source-validate dan tests/source-actions); tes live terhadap Supabase di task 29.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Validasi form release",
+            "description": "src/lib/releases/validate.ts (murni).",
+            "status": "pending",
+            "details": "parseReleaseForm: sourceId harus UUID; tag wajib dan maksimal 100 karakter; nama wajib, 1 sampai 100 karakter, tanpa karakter kontrol; task awal dan akhir bilangan bulat positif maksimal 15 digit, awal <= akhir; tanggal target wajib, format yyyy-mm-dd dan tanggal kalender valid (30 Feb ditolak); tanggal mulai opsional dan tidak setelah target. Pesan galat per isian dalam bahasa Indonesia.",
+            "parentId": "24"
+          },
+          {
+            "id": 2,
+            "title": "Repositori release",
+            "description": "src/lib/releases/repo.ts (server-only).",
+            "status": "pending",
+            "details": "Baca (klien bersesi): listReleases, getRelease. Tulis (service role): createRelease, updateRelease, setReleased(id, tanggal atau null), deleteRelease. Kode galat 23505 dipetakan ke DuplicateReleaseError; baris tidak ditemukan ke ReleaseNotFoundError. Petakan baris database ke tipe tampilan di satu tempat.",
+            "parentId": "24"
+          },
+          {
+            "id": 3,
+            "title": "Pemuat data dan hitungan",
+            "description": "Menggabungkan release, nama aplikasi, task, dan model.",
+            "status": "pending",
+            "details": "Baca release dan nama aplikasi, lalu baca task per pasangan (source, tag) yang dipakai, satu kali per pasangan, dengan paginasi 1000 baris per permintaan (batas baris PostgREST). Dependensi dicari dari task yang sudah terbaca (tanpa permintaan tambahan). Kolom yang dibaca hanya yang perlu: task_id, title, status, priority, dependencies, subtasks_total, subtasks_done. Sertakan status sinkron aplikasi (data usang, nonaktif) dan apakah tag masih ada.",
+            "parentId": "24"
+          },
+          {
+            "id": 4,
+            "title": "Server actions admin",
+            "description": "src/app/release/actions.ts.",
+            "status": "pending",
+            "details": "saveRelease (tambah atau ubah), markReleased (isi atau kosongkan tanggal rilis; hari ini menurut WIB), removeRelease, dan previewRange (jumlah task di rentang untuk pratinjau form). Semuanya requireAdmin() di baris pertama. saveRelease memastikan aplikasi ada dan tag ada pada aplikasi itu. Setelah sukses: revalidatePath('/release') dan redirect untuk simpan. Galat generik ke klien; catat hanya nama galat.",
+            "parentId": "24"
+          },
+          {
+            "id": 5,
+            "title": "Tes validasi dan action",
+            "description": "tests/release-validate.test.ts dan tests/release-actions.test.ts.",
+            "status": "pending",
+            "details": "Validasi: semua aturan di atas termasuk batas (100 karakter, 15 digit, awal = akhir, mulai = target). Action: viewer atau pengguna belum login ditolak sebelum menyentuh data; ID tidak valid ditolak; nama ganda memberi pesan jelas; galat tak terduga tidak membocorkan pesan asli.",
+            "parentId": "24"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "25",
+        "title": "Release: halaman Daftar release dan menu sidebar",
+        "description": "Halaman /release berisi kartu per release.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "24"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, tabel Kebutuhan fungsional (Menu sidebar dan Daftar release). Memakai komponen shadcn dan pola halaman yang ada (AppShell, PageHeader, Suspense, LoadError, EmptyState). Filter memakai form GET dengan select asli agar jalan tanpa JavaScript, seperti halaman Daftar task.",
+        "testStrategy": "Tes markup (renderToStaticMarkup) untuk kartu dan bar progres; tangkapan layar terang, gelap, dan ponsel.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Menu Release di sidebar",
+            "description": "Item baru di grup Pantau.",
+            "status": "pending",
+            "details": "Tambahkan 'Release' (ikon Rocket dari lucide) di NAV pada src/components/layout/app-sidebar.tsx, terlihat oleh semua pengguna. Aktif untuk /release dan turunannya.",
+            "parentId": "25"
+          },
+          {
+            "id": 2,
+            "title": "Komponen kartu, bar progres, dan penanda risiko",
+            "description": "src/components/releases/*.",
+            "status": "pending",
+            "details": "ReleaseCard: nama, aplikasi, tag, rentang task, jumlah task, tanggal target dan sisa hari, penanda risiko, bar progres, ringkasan status, jumlah ditunda/dibatalkan. Bar progres bertingkat per status dengan role=progressbar dan legenda angka (tidak mengandalkan warna saja). RiskBadge: teks + ikon untuk lima penanda. Tampilkan angka mentah (persen progres dan persen waktu) berdampingan dengan penanda.",
+            "parentId": "25"
+          },
+          {
+            "id": 3,
+            "title": "Halaman /release",
+            "description": "Daftar, filter, dan keadaan kosong.",
+            "status": "pending",
+            "details": "requireUser, dibungkus Suspense. Urut dari tanggal target terdekat; yang sudah rilis disembunyikan secara bawaan dan muncul lewat pilihan 'tampilkan yang sudah rilis' (parameter URL). Filter aplikasi lewat ?source=<id> dengan nilai tidak valid diabaikan. EmptyState bila belum ada release (admin melihat petunjuk Tambah release). LoadError bila pemuatan gagal. Tombol Tambah release hanya untuk admin.",
+            "parentId": "25"
+          },
+          {
+            "id": 4,
+            "title": "Tes tampilan",
+            "description": "tests/release-card.test.tsx.",
+            "status": "pending",
+            "details": "Kartu dengan setiap penanda risiko, total nol ('Belum ada task di rentang ini'), release sudah rilis, bar progres memiliki atribut aria yang benar dan legenda memuat angka, ditunda/dibatalkan tampil terpisah.",
+            "parentId": "25"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "26",
+        "title": "Release: halaman Detail release",
+        "description": "Ringkasan, progres, hambatan, dan tabel task per release.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "24"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, tabel Kebutuhan fungsional (Detail release) dan Kasus khusus. Rute /release/[id]; id bukan UUID atau tidak ditemukan menghasilkan 404. Hanya baca bagi non-admin.",
+        "testStrategy": "Tes markup untuk setiap bagian dan kasus khusus; tangkapan layar terang, gelap, dan ponsel; tautan baris menuju detail task benar.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Rute dan header",
+            "description": "/release/[id] dengan judul dan metadata.",
+            "status": "pending",
+            "details": "Judul 'Aplikasi · nama release', tag, rentang task ('task #100 sampai #200', plus ID terkecil dan terbesar yang ada), tanggal mulai, target, dan rilis, sisa hari, penanda risiko. Breadcrumb Release > nama. Dibungkus Suspense dan requireUser; galat pemuatan menampilkan LoadError.",
+            "parentId": "26"
+          },
+          {
+            "id": 2,
+            "title": "Angka ringkas dan bar progres",
+            "description": "Empat angka plus bar bertingkat.",
+            "status": "pending",
+            "details": "Empat angka: total, selesai, dalam pengerjaan (in-progress dan review), perlu perhatian (terhambat, ditunda, dibatalkan). Bar progres bertingkat per status dengan legenda angka. Tampilkan persen progres dan persen waktu berdampingan, dan jelaskan rumus risiko singkat (teks bantuan) agar penanda tidak dianggap prediksi pasti.",
+            "parentId": "26"
+          },
+          {
+            "id": 3,
+            "title": "Bagian Perlu perhatian",
+            "description": "Terhambat, dependensi luar rentang, ditunda/dibatalkan.",
+            "status": "pending",
+            "details": "Tiga kelompok dengan daftar task yang menaut ke detail task: (1) task terhambat; (2) task yang menunggu dependensi di luar rentang yang belum selesai, menyebut dependensinya dan statusnya; (3) 'Perlu dievaluasi': task ditunda dan dibatalkan, dengan jumlah. Dependensi yang tidak ditemukan dilaporkan terpisah. Kelompok kosong tidak ditampilkan; bila semuanya kosong tampil 'Tidak ada hambatan'.",
+            "parentId": "26"
+          },
+          {
+            "id": 4,
+            "title": "Tabel task di rentang",
+            "description": "Semua task release, paling perlu perhatian dulu.",
+            "status": "pending",
+            "details": "Kolom: ID, judul, status, prioritas, subtask selesai/total. Urut status_rank (terhambat, dikerjakan, ditinjau, menunggu, ditunda, selesai, dibatalkan, lainnya) lalu ID angka. Memakai StatusBadge dan PriorityBadge yang ada; tiap baris menaut ke detail task (taskHref).",
+            "parentId": "26"
+          },
+          {
+            "id": 5,
+            "title": "Kasus khusus dan tombol admin",
+            "description": "Data usang, tag hilang, aplikasi nonaktif, rilis.",
+            "status": "pending",
+            "details": "Penanda data usang dengan waktu sinkron terakhir bila sinkron gagal; pesan 'Tag tidak ditemukan pada data terakhir' dengan angka nol; penanda aplikasi nonaktif; release sudah rilis menampilkan 'dirilis pada [tanggal], progres saat ini N%'. Tombol admin: Ubah, Tandai rilis atau Batalkan tanda rilis, Hapus.",
+            "parentId": "26"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "27",
+        "title": "Release: form tambah/ubah, tandai rilis, dan hapus (admin)",
+        "description": "Form release dan aksi admin dengan dialog konfirmasi.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "24"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, tabel Kebutuhan fungsional (Form release) dan Aturan perilaku. Rute /release/baru dan /release/[id]/ubah, keduanya requireAdmin(). Mengikuti pola source-form: action dipanggil langsung agar isian tidak di-reset, galat tampil di bawah isian, notifikasi sonner untuk hasil.",
+        "testStrategy": "Tes form dan action; uji manual di browser: tambah, ubah, tandai rilis, batalkan tanda rilis, hapus; viewer dialihkan dari rute admin.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Rute tambah dan ubah",
+            "description": "/release/baru dan /release/[id]/ubah.",
+            "status": "pending",
+            "details": "requireAdmin, Suspense, lebar narrow. Halaman ubah memvalidasi UUID (404 bila tidak ada) dan mengisi form dari data release; key form mengikuti data agar dibangun ulang saat berubah.",
+            "parentId": "27"
+          },
+          {
+            "id": 2,
+            "title": "Form release",
+            "description": "src/app/release/release-form.tsx (komponen klien).",
+            "status": "pending",
+            "details": "Isian: aplikasi (select), tag (select, daftar dari data aplikasi terpilih; otomatis terisi bila hanya satu tag), nama/versi, task awal, task akhir, tanggal mulai (opsional, petunjuk 'bawaan: tanggal release dibuat'), tanggal target. Galat validasi di bawah isian; galat umum sebagai alert; tombol Simpan dan Batal.",
+            "parentId": "27"
+          },
+          {
+            "id": 3,
+            "title": "Pratinjau jumlah task",
+            "description": "'Rentang ini memuat N task' saat mengisi.",
+            "status": "pending",
+            "details": "Setelah aplikasi, tag, dan rentang terisi valid, panggil previewRange (debounce) dan tampilkan jumlah task serta ID terkecil dan terbesar yang ada. Rentang tanpa task menampilkan peringatan tetapi tetap boleh disimpan. Pratinjau hanya informasi; tidak menyimpan apa pun.",
+            "parentId": "27"
+          },
+          {
+            "id": 4,
+            "title": "Tandai rilis dan hapus",
+            "description": "Aksi di detail dan kartu release.",
+            "status": "pending",
+            "details": "Tandai rilis mengisi tanggal rilis dengan hari ini (WIB); Batalkan tanda rilis mengosongkannya. Hapus memakai AlertDialog konfirmasi (task tidak terpengaruh) dan notifikasi sonner. Pola mengikuti row-actions.tsx pada Pengaturan sumber.",
+            "parentId": "27"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "28",
+        "title": "Release: baris release di kartu Dashboard",
+        "description": "Release terdekat yang belum rilis tampil di kartu aplikasi.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "24",
+          "10"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, tabel Kebutuhan fungsional (Dashboard). Kartu aplikasi menampilkan satu baris untuk release belum rilis dengan tanggal target terdekat; aplikasi tanpa release aktif tidak menampilkan baris tambahan.",
+        "testStrategy": "Tes kartu dengan dan tanpa release, dengan lebih dari satu release; tes dashboard yang sudah ada tetap lolos.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Data ringkas per aplikasi",
+            "description": "Release terdekat dan jumlah lainnya.",
+            "status": "pending",
+            "details": "Muat release belum rilis per aplikasi (urut target terdekat), hitung progres dan penanda risiko dengan model task 23, dan sertakan jumlah release aktif lainnya pada DashboardCard (field opsional agar tes lama tidak pecah). Kegagalan memuat release tidak boleh menggagalkan seluruh dashboard.",
+            "parentId": "28"
+          },
+          {
+            "id": 2,
+            "title": "Tampilan di SourceCard",
+            "description": "Satu baris: nama, persen, sisa hari, penanda.",
+            "status": "pending",
+            "details": "Contoh 'v2.1 · 62% · 13 hari lagi · Berisiko', menaut ke /release/[id]. Bila ada lebih dari satu: '+N release lain' menaut ke /release?source=<id>. Penanda memakai teks dan ikon. Baris berada di dalam area kartu yang bisa diklik; pastikan tautan tetap bisa diklik (z-10 seperti tombol Segarkan).",
+            "parentId": "28"
+          },
+          {
+            "id": 3,
+            "title": "Tes dashboard",
+            "description": "Perbarui tests/dashboard-card dan dashboard-cards.",
+            "status": "pending",
+            "details": "Kartu tanpa release tidak berubah; kartu dengan satu dan beberapa release; release terlewat target; sumber nonaktif.",
+            "parentId": "28"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "29",
+        "title": "Release: verifikasi dan dokumentasi Tahap 1",
+        "description": "Terapkan migrasi, uji live, periksa sampel, dan dokumentasi.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "25",
+          "26",
+          "27",
+          "28"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, bagian Rencana rilis Tahap 1: dianggap selesai bila admin bisa membuat release (mis. v2.1, task 100 sampai 200, target 20 November) dan semua pengguna melihat jumlah task, progres, sisa hari, penanda risiko, serta daftar hambatan, dengan hasil cocok pada pemeriksaan sampel manual.",
+        "testStrategy": "tsc, eslint, vitest, build lolos; tes live lolos; sampel manual tiga release cocok 100%; tampilan benar di terang, gelap, dan ponsel.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Terapkan migrasi dan uji SQL",
+            "description": "Dilakukan pengguna di SQL editor Supabase.",
+            "status": "pending",
+            "details": "Jalankan 20261107040000_releases.sql lalu supabase/tests/releases_test.sql; harapannya notice 'UJI RELEASES LOLOS'. Jangan lanjut ke tes live bila ada baris FAIL.",
+            "parentId": "29"
+          },
+          {
+            "id": 2,
+            "title": "Tes live terhadap Supabase",
+            "description": "tests/releases.live.test.ts.",
+            "status": "pending",
+            "details": "Pola sama dengan tes live yang ada (dijalankan lewat npm run test:live): buat release sementara, baca lewat sesi pengguna, pastikan hitungan sama dengan hitungan manual pada data nyata, lalu bersihkan.",
+            "parentId": "29"
+          },
+          {
+            "id": 3,
+            "title": "Pemeriksaan sampel manual",
+            "description": "Cocokkan minimal tiga release dengan data sumber.",
+            "status": "pending",
+            "details": "Metrik PRD: kesesuaian jumlah task dan progres 100% pada pemeriksaan sampel untuk minimal tiga release. Bandingkan dengan tasks.json di repo asal.",
+            "parentId": "29"
+          },
+          {
+            "id": 4,
+            "title": "Pemeriksaan visual dan kualitas kode",
+            "description": "Tangkapan layar dan seluruh pemeriksaan.",
+            "status": "pending",
+            "details": "Tangkapan layar desktop dan ponsel, mode terang dan gelap, untuk Daftar release, Detail release, Form, dan Dashboard; tsc, eslint, vitest, dan npm run build bersih; tidak ada galat konsol; waktu muat halaman Release di bawah 2 detik.",
+            "parentId": "29"
+          },
+          {
+            "id": 5,
+            "title": "Dokumentasi",
+            "description": "README dan PRD.",
+            "status": "pending",
+            "details": "Perbarui README proyek (fitur Release, cara membuat release, aturan hitung ringkas) dan catat keputusan akhir pada PRD-Fitur-Release-Tracking.md bila ada yang berubah selama pembuatan.",
+            "parentId": "29"
+          }
+        ],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "30",
+        "title": "Release Tahap 2: riwayat progres, burn-up, dan prakiraan selesai",
+        "description": "Snapshot per release, grafik burn-up, dan prakiraan tanggal selesai.",
+        "status": "deferred",
+        "priority": "low",
+        "dependencies": [
+          "29"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, Rencana rilis Tahap 2. Snapshot progres per release setiap sinkronisasi (tabel baru), grafik burn-up (selesai terhadap waktu dengan garis target), dan prakiraan tanggal selesai dari laju 7 sampai 14 hari terakhir. Dianggap selesai bila garis progres release terlihat dari waktu ke waktu dan prakiraan muncul di detail release.",
+        "testStrategy": "Snapshot terbentuk tiap sinkronisasi; prakiraan benar pada data uji; grafik lolos pemeriksaan palet dataviz.",
+        "subtasks": [],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "31",
+        "title": "Release Tahap 3: pengingat dan perluasan (lintas aplikasi, multi-rentang)",
+        "description": "Notifikasi release berisiko dan perluasan model release.",
+        "status": "deferred",
+        "priority": "low",
+        "dependencies": [
+          "29"
+        ],
+        "details": "PRD-Fitur-Release-Tracking.md, Rencana rilis Tahap 3. Notifikasi saat release berisiko atau mendekati target (bergantung pada mekanisme notifikasi task 20); release lintas aplikasi atau lebih dari satu rentang bila ternyata dibutuhkan. Keputusan ini sengaja ditunda; PRD menetapkan satu aplikasi dan satu rentang per release.",
+        "testStrategy": "Notifikasi terkirim sekali per perubahan penanda; model baru tidak merusak release yang sudah ada.",
+        "subtasks": [],
+        "updatedAt": "2026-11-07T01:11:01.413Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-06T19:34:42.661Z",
-      "taskCount": 21,
+      "lastModified": "2026-11-07T01:11:01.413Z",
+      "taskCount": 31,
       "completedCount": 14,
       "tags": [
         "master"
