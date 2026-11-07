@@ -1037,7 +1037,7 @@
         "id": "24",
         "title": "Release: validasi, akses data, dan aksi admin",
         "description": "validate.ts, repo.ts, pemuat data, dan server actions.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "22",
@@ -1051,44 +1051,49 @@
             "id": 1,
             "title": "Validasi form release",
             "description": "src/lib/releases/validate.ts (murni).",
-            "status": "pending",
+            "status": "done",
             "details": "parseReleaseForm: sourceId harus UUID; tag wajib dan maksimal 100 karakter; nama wajib, 1 sampai 100 karakter, tanpa karakter kontrol; task awal dan akhir bilangan bulat positif maksimal 15 digit, awal <= akhir; tanggal target wajib, format yyyy-mm-dd dan tanggal kalender valid (30 Feb ditolak); tanggal mulai opsional dan tidak setelah target. Pesan galat per isian dalam bahasa Indonesia.",
-            "parentId": "24"
+            "parentId": "24",
+            "updatedAt": "2026-11-07T01:28:49.299Z"
           },
           {
             "id": 2,
             "title": "Repositori release",
             "description": "src/lib/releases/repo.ts (server-only).",
-            "status": "pending",
+            "status": "done",
             "details": "Baca (klien bersesi): listReleases, getRelease. Tulis (service role): createRelease, updateRelease, setReleased(id, tanggal atau null), deleteRelease. Kode galat 23505 dipetakan ke DuplicateReleaseError; baris tidak ditemukan ke ReleaseNotFoundError. Petakan baris database ke tipe tampilan di satu tempat.",
-            "parentId": "24"
+            "parentId": "24",
+            "updatedAt": "2026-11-07T01:28:49.299Z"
           },
           {
             "id": 3,
             "title": "Pemuat data dan hitungan",
             "description": "Menggabungkan release, nama aplikasi, task, dan model.",
-            "status": "pending",
+            "status": "done",
             "details": "Baca release dan nama aplikasi, lalu baca task per pasangan (source, tag) yang dipakai, satu kali per pasangan, dengan paginasi 1000 baris per permintaan (batas baris PostgREST). Dependensi dicari dari task yang sudah terbaca (tanpa permintaan tambahan). Kolom yang dibaca hanya yang perlu: task_id, title, status, priority, dependencies, subtasks_total, subtasks_done. Sertakan status sinkron aplikasi (data usang, nonaktif) dan apakah tag masih ada.",
-            "parentId": "24"
+            "parentId": "24",
+            "updatedAt": "2026-11-07T01:28:49.299Z"
           },
           {
             "id": 4,
             "title": "Server actions admin",
             "description": "src/app/release/actions.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "saveRelease (tambah atau ubah), markReleased (isi atau kosongkan tanggal rilis; hari ini menurut WIB), removeRelease, dan previewRange (jumlah task di rentang untuk pratinjau form). Semuanya requireAdmin() di baris pertama. saveRelease memastikan aplikasi ada dan tag ada pada aplikasi itu. Setelah sukses: revalidatePath('/release') dan redirect untuk simpan. Galat generik ke klien; catat hanya nama galat.",
-            "parentId": "24"
+            "parentId": "24",
+            "updatedAt": "2026-11-07T01:28:49.299Z"
           },
           {
             "id": 5,
             "title": "Tes validasi dan action",
             "description": "tests/release-validate.test.ts dan tests/release-actions.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Validasi: semua aturan di atas termasuk batas (100 karakter, 15 digit, awal = akhir, mulai = target). Action: viewer atau pengguna belum login ditolak sebelum menyentuh data; ID tidak valid ditolak; nama ganda memberi pesan jelas; galat tak terduga tidak membocorkan pesan asli.",
-            "parentId": "24"
+            "parentId": "24",
+            "updatedAt": "2026-11-07T01:28:49.299Z"
           }
         ],
-        "updatedAt": "2026-11-07T01:11:01.413Z"
+        "updatedAt": "2026-11-07T01:28:49.299Z"
       },
       {
         "id": "25",
@@ -1368,9 +1373,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:25:49.546Z",
+      "lastModified": "2026-11-07T01:28:49.299Z",
       "taskCount": 31,
-      "completedCount": 16,
+      "completedCount": 17,
       "tags": [
         "master"
       ]
