@@ -1738,7 +1738,7 @@
         "id": "39",
         "title": "Release multi-aplikasi: model agregasi dan risiko",
         "description": "Fungsi murni untuk progres gabungan dan risiko release.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-Release-Multi-Aplikasi.md, bagian Perhitungan dan Risiko. src/lib/releases/model.ts. computeRelease per komponen tetap; tambah agregasi.",
@@ -1748,35 +1748,40 @@
             "id": 1,
             "title": "Ekstrak logika risiko",
             "description": "Fungsi risiko yang dipakai komponen dan gabungan.",
-            "status": "pending",
+            "status": "done",
             "details": "Pisahkan penentuan RiskLevel (released/empty/overdue/behind/at_risk/on_track) dari computeRelease menjadi fungsi yang menerima gap, status rilis, total, daysLeft, dan penanda perhatian (terhambat, menunggu dependensi, dependensi hilang). Perilaku computeRelease tidak berubah (semua tes model lama tetap lolos).",
-            "parentId": "39"
+            "parentId": "39",
+            "updatedAt": "2026-11-14T04:00:27.290Z"
           },
           {
             "id": 2,
             "title": "aggregateRelease",
             "description": "Statistik gabungan dari statistik komponen.",
-            "status": "pending",
+            "status": "done",
             "details": "Total, counts per status, done, inProgress dijumlahkan; percentDone = round(done/total); gap memakai persen gabungan tanpa pembulatan; elapsedPercent dan daysLeft dari tanggal release; risiko dari fungsi bersama dengan penanda perhatian gabungan; firstId/lastId tidak relevan (per komponen). Kembalikan juga komponen penyebab At risk.",
-            "parentId": "39"
+            "parentId": "39",
+            "updatedAt": "2026-11-14T04:00:27.290Z"
           },
           {
             "id": 3,
             "title": "Tipe untuk komponen",
             "description": "Definisi release dan komponen.",
-            "status": "pending",
+            "status": "done",
             "details": "ReleaseDef menjadi header (startDate, targetDate, releasedOn); ComponentDef (rangeStart, rangeEnd). computeRelease menerima gabungan keduanya agar pemanggil lama mudah diadaptasi.",
-            "parentId": "39"
+            "parentId": "39",
+            "updatedAt": "2026-11-14T04:00:27.290Z"
           },
           {
             "id": 4,
             "title": "Tes unit",
             "description": "tests/release-model.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambahkan kasus agregasi: contoh PRD 70%, satu komponen kosong, semua kosong (No tasks), komponen terhambat menandai At risk dan disebut, overdue, released, gap dari persen gabungan (bukan rata-rata).",
-            "parentId": "39"
+            "parentId": "39",
+            "updatedAt": "2026-11-14T04:00:27.290Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T04:00:27.290Z"
       },
       {
         "id": "40",
@@ -2022,9 +2027,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:58:56.574Z",
+      "lastModified": "2026-11-14T04:00:27.290Z",
       "taskCount": 44,
-      "completedCount": 28,
+      "completedCount": 29,
       "tags": [
         "master"
       ]

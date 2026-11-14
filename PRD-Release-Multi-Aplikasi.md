@@ -85,7 +85,7 @@ Aturan tambahan: pasangan (aplikasi, tag) tidak boleh muncul dua kali dalam satu
 Penanda risiko release memakai urutan dan ambang yang sama seperti sekarang (10 dan 25 poin selisih waktu dan progres), dengan aturan:
 
 - Selisih dihitung dari **progres gabungan**.
-- Bila ada komponen dengan task terhambat, task yang menunggu dependensi di luar rentang, atau dependensi tidak ditemukan, release minimal **At risk**, dan komponen penyebabnya disebut.
+- Bila ada komponen dengan task terhambat atau task yang menunggu dependensi di luar rentang (dependensi itu belum selesai), release minimal **At risk**, dan komponen penyebabnya disebut. Dependensi yang tidak ditemukan hanya ditampilkan sebagai peringatan dan tidak mengubah risiko (sama seperti sekarang).
 - Release dianggap **Overdue** bila target lewat dan belum 100%, **Released** bila sudah ditandai rilis, dan **No tasks** bila semua komponen kosong.
 - Risiko tiap komponen juga ditampilkan di bagian komponen, memakai tanggal release yang sama.
 

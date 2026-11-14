@@ -11,9 +11,8 @@ export const AMBANG_BERISIKO = 10;
 /** Selisih di atas ini = Tertinggal. */
 export const AMBANG_TERTINGGAL = 25;
 
-export type ReleaseDef = {
-  rangeStart: number;
-  rangeEnd: number;
+/** Header release: satu untuk seluruh komponen. */
+export type ReleaseHeader = {
   /** yyyy-mm-dd */
   startDate: string;
   /** yyyy-mm-dd */
@@ -21,6 +20,15 @@ export type ReleaseDef = {
   /** yyyy-mm-dd; null = belum rilis */
   releasedOn: string | null;
 };
+
+/** Satu komponen: rentang task (inklusif) pada satu aplikasi dan tag. */
+export type ComponentRange = {
+  rangeStart: number;
+  rangeEnd: number;
+};
+
+/** Header + rentang satu komponen; masukan computeRelease. */
+export type ReleaseDef = ReleaseHeader & ComponentRange;
 
 /** Task pada tag release, seperti dibaca dari tabel tasks (kolom seperlunya). */
 export type TaskInput = {
@@ -149,6 +157,29 @@ export function timeProgress(startDate: string, targetDate: string, now: Date): 
   return { elapsedPercent, daysLeft: target - today };
 }
 
+export type RiskInput = {
+  releasedOn: string | null;
+  total: number;
+  done: number;
+  daysLeft: number;
+  /** elapsedPercent - persen progres (tanpa pembulatan); null bila total 0. */
+  gap: number | null;
+  /** Jumlah task terhambat. */
+  blocked: number;
+  /** Jumlah task yang menunggu dependensi di luar rentang. */
+  waiting: number;
+};
+
+/** Penanda risiko; dipakai satu komponen maupun gabungan seluruh komponen. */
+export function riskLevel(i: RiskInput): RiskLevel {
+  if (i.releasedOn) return "released";
+  if (i.total === 0 || i.gap === null) return "empty";
+  if (i.daysLeft < 0 && i.done < i.total) return "overdue";
+  if (i.gap > AMBANG_TERTINGGAL) return "behind";
+  if (i.gap > AMBANG_BERISIKO || i.blocked > 0 || i.waiting > 0) return "at_risk";
+  return "on_track";
+}
+
 /**
  * Menghitung statistik satu release dari semua task pada tag-nya.
  * Total mencakup semua status (termasuk ditunda dan dibatalkan) agar penyebab progres tertahan
@@ -190,13 +221,9 @@ export function computeRelease(def: ReleaseDef, tagTasks: TaskInput[], now: Date
   const gap = exactPercent === null ? null : time.elapsedPercent - exactPercent;
   const blocked = tasks.filter((t) => t.status === "blocked");
 
-  let risk: RiskLevel;
-  if (def.releasedOn) risk = "released";
-  else if (total === 0) risk = "empty";
-  else if (time.daysLeft < 0 && done < total) risk = "overdue";
-  else if (gap! > AMBANG_TERTINGGAL) risk = "behind";
-  else if (gap! > AMBANG_BERISIKO || blocked.length > 0 || waiting.length > 0) risk = "at_risk";
-  else risk = "on_track";
+  const risk = riskLevel({
+    releasedOn: def.releasedOn, total, done, daysLeft: time.daysLeft, gap, blocked: blocked.length, waiting: waiting.length,
+  });
 
   return {
     total,
@@ -224,4 +251,61 @@ export function computeRelease(def: ReleaseDef, tagTasks: TaskInput[], now: Date
 /** Ada sesuatu yang perlu dilihat di release ini (untuk ringkasan di kartu). */
 export function needsAttentionCount(s: ReleaseStats): number {
   return s.counts.blocked + s.counts.deferred + s.counts.cancelled;
+}
+
+/** Statistik gabungan seluruh komponen satu release (PRD-Release-Multi-Aplikasi.md). */
+export type ReleaseAggregate = {
+  total: number;
+  counts: Record<DisplayStatus, number>;
+  done: number;
+  /** Dikerjakan + ditinjau. */
+  inProgress: number;
+  /** Bulat 0..100 dari jumlah task seluruh komponen; null bila total 0. */
+  percentDone: number | null;
+  elapsedPercent: number;
+  daysLeft: number;
+  /** elapsedPercent - persen progres gabungan (tanpa pembulatan); null bila total 0. */
+  gap: number | null;
+  risk: RiskLevel;
+  /** Indeks komponen yang sendiri berisiko (At risk, Behind, atau Overdue), urut sesuai masukan. */
+  riskComponents: number[];
+  /** Jumlah task ditunda, dibatalkan, dan terhambat di seluruh komponen. */
+  attentionCount: number;
+};
+
+const RISKY: RiskLevel[] = ["at_risk", "behind", "overdue"];
+
+/**
+ * Menggabungkan statistik komponen. Progres = total selesai / total task (bukan rata-rata persen);
+ * risiko memakai aturan yang sama dengan satu komponen, dengan selisih dari progres gabungan.
+ * `components` adalah hasil computeRelease tiap komponen (tanggal dari header yang sama).
+ */
+export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats[], now: Date): ReleaseAggregate {
+  const counts = zeroCounts();
+  let blocked = 0;
+  let waiting = 0;
+  for (const c of components) {
+    for (const s of STATUS_ORDER) counts[s] += c.counts[s];
+    blocked += c.counts.blocked;
+    waiting += c.attention.waiting.length;
+  }
+  const total = STATUS_ORDER.reduce((n, s) => n + counts[s], 0);
+  const done = counts.done;
+  const exactPercent = total > 0 ? (done * 100) / total : null;
+  const time = timeProgress(header.startDate, header.targetDate, now);
+  const gap = exactPercent === null ? null : time.elapsedPercent - exactPercent;
+
+  return {
+    total,
+    counts,
+    done,
+    inProgress: counts.in_progress + counts.review,
+    percentDone: exactPercent === null ? null : Math.round(exactPercent),
+    elapsedPercent: time.elapsedPercent,
+    daysLeft: time.daysLeft,
+    gap,
+    risk: riskLevel({ releasedOn: header.releasedOn, total, done, daysLeft: time.daysLeft, gap, blocked, waiting }),
+    riskComponents: components.flatMap((c, i) => (RISKY.includes(c.risk) ? [i] : [])),
+    attentionCount: counts.blocked + counts.deferred + counts.cancelled,
+  };
 }

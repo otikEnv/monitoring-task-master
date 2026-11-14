@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  AMBANG_BERISIKO, AMBANG_TERTINGGAL, computeRelease, needsAttentionCount, numericId, tasksInRange,
+  AMBANG_BERISIKO, AMBANG_TERTINGGAL, aggregateRelease, computeRelease, riskLevel, needsAttentionCount, numericId, tasksInRange,
   timeProgress, wibDay, type ReleaseDef, type TaskInput,
 } from "@/lib/releases/model";
 
@@ -204,5 +204,116 @@ describe("hambatan dari dependensi", () => {
     const s = computeRelease(def, [task("10", "pending", { dependencies: null }), task("11", "pending", { dependencies: "5" })], now);
     expect(s.attention.waiting).toEqual([]);
     expect(s.total).toBe(2);
+  });
+});
+
+describe("riskLevel (dipakai komponen dan gabungan)", () => {
+  const base = { releasedOn: null, total: 10, done: 5, daysLeft: 5, gap: 0, blocked: 0, waiting: 0 };
+  it("urutan prioritas", () => {
+    expect(riskLevel({ ...base, releasedOn: "2026-11-01", total: 0, gap: null })).toBe("released");
+    expect(riskLevel({ ...base, total: 0, gap: null })).toBe("empty");
+    expect(riskLevel({ ...base, daysLeft: -1, gap: 90 })).toBe("overdue");
+    expect(riskLevel({ ...base, gap: AMBANG_TERTINGGAL + 0.1 })).toBe("behind");
+    expect(riskLevel({ ...base, gap: AMBANG_BERISIKO + 0.1 })).toBe("at_risk");
+    expect(riskLevel({ ...base, blocked: 1 })).toBe("at_risk");
+    expect(riskLevel({ ...base, waiting: 1 })).toBe("at_risk");
+    expect(riskLevel(base)).toBe("on_track");
+  });
+});
+
+describe("aggregateRelease (release lintas aplikasi)", () => {
+  // Header: 1..21 Nov 2026. Web #10..19 dan backend #1..4 (tag berbeda, jadi task terpisah).
+  const web: ReleaseDef = { rangeStart: 10, rangeEnd: 19, startDate: "2026-11-01", targetDate: "2026-11-21", releasedOn: null };
+  const api: ReleaseDef = { rangeStart: 1, rangeEnd: 4, startDate: "2026-11-01", targetDate: "2026-11-21", releasedOn: null };
+  const apiTasks = (done: number) => Array.from({ length: 4 }, (_, i) => task(String(1 + i), i < done ? "done" : "pending"));
+  const now = at("2026-11-05"); // 20% waktu terpakai
+
+  it("progres = total selesai / total task, bukan rata-rata persen", () => {
+    // web 8/10 (80%) dan backend 1/4 (25%): rata-rata 52,5% tetapi gabungan 9/14 = 64,3%.
+    const a = computeRelease(web, tenTasks(8), now);
+    const b = computeRelease(api, apiTasks(1), now);
+    const g = aggregateRelease(web, [a, b], now);
+    expect([g.total, g.done, g.percentDone]).toEqual([14, 9, 64]);
+    expect(g.counts.done).toBe(9);
+    expect(g.counts.pending).toBe(5);
+  });
+
+  it("contoh PRD: 60 dari 80 dan 10 dari 20 = 70 dari 100 = 70%", () => {
+    const mk = (total: number, done: number, base: number) =>
+      Array.from({ length: total }, (_, i) => task(String(base + i), i < done ? "done" : "pending"));
+    const d: ReleaseDef = { ...web, rangeStart: 1, rangeEnd: 1000 };
+    const g = aggregateRelease(d, [computeRelease(d, mk(80, 60, 1), now), computeRelease(d, mk(20, 10, 101), now)], now);
+    expect([g.total, g.done, g.percentDone]).toEqual([100, 70, 70]);
+  });
+
+  it("satu komponen sama persis dengan hasil computeRelease", () => {
+    const tasks = tenTasks(3, (i) => (i === 9 ? { status: "blocked" } : {}));
+    const s = computeRelease(web, tasks, now);
+    const g = aggregateRelease(web, [s], now);
+    expect([g.total, g.done, g.percentDone, g.gap, g.risk, g.elapsedPercent, g.daysLeft])
+      .toEqual([s.total, s.done, s.percentDone, s.gap, s.risk, s.elapsedPercent, s.daysLeft]);
+    expect(g.counts).toEqual(s.counts);
+  });
+
+  it("selisih dihitung dari progres gabungan, bukan dari komponen terburuk", () => {
+    // 20% waktu; web 10/10 selesai, backend 0/4: gabungan 10/14 = 71,4% -> sesuai jadwal.
+    const g = aggregateRelease(web, [computeRelease(web, tenTasks(10), now), computeRelease(api, apiTasks(0), now)], now);
+    expect(g.gap).toBeCloseTo(20 - (10 * 100) / 14, 5);
+    expect(g.risk).toBe("on_track");
+  });
+
+  it("task terhambat atau menunggu di salah satu komponen menandai gabungan At risk dan komponennya disebut", () => {
+    const later = at("2026-11-11"); // 50% waktu
+    const ok = computeRelease(web, tenTasks(5), later); // 50% progres
+    const withBlocked = computeRelease(api, [task("1", "done"), task("2", "done"), task("3", "blocked"), task("4", "pending")], later);
+    const g = aggregateRelease(web, [ok, withBlocked], later);
+    expect(g.risk).toBe("at_risk");
+    expect(g.riskComponents).toEqual([1]);
+    expect(g.attentionCount).toBe(1);
+
+    const waiting = computeRelease(api, [task("1", "pending", { dependencies: ["50"] }), task("50", "pending")], later);
+    expect(aggregateRelease(web, [ok, waiting], later).risk).toBe("at_risk");
+  });
+
+  it("tertinggal dan lewat target mengikuti progres gabungan", () => {
+    const late = at("2026-11-17"); // 80% waktu
+    const g = aggregateRelease(web, [computeRelease(web, tenTasks(2), late), computeRelease(api, apiTasks(0), late)], late);
+    expect(g.risk).toBe("behind"); // 2/14 = 14,3% vs 80% waktu
+    const over = at("2026-11-23");
+    expect(aggregateRelease(web, [computeRelease(web, tenTasks(9), over)], over).risk).toBe("overdue");
+    expect(aggregateRelease(web, [computeRelease(web, tenTasks(10), over)], over).risk).toBe("on_track");
+  });
+
+  it("komponen kosong tidak menyembunyikan komponen lain; semua kosong = No tasks", () => {
+    const empty = computeRelease(api, [], now);
+    const g = aggregateRelease(web, [computeRelease(web, tenTasks(5), now), empty], now);
+    expect([g.total, g.percentDone]).toEqual([10, 50]);
+    expect(aggregateRelease(web, [empty, empty], now)).toMatchObject({ total: 0, percentDone: null, gap: null, risk: "empty" });
+    expect(aggregateRelease(web, [], now).risk).toBe("empty");
+  });
+
+  it("sudah rilis mengalahkan semua penanda; komponen penyebab tidak ditandai", () => {
+    const released: ReleaseDef = { ...web, releasedOn: "2026-11-20" };
+    const late = at("2026-11-23");
+    const g = aggregateRelease(released, [computeRelease(released, tenTasks(1), late)], late);
+    expect(g.risk).toBe("released");
+    expect(g.riskComponents).toEqual([]);
+  });
+
+  it("ditunda dan dibatalkan dari semua komponen dihitung dan disorot", () => {
+    const a = computeRelease(web, [task("10", "deferred"), task("11", "done")], now);
+    const b = computeRelease(api, [task("1", "cancelled"), task("2", "blocked")], now);
+    const g = aggregateRelease(web, [a, b], now);
+    expect(g.total).toBe(4);
+    expect(g.attentionCount).toBe(3);
+    expect(g.counts).toMatchObject({ deferred: 1, cancelled: 1, blocked: 1, done: 1 });
+  });
+
+  it("indeks komponen berisiko mengikuti urutan masukan", () => {
+    const later = at("2026-11-17"); // 80% waktu
+    const bad1 = computeRelease(web, tenTasks(0), later); // behind
+    const good = computeRelease(api, apiTasks(4), later); // on_track
+    const bad2 = computeRelease(web, tenTasks(0), later); // behind
+    expect(aggregateRelease(web, [bad1, good, bad2], later).riskComponents).toEqual([0, 2]);
   });
 });
