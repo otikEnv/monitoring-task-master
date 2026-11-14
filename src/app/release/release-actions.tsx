@@ -9,10 +9,13 @@ import {
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { restoreRelease } from "@/app/archive/actions";
 import { markReleased, removeRelease } from "./actions";
 
 /** Tombol admin pada detail release: Edit, Mark as released (or undo), Delete with confirmation. */
-export function ReleaseActions({ id, name, released }: { id: string; name: string; released: boolean }) {
+export function ReleaseActions({
+  id, name, released, archived = false,
+}: { id: string; name: string; released: boolean; archived?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [confirming, setConfirming] = useState(false);
@@ -49,6 +52,14 @@ export function ReleaseActions({ id, name, released }: { id: string; name: strin
         >
           {released ? "Unmark as released" : "Mark as released"}
         </Button>
+        {archived && (
+          <Button
+            type="button" size="sm" disabled={pending}
+            onClick={() => run(() => restoreRelease(id), `Restored ${name}.`, () => router.refresh())}
+          >
+            Restore
+          </Button>
+        )}
         <Button type="button" variant="destructive" size="sm" disabled={pending} onClick={() => setConfirming(true)}>
           Delete
         </Button>

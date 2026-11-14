@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, Rocket, Settings2, TrendingUp } from "lucide-react";
+import { Archive, ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, Rocket, Settings2, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
@@ -23,6 +23,8 @@ const NAV: NavItem[] = [
   { href: "/tren", label: "Trend", icon: TrendingUp },
 ];
 
+// Archive dapat dilihat semua pengguna (hanya admin yang bisa Restore); Source settings hanya untuk admin.
+const MANAGE_NAV: NavItem[] = [{ href: "/archive", label: "Archive", icon: Archive }];
 const ADMIN_NAV: NavItem[] = [{ href: "/pengaturan/sumber", label: "Source settings", icon: Settings2 }];
 
 const ROLE_LABEL: Record<SessionUser["role"], string> = { admin: "Admin", viewer: "Viewer" };
@@ -71,7 +73,7 @@ export function AppSidebar({ user }: { user: SessionUser }) {
 
       <SidebarContent>
         {group("Monitor", NAV)}
-        {user.role === "admin" && group("Manage", ADMIN_NAV)}
+        {group("Manage", user.role === "admin" ? [...MANAGE_NAV, ...ADMIN_NAV] : MANAGE_NAV)}
       </SidebarContent>
 
       <SidebarFooter>

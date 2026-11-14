@@ -230,3 +230,16 @@ describe("release lintas aplikasi", () => {
     expect(o).not.toContain("<table");
   });
 });
+
+describe("release terarsip", () => {
+  it("penanda Archived hanya tampil bila diarsipkan; isi dan angka tidak berubah", () => {
+    const active = overviewOf([{ tasks: [task(100, "done")] }]);
+    expect(html(active)).not.toContain(">Archived<");
+
+    const archived = { ...active, release: { ...active.release, archivedAt: "2026-11-14T00:00:00Z" } };
+    const out = html(archived);
+    expect(out).toContain(">Archived<");
+    expect(out).toContain("Total tasks");
+    expect(out).toContain(">100%<");
+  });
+});

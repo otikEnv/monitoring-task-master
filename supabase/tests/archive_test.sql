@@ -45,16 +45,17 @@ begin
   if n <> 2 then raise exception 'FAIL: source_snapshot_totals seharusnya 2 baris uji, dapat %', n; end if;
 end $$;
 
--- 3. Mengarsipkan aplikasi A: hilang dari task_list dan source_snapshot_totals, B tidak terpengaruh.
+-- 3. Mengarsipkan aplikasi A: hilang dari source_snapshot_totals (gabungan Trend). task_list tetap memuatnya
+--    (penyaringan Daftar task dilakukan aplikasi agar tautan langsung ke aplikasi terarsip tetap terbuka).
 update public.sources set archived_at = now() where id = '00000000-0000-0000-0000-0000000000f1';
 do $$
 declare n int;
 begin
   select count(*) into n from public.task_list where source_id = '00000000-0000-0000-0000-0000000000f1';
-  if n <> 0 then raise exception 'FAIL: task_list masih memuat aplikasi terarsip (%)', n; end if;
+  if n <> 2 then raise exception 'FAIL: task_list seharusnya tetap memuat aplikasi terarsip (%)', n; end if;
   select count(*) into n from public.source_snapshot_totals where source_id = '00000000-0000-0000-0000-0000000000f1';
   if n <> 0 then raise exception 'FAIL: source_snapshot_totals masih memuat aplikasi terarsip (%)', n; end if;
-  select count(*) into n from public.task_list where source_id = '00000000-0000-0000-0000-0000000000f2';
+  select count(*) into n from public.source_snapshot_totals where source_id = '00000000-0000-0000-0000-0000000000f2';
   if n <> 1 then raise exception 'FAIL: aplikasi lain ikut tersaring (%)', n; end if;
 
   -- Data tidak berubah: tabel dasar tetap lengkap, dan view yang tidak disaring tetap memuatnya.
@@ -111,8 +112,8 @@ begin
   select count(*) into n from public.releases where name = 'T-arc' and archived_at is null;
   if n <> 1 then raise exception 'FAIL: authenticated tidak bisa membaca releases.archived_at (%)', n; end if;
   -- view disaring juga untuk pengguna login (security_invoker membaca sources.archived_at)
-  select count(*) into n from public.task_list where source_id = '00000000-0000-0000-0000-0000000000f2';
-  if n <> 0 then raise exception 'FAIL: task_list bagi authenticated memuat aplikasi terarsip (%)', n; end if;
+  select count(*) into n from public.source_snapshot_totals where source_id = '00000000-0000-0000-0000-0000000000f2';
+  if n <> 0 then raise exception 'FAIL: source_snapshot_totals bagi authenticated memuat aplikasi terarsip (%)', n; end if;
 
   begin
     update public.sources set archived_at = null where id = '00000000-0000-0000-0000-0000000000f2';

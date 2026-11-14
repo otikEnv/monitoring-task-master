@@ -180,3 +180,13 @@ describe("hanya-baca dan aksesibilitas", () => {
     expect(render()).toContain("← Back to task list");
   });
 });
+
+describe("aplikasi terarsip", () => {
+  it("detail tetap terbuka dan memberi penanda 'Archived application'", () => {
+    expect(render()).not.toContain("Archived application");
+    expect(render(detail({ sourceArchived: false }))).not.toContain("Archived application");
+    const html = render(detail({ sourceArchived: true }));
+    expect(html).toContain("Archived application");
+    expect(html).toContain("Verifikasi aktif di staging"); // isi detail tidak berubah
+  });
+});

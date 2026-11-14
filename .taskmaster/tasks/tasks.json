@@ -2301,7 +2301,7 @@
         "id": "49",
         "title": "Archive: halaman Archive dan penanda pada halaman detail",
         "description": "Menu sidebar, dua tab, berhalaman, Restore, dan penanda Archived.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "46"
@@ -2313,43 +2313,49 @@
             "id": 1,
             "title": "Rute dan sidebar",
             "description": "src/app/archive/page.tsx dan app-sidebar.",
-            "status": "pending",
+            "status": "done",
             "details": "Item 'Archive' (ikon Archive dari lucide) pada kelompok Manage; halaman memakai AppShell dan PageHeader; requireUser (bukan admin-only). Parameter tab (applications|releases, bawaan applications) dan page divalidasi seperti parseReleaseListParams; nilai tidak valid diabaikan.",
-            "parentId": "49"
+            "parentId": "49",
+            "updatedAt": "2026-11-14T05:34:04.048Z"
           },
           {
             "id": 2,
             "title": "Tab Applications dan Releases",
             "description": "Daftar berhalaman 10 per halaman.",
-            "status": "pending",
+            "status": "done",
             "details": "Tab sebagai tautan (bekerja tanpa JavaScript). Baris aplikasi: nama, jumlah task, sinkronisasi terakhir, tanggal arsip. Baris release: nama, released atau belum, target, jumlah komponen, tanggal arsip. Pager yang sama dengan Task list; keadaan kosong 'Nothing is archived.'.",
-            "parentId": "49"
+            "parentId": "49",
+            "updatedAt": "2026-11-14T05:34:04.048Z"
           },
           {
             "id": 3,
             "title": "Menu Restore per baris",
             "description": "Details dan Restore.",
-            "status": "pending",
+            "status": "done",
             "details": "Menu tiga titik: Details (semua) dan Restore (hanya admin) yang memanggil action restore dengan toast; baris hilang setelah Restore. Gunakan CardMenu dari task 48 atau varian baris.",
-            "parentId": "49"
+            "parentId": "49",
+            "updatedAt": "2026-11-14T05:34:04.048Z"
           },
           {
             "id": 4,
             "title": "Penanda Archived pada detail",
             "description": "Detail release dan halaman aplikasi/task.",
-            "status": "pending",
+            "status": "done",
             "details": "Detail release terarsip menampilkan badge 'Archived' dan tombol Restore untuk admin (di samping Edit/Mark as released/Delete). Detail task aplikasi terarsip tetap terbuka dengan badge di header.",
-            "parentId": "49"
+            "parentId": "49",
+            "updatedAt": "2026-11-14T05:34:04.048Z"
           },
           {
             "id": 5,
             "title": "Tes",
             "description": "tests/archive-page.test.tsx dan parameter.",
-            "status": "pending",
+            "status": "done",
             "details": "Render tab, baris, kosong, paginasi, viewer tanpa tombol Restore; parameter URL tidak valid diabaikan.",
-            "parentId": "49"
+            "parentId": "49",
+            "updatedAt": "2026-11-14T05:34:04.048Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T05:34:04.048Z"
       },
       {
         "id": "50",
@@ -2402,9 +2408,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T05:19:44.724Z",
+      "lastModified": "2026-11-14T05:34:04.048Z",
       "taskCount": 50,
-      "completedCount": 38,
+      "completedCount": 39,
       "tags": [
         "master"
       ]

@@ -19,6 +19,8 @@ export type DependencyView = { id: string; found: boolean; title?: string; statu
 export type TaskDetail = {
   sourceId: string;
   sourceName: string;
+  /** Aplikasi diarsipkan (tampil penanda Archived); null/false = aktif. */
+  sourceArchived?: boolean;
   tag: string;
   taskId: string;
   title: string;

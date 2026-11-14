@@ -17,7 +17,7 @@ export async function loadTaskDetail(
 ): Promise<TaskDetail | null> {
   const [task, source] = await Promise.all([
     db.from("tasks").select("*").eq("source_id", key.sourceId).eq("tag", key.tag).eq("task_id", key.taskId).maybeSingle(),
-    db.from("sources").select("id, name").eq("id", key.sourceId).maybeSingle(),
+    db.from("sources").select("id, name, archived_at").eq("id", key.sourceId).maybeSingle(),
   ]);
   if (task.error) throw new Error(`Gagal membaca task: ${task.error.message}`);
   if (source.error) throw new Error(`Gagal membaca sumber: ${source.error.message}`);
@@ -42,6 +42,7 @@ export async function loadTaskDetail(
   return {
     sourceId: key.sourceId,
     sourceName: (source.data as { name: string }).name,
+    sourceArchived: Boolean((source.data as { archived_at: string | null }).archived_at),
     tag: t.tag as string,
     taskId: t.task_id as string,
     title: t.title as string,

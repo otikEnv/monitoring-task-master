@@ -47,7 +47,7 @@ async function ReleaseDetailContent({ params }: { params: Params }) {
         overview={overview}
         actions={
           user.role === "admin" ? (
-            <ReleaseActions id={overview.release.id} name={overview.release.name} released={Boolean(overview.release.releasedOn)} />
+            <ReleaseActions id={overview.release.id} name={overview.release.name} released={Boolean(overview.release.releasedOn)} archived={Boolean(overview.release.archivedAt)} />
           ) : undefined
         }
       />

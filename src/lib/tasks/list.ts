@@ -60,14 +60,25 @@ const TIE_BREAKERS: Array<{ column: string; nullsLast?: boolean }> = [
 export async function loadTaskList(db: SupabaseClient, requested: TaskListParams): Promise<TaskListResult> {
   // 1. Opsi filter dulu: tag dari URL yang tidak ada pada aplikasi terpilih (mis. URL lama, atau aplikasi
   //    diganti) diabaikan dan dilaporkan, bukan menghasilkan daftar kosong yang membingungkan.
-  //    Aplikasi yang diarsipkan tidak ada di pilihan, dan tag-nya tidak ikut (PRD-Archive.md); daftar task
-  //    sendiri sudah menyaringnya lewat view task_list.
-  const sources = await db.from("sources").select("id, name").is("archived_at", null).order("name", { ascending: true });
-  if (sources.error) throw new Error(`Gagal membaca sumber: ${sources.error.message}`);
-  const visibleIds = (sources.data as { id: string }[]).map((s) => s.id);
+  //    Aplikasi yang diarsipkan tidak ada di pilihan dan tidak ikut daftar bila tidak ada pilihan aplikasi
+  //    (PRD-Archive.md). Tautan langsung ke aplikasi terarsip (?source=<id>) tetap terbaca dan aplikasinya
+  //    ditambahkan ke pilihan dengan penanda "(archived)".
+  const active = await db.from("sources").select("id, name").is("archived_at", null).order("name", { ascending: true });
+  if (active.error) throw new Error(`Gagal membaca sumber: ${active.error.message}`);
+  const options = active.data as { id: string; name: string }[];
+  const visibleIds = options.map((s) => s.id);
+  if (requested.source && !visibleIds.includes(requested.source)) {
+    const one = await db.from("sources").select("id, name").eq("id", requested.source).maybeSingle();
+    if (one.error) throw new Error(`Gagal membaca sumber: ${one.error.message}`);
+    if (one.data) {
+      const s = one.data as { id: string; name: string };
+      options.push({ id: s.id, name: `${s.name} (archived)` });
+      options.sort((x, y) => x.name.localeCompare(y.name, "en"));
+    }
+  }
   const tagQuery = db.from("source_tags").select("tag");
   const tagRows = requested.source
-    ? await tagQuery.eq("source_id", requested.source).in("source_id", visibleIds)
+    ? await tagQuery.eq("source_id", requested.source)
     : visibleIds.length > 0 ? await tagQuery.in("source_id", visibleIds) : { data: [], error: null };
   if (tagRows.error) throw new Error(`Gagal membaca tag: ${tagRows.error.message}`);
 
@@ -78,8 +89,9 @@ export async function loadTaskList(db: SupabaseClient, requested: TaskListParams
   const params: TaskListParams = ignoredTag ? { ...requested, tag: null } : requested;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const filtered = <Q extends { eq: any; not: any }>(q: Q): Q => {
-    if (params.source) q = q.eq("source_id", params.source);
+  const filtered = <Q extends { eq: any; not: any; in: any }>(q: Q): Q => {
+    // Tanpa pilihan aplikasi: hanya aplikasi yang tidak diarsipkan. Dengan pilihan eksplisit: aplikasi itu apa adanya.
+    q = params.source ? q.eq("source_id", params.source) : q.in("source_id", visibleIds);
     if (params.tag) q = q.eq("tag", params.tag);
     if (params.priority) q = q.eq("priority", params.priority);
     if (params.status === "other") {
@@ -136,7 +148,7 @@ export async function loadTaskList(db: SupabaseClient, requested: TaskListParams
     page,
     pageCount,
     pageSize: PAGE_SIZE,
-    sources: sources.data as { id: string; name: string }[],
+    sources: options,
     tags,
   };
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RiskBadge } from "@/components/releases/risk-badge";
+import { Badge } from "@/components/ui/badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/task-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -192,7 +193,10 @@ export function ReleaseDetailView({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold leading-snug tracking-tight break-words">{release.name}</h1>
-            <RiskBadge risk={stats.risk} />
+            <div className="flex flex-wrap items-center gap-2">
+              <RiskBadge risk={stats.risk} />
+              {release.archivedAt && <Badge variant="outline">Archived</Badge>}
+            </div>
           </div>
           {actions}
         </div>

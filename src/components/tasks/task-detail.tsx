@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Markdown } from "@/components/markdown";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/task-table";
+import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/format";
 import { hrefFor, DEFAULT_PARAMS, taskHref } from "@/lib/tasks/list-params";
 import { subtaskProgress, type TaskDetail } from "@/lib/tasks/detail-model";
@@ -36,6 +37,7 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={detail.status} />
           <PriorityBadge priority={detail.priority} />
+          {detail.sourceArchived && <Badge variant="outline">Archived application</Badge>}
           {total > 0 && (
             <span className="text-xs text-muted-foreground">{done} of {total} subtasks done</span>
           )}

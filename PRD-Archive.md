@@ -111,7 +111,7 @@ Detail aplikasi atau release yang diarsipkan menampilkan penanda "Archived" dan,
 ## Data dan migrasi
 
 - Kolom `archived_at timestamptz` (kosong = aktif) pada tabel `sources` dan `releases`.
-- Dua view menyembunyikan aplikasi yang diarsipkan di database: `task_list` (Task list) dan `source_snapshot_totals` (gabungan Trend). Karena itu migrasi memperbarui view tersebut, bukan hanya menambah kolom. `source_status_counts` dan `source_tags` sengaja tidak diubah karena juga dipakai jalur yang tetap harus membaca aplikasi terarsip (validasi komponen release, detail); aplikasi menyaringnya pada daftar aplikasi yang ditampilkan (Dashboard, pilihan filter Task list).
+- Hanya satu view yang menyembunyikan aplikasi terarsip di database: `source_snapshot_totals` (gabungan Trend). `task_list`, `source_status_counts`, dan `source_tags` sengaja tidak menyaring, karena tautan langsung ke aplikasi terarsip (menu Details di halaman Archive membuka Task list aplikasi itu) harus tetap terbaca. Aplikasi yang menyaringnya: Task list tanpa pilihan aplikasi hanya memuat aplikasi tidak terarsip, dan pilihan aplikasi yang eksplisit memuat aplikasi apa adanya dengan penanda "(archived)" pada pilihan; Dashboard dan pilihan filter memakai daftar aplikasi yang tidak terarsip.
 - `sources` memakai hak baca per kolom, jadi kolom `archived_at` diizinkan eksplisit untuk pengguna login (hanya baca).
 - Perubahan database dijalankan langsung dengan `npm run db:run`, bukan manual.
 - Pembatasan akses tidak berubah: pengguna login hanya membaca, penulisan lewat service role dan `requireAdmin()` pada setiap server action.

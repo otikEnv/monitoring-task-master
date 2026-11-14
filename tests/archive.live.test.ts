@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomBytes } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { loadArchivedReleases, loadArchivedSources } from "@/lib/archive/load";
 import { loadDashboardData } from "@/lib/dashboard/data";
 import { loadReleaseOverviews, loadSourceOptions } from "@/lib/releases/load";
@@ -22,6 +22,8 @@ const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const ENABLED = Boolean(URL_ && ANON && SERVICE);
 
 describe.skipIf(!ENABLED)("archive (Supabase asli, sesi viewer)", () => {
+  // Banyak tes memakai belasan permintaan ke Supabase asli berturut-turut; batas bawaan 5 dtk bisa terlampaui.
+  vi.setConfig({ testTimeout: 60_000 });
   const opt = { auth: { persistSession: false, autoRefreshToken: false } };
   const run = randomBytes(3).toString("hex");
   const email = `tmp-arc-${run}@envisions.app`;
@@ -212,18 +214,24 @@ describe.skipIf(!ENABLED)("archive (Supabase asli, sesi viewer)", () => {
 
     it("aplikasi terarsip hilang dari Dashboard, Task list, Trend, dan pilihan form; yang lain tidak terpengaruh", async () => {
       await reset();
+      const totalBefore = (await loadTaskList(viewer, { ...DEFAULT_PARAMS })).total;
       await setSourceArchived(ids.a, true, admin);
 
       const cards = await cardIds();
       expect(cards).not.toContain(ids.a);
       expect(cards).toContain(ids.b);
 
-      expect(await taskTotal(ids.a)).toBe(0);
-      expect(await taskTotal(ids.b)).toBe(1);
+      // Tanpa pilihan aplikasi: task aplikasi terarsip (2) tidak ikut dihitung; aplikasi lain tetap.
       const list = await loadTaskList(viewer, { ...DEFAULT_PARAMS });
+      expect(list.total).toBe(totalBefore - 2);
       expect(list.sources.map((s) => s.id)).not.toContain(ids.a);
       expect(list.sources.map((s) => s.id)).toContain(ids.b);
-      expect(list.rows.every((r) => r.sourceId !== ids.a)).toBe(true);
+      expect(await taskTotal(ids.b)).toBe(1);
+      // Tautan langsung ke aplikasi terarsip tetap terbaca, dan aplikasinya muncul di pilihan dengan penanda.
+      const direct = await loadTaskList(viewer, { ...DEFAULT_PARAMS, source: ids.a });
+      expect(direct.total).toBe(2);
+      expect(direct.sources.find((s) => s.id === ids.a)?.name).toBe(nm("a") + " (archived)");
+      expect(direct.tags).toEqual(["master"]);
 
       const trend = await loadTrend(viewer, { range: "all", source: null });
       expect(trend.sources.map((s) => s.id)).not.toContain(ids.a);
