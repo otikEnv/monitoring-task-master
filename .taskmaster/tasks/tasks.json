@@ -1680,7 +1680,7 @@
         "id": "38",
         "title": "Release multi-aplikasi: migrasi database komponen",
         "description": "Tabel release_components, backfill release lama, fungsi simpan atomik.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-Release-Multi-Aplikasi.md, bagian Data dan migrasi. Dijalankan langsung dengan npm run db:run. Release nyata \"2.1\" (tag master, #100-#150) tidak boleh berubah angkanya.",
@@ -1690,43 +1690,49 @@
             "id": 1,
             "title": "Catat angka release lama sebagai pembanding",
             "description": "Sebelum migrasi.",
-            "status": "pending",
+            "status": "done",
             "details": "Simpan isi tabel releases (id, name, source_id, tag, range) dan hasil computeRelease untuk tiap release (total, done, percent) ke berkas di scratchpad. Cek tidak ada nama release ganda (syarat unique(name)).",
-            "parentId": "38"
+            "parentId": "38",
+            "updatedAt": "2026-11-14T03:58:56.574Z"
           },
           {
             "id": 2,
             "title": "Tulis migrasi release_components",
             "description": "supabase/migrations/<ts>_release_components.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Tabel release_components (id uuid, release_id FK cascade, source_id FK cascade, tag, range_start, range_end bigint, created_at) dengan check yang sama seperti releases (tag 1-100, start>0 dan <= end), unique(release_id, source_id, tag), indeks source_id; RLS select untuk authenticated, revoke semua dari anon/authenticated lalu grant select (pola releases). Backfill satu komponen per release lama; hapus kolom source_id, tag, range_start, range_end dari releases; ganti unique(source_id,name) dengan unique(name).",
-            "parentId": "38"
+            "parentId": "38",
+            "updatedAt": "2026-11-14T03:58:56.574Z"
           },
           {
             "id": 3,
             "title": "Fungsi save_release atomik",
             "description": "save_release(p_id, p_header jsonb, p_components jsonb).",
-            "status": "pending",
+            "status": "done",
             "details": "security definer, search_path kosong, execute hanya untuk service_role. Insert atau update header (name, start_date, target_date) lalu ganti seluruh komponen dalam satu transaksi; tolak 0 atau lebih dari 10 komponen dan pasangan (source_id, tag) ganda; nama ganda memunculkan unique_violation yang bisa dikenali repo.",
-            "parentId": "38"
+            "parentId": "38",
+            "updatedAt": "2026-11-14T03:58:56.574Z"
           },
           {
             "id": 4,
             "title": "Tes SQL",
             "description": "Perbarui supabase/tests/releases_test.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Kasus: backfill (komponen ada), cascade hapus release dan hapus aplikasi, constraint rentang dan duplikat, save_release membuat dan mengganti komponen, rollback saat komponen tidak valid, klien tidak bisa menulis, RLS select. Awali dengan set_config('app.allow_any_domain','on',true) untuk user uji.",
-            "parentId": "38"
+            "parentId": "38",
+            "updatedAt": "2026-11-14T03:58:56.574Z"
           },
           {
             "id": 5,
             "title": "Terapkan dan cocokkan angka",
             "description": "npm run db:run lalu bandingkan.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan migrasi dan tes SQL; bandingkan tiap release lama (satu komponen, rentang sama). Perbarui supabase/README.md. Catatan: kode aplikasi lama rusak setelah kolom dihapus sampai task 40 selesai, jadi kerjakan 39 dan 40 segera berikutnya.",
-            "parentId": "38"
+            "parentId": "38",
+            "updatedAt": "2026-11-14T03:58:56.574Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T03:58:56.574Z"
       },
       {
         "id": "39",
@@ -2016,9 +2022,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:55:31.493Z",
+      "lastModified": "2026-11-14T03:58:56.574Z",
       "taskCount": 44,
-      "completedCount": 27,
+      "completedCount": 28,
       "tags": [
         "master"
       ]
