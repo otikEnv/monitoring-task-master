@@ -2241,7 +2241,7 @@
         "id": "48",
         "title": "Archive: menu tiga titik pada kartu, konfirmasi, dan toast Undo",
         "description": "Details dan Archive pada kartu aplikasi dan kartu release.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "46"
@@ -2253,43 +2253,49 @@
             "id": 1,
             "title": "Komponen menu kartu",
             "description": "CardMenu bersama.",
-            "status": "pending",
+            "status": "done",
             "details": "Tombol tiga titik (ikon MoreVertical/Ellipsis) berlabel aksesibel 'Actions for <nama>', menu berisi Details (tautan ke detail, semua pengguna) dan Archive (hanya admin). Tambahkan komponen DropdownMenu lewat shadcn bila belum ada, tanpa dependensi baru di luar @base-ui/react yang sudah dipakai.",
-            "parentId": "48"
+            "parentId": "48",
+            "updatedAt": "2026-11-14T05:19:44.724Z"
           },
           {
             "id": 2,
             "title": "Pasang pada kedua kartu",
             "description": "Source card dan release card.",
-            "status": "pending",
+            "status": "done",
             "details": "Tombol di pojok kanan atas, di atas tautan membentang (z-10), tidak memicu navigasi kartu saat diklik; bisa dioperasikan dengan keyboard (Enter/Space, Escape menutup).",
-            "parentId": "48"
+            "parentId": "48",
+            "updatedAt": "2026-11-14T05:19:44.724Z"
           },
           {
             "id": 3,
             "title": "Dialog konfirmasi",
             "description": "AlertDialog sebelum Archive.",
-            "status": "pending",
+            "status": "done",
             "details": "Aplikasi: menyebut jumlah release belum rilis yang masih memakai aplikasi ini ('they keep running') dan bahwa Archive hanya menyembunyikan, tidak menghentikan sinkronisasi (gunakan Deactivate untuk itu). Release: penjelasan singkat bisa dikembalikan dari menu Archive.",
-            "parentId": "48"
+            "parentId": "48",
+            "updatedAt": "2026-11-14T05:19:44.724Z"
           },
           {
             "id": 4,
             "title": "Toast Undo",
             "description": "sonner dengan tombol Undo.",
-            "status": "pending",
+            "status": "done",
             "details": "Setelah berhasil: toast 'Archived <nama>' dengan aksi Undo yang memanggil action Restore; galat server ditampilkan sebagai toast galat. Daftar disegarkan (router.refresh atau revalidasi dari action).",
-            "parentId": "48"
+            "parentId": "48",
+            "updatedAt": "2026-11-14T05:19:44.724Z"
           },
           {
             "id": 5,
             "title": "Tes",
             "description": "Vitest dan puppeteer.",
-            "status": "pending",
+            "status": "done",
             "details": "Render: admin melihat Archive, viewer hanya Details. Puppeteer pada data uji (jangan menyentuh release 2.1 atau aplikasi nyata): buka menu, Archive, kartu hilang, Undo mengembalikan; tidak ada galat konsol; tampilan terang, gelap, ponsel.",
-            "parentId": "48"
+            "parentId": "48",
+            "updatedAt": "2026-11-14T05:19:44.724Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T05:19:44.724Z"
       },
       {
         "id": "49",
@@ -2396,9 +2402,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T05:12:09.949Z",
+      "lastModified": "2026-11-14T05:19:44.724Z",
       "taskCount": 50,
-      "completedCount": 37,
+      "completedCount": 38,
       "tags": [
         "master"
       ]

@@ -81,7 +81,7 @@ async function ReleaseContent({ searchParams }: { searchParams: SearchParams }) 
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {data.overviews.map((o) => (
-                <ReleaseCard key={o.release.id} overview={o} />
+                <ReleaseCard key={o.release.id} overview={o} canArchive={isAdmin} />
               ))}
             </div>
           )}

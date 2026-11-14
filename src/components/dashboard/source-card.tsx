@@ -1,5 +1,6 @@
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { CardMenu } from "@/components/archive/card-menu";
 import { RiskBadge } from "@/components/releases/risk-badge";
 import { Button } from "@/components/ui/button";
 import type { DashboardCard } from "@/lib/dashboard/cards";
@@ -26,10 +27,13 @@ export function SourceCard({
   card,
   refresh,
   onRefresh,
+  canArchive = false,
 }: {
   card: DashboardCard;
   refresh: RefreshUi;
   onRefresh: (id: string) => void;
+  /** Admin: menu tiga titik memuat Archive. Pengguna lain hanya melihat Details. */
+  canArchive?: boolean;
 }) {
   const failed = card.lastSyncStatus === "failed";
   const never = card.lastSyncStatus === "never";
@@ -52,11 +56,17 @@ export function SourceCard({
               {card.name}
             </Link>
           </h2>
-          {!card.isActive && (
-            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs">
-              Inactive
-            </span>
-          )}
+          <div className="flex shrink-0 items-center gap-1.5">
+            {!card.isActive && (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
+                Inactive
+              </span>
+            )}
+            <CardMenu
+              kind="application" id={card.id} name={card.name}
+              detailsHref={`/tasks?source=${encodeURIComponent(card.id)}`} canArchive={canArchive}
+            />
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">
           {PROVIDER_LABEL[card.provider]} · Branch <strong>{card.branch}</strong>

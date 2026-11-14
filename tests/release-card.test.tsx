@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ReleaseCard } from "@/components/releases/release-card";
 import { RiskBadge } from "@/components/releases/risk-badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
@@ -8,6 +8,11 @@ import type { ReleaseOverview } from "@/lib/releases/load";
 import type { RiskLevel } from "@/lib/releases/model";
 import { parseReleaseListParams, releaseListHref } from "@/lib/releases/params";
 import { overviewOf, REL_ID, SRC, SRC2, task, type Part } from "./fixtures/release-overview";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {}, push: () => {} }) }));
+vi.mock("@/app/archive/actions", () => ({
+  archiveSource: vi.fn(), restoreSource: vi.fn(), archiveRelease: vi.fn(), restoreRelease: vi.fn(), sourceArchiveImpact: vi.fn(),
+}));
 
 const html = (o: ReleaseOverview) => renderToStaticMarkup(<ReleaseCard overview={o} />);
 const one = (tasks: Part["tasks"], extra: Partial<Part> = {}, opts: Parameters<typeof overviewOf>[1] = {}) =>

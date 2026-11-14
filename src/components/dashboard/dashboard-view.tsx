@@ -51,7 +51,8 @@ export function DashboardView({
         {isAdmin ? (
           <>
             Register the first repo in{" "}
-            <Link href="/pengaturan/sumber/baru" className="underline">Source settings</Link>.
+            <Link href="/pengaturan/sumber/baru" className="underline">Source settings</Link>.{" "}
+            Archived applications are listed on the <Link href="/archive" className="underline">Archive</Link> page.
           </>
         ) : (
           "Ask an admin to register an application."
@@ -92,6 +93,7 @@ export function DashboardView({
             card={card}
             refresh={ui[card.id] ?? { phase: "idle" }}
             onRefresh={(id) => refresh([id])}
+            canArchive={isAdmin}
           />
         ))}
       </div>

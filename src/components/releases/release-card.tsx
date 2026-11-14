@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CardMenu } from "@/components/archive/card-menu";
 import { RiskBadge } from "@/components/releases/risk-badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
 import { formatDateTime } from "@/lib/format";
@@ -17,7 +18,7 @@ function componentNote(c: ComponentOverview): string | null {
 }
 
 /** Kartu satu release. Presentasional; seluruh kartu menaut ke detail release. */
-export function ReleaseCard({ overview }: { overview: ReleaseOverview }) {
+export function ReleaseCard({ overview, canArchive = false }: { overview: ReleaseOverview; canArchive?: boolean }) {
   const { release, stats, components } = overview;
   const released = Boolean(release.releasedOn);
   const evaluate = stats.counts.deferred + stats.counts.cancelled;
@@ -32,7 +33,10 @@ export function ReleaseCard({ overview }: { overview: ReleaseOverview }) {
               {release.name}
             </Link>
           </h2>
-          <RiskBadge risk={stats.risk} />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <RiskBadge risk={stats.risk} />
+            <CardMenu kind="release" id={release.id} name={release.name} detailsHref={`/release/${release.id}`} canArchive={canArchive} />
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">
           {stats.total} tasks · {components.length} {components.length === 1 ? "component" : "components"}

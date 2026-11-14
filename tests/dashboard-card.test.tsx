@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 import { SourceCard, type RefreshUi } from "@/components/dashboard/source-card";
 import type { DashboardCard } from "@/lib/dashboard/cards";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {}, push: () => {} }) }));
+vi.mock("@/app/archive/actions", () => ({
+  archiveSource: vi.fn(), restoreSource: vi.fn(), archiveRelease: vi.fn(), restoreRelease: vi.fn(), sourceArchiveImpact: vi.fn(),
+}));
+
 const card = (over: Partial<DashboardCard> = {}): DashboardCard => ({
   id: "11111111-1111-4111-8111-111111111111",
   name: "Echo App",
