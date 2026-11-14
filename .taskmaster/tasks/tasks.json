@@ -1675,12 +1675,349 @@
           }
         ],
         "updatedAt": "2026-11-14T03:33:07.812Z"
+      },
+      {
+        "id": "38",
+        "title": "Release multi-aplikasi: migrasi database komponen",
+        "description": "Tabel release_components, backfill release lama, fungsi simpan atomik.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Data dan migrasi. Dijalankan langsung dengan npm run db:run. Release nyata \"2.1\" (tag master, #100-#150) tidak boleh berubah angkanya.",
+        "testStrategy": "Tes SQL lolos; angka release 2.1 (jumlah task, selesai, progres) identik sebelum dan sesudah migrasi; db:run tanpa galat.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Catat angka release lama sebagai pembanding",
+            "description": "Sebelum migrasi.",
+            "status": "pending",
+            "details": "Simpan isi tabel releases (id, name, source_id, tag, range) dan hasil computeRelease untuk tiap release (total, done, percent) ke berkas di scratchpad. Cek tidak ada nama release ganda (syarat unique(name)).",
+            "parentId": "38"
+          },
+          {
+            "id": 2,
+            "title": "Tulis migrasi release_components",
+            "description": "supabase/migrations/<ts>_release_components.sql.",
+            "status": "pending",
+            "details": "Tabel release_components (id uuid, release_id FK cascade, source_id FK cascade, tag, range_start, range_end bigint, created_at) dengan check yang sama seperti releases (tag 1-100, start>0 dan <= end), unique(release_id, source_id, tag), indeks source_id; RLS select untuk authenticated, revoke semua dari anon/authenticated lalu grant select (pola releases). Backfill satu komponen per release lama; hapus kolom source_id, tag, range_start, range_end dari releases; ganti unique(source_id,name) dengan unique(name).",
+            "parentId": "38"
+          },
+          {
+            "id": 3,
+            "title": "Fungsi save_release atomik",
+            "description": "save_release(p_id, p_header jsonb, p_components jsonb).",
+            "status": "pending",
+            "details": "security definer, search_path kosong, execute hanya untuk service_role. Insert atau update header (name, start_date, target_date) lalu ganti seluruh komponen dalam satu transaksi; tolak 0 atau lebih dari 10 komponen dan pasangan (source_id, tag) ganda; nama ganda memunculkan unique_violation yang bisa dikenali repo.",
+            "parentId": "38"
+          },
+          {
+            "id": 4,
+            "title": "Tes SQL",
+            "description": "Perbarui supabase/tests/releases_test.sql.",
+            "status": "pending",
+            "details": "Kasus: backfill (komponen ada), cascade hapus release dan hapus aplikasi, constraint rentang dan duplikat, save_release membuat dan mengganti komponen, rollback saat komponen tidak valid, klien tidak bisa menulis, RLS select. Awali dengan set_config('app.allow_any_domain','on',true) untuk user uji.",
+            "parentId": "38"
+          },
+          {
+            "id": 5,
+            "title": "Terapkan dan cocokkan angka",
+            "description": "npm run db:run lalu bandingkan.",
+            "status": "pending",
+            "details": "Jalankan migrasi dan tes SQL; bandingkan tiap release lama (satu komponen, rentang sama). Perbarui supabase/README.md. Catatan: kode aplikasi lama rusak setelah kolom dihapus sampai task 40 selesai, jadi kerjakan 39 dan 40 segera berikutnya.",
+            "parentId": "38"
+          }
+        ]
+      },
+      {
+        "id": "39",
+        "title": "Release multi-aplikasi: model agregasi dan risiko",
+        "description": "Fungsi murni untuk progres gabungan dan risiko release.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Perhitungan dan Risiko. src/lib/releases/model.ts. computeRelease per komponen tetap; tambah agregasi.",
+        "testStrategy": "Tes unit model: contoh web 60/80 + backend 10/20 = 70/100 = 70%; risiko terburuk; kasus kosong, rilis, overdue.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Ekstrak logika risiko",
+            "description": "Fungsi risiko yang dipakai komponen dan gabungan.",
+            "status": "pending",
+            "details": "Pisahkan penentuan RiskLevel (released/empty/overdue/behind/at_risk/on_track) dari computeRelease menjadi fungsi yang menerima gap, status rilis, total, daysLeft, dan penanda perhatian (terhambat, menunggu dependensi, dependensi hilang). Perilaku computeRelease tidak berubah (semua tes model lama tetap lolos).",
+            "parentId": "39"
+          },
+          {
+            "id": 2,
+            "title": "aggregateRelease",
+            "description": "Statistik gabungan dari statistik komponen.",
+            "status": "pending",
+            "details": "Total, counts per status, done, inProgress dijumlahkan; percentDone = round(done/total); gap memakai persen gabungan tanpa pembulatan; elapsedPercent dan daysLeft dari tanggal release; risiko dari fungsi bersama dengan penanda perhatian gabungan; firstId/lastId tidak relevan (per komponen). Kembalikan juga komponen penyebab At risk.",
+            "parentId": "39"
+          },
+          {
+            "id": 3,
+            "title": "Tipe untuk komponen",
+            "description": "Definisi release dan komponen.",
+            "status": "pending",
+            "details": "ReleaseDef menjadi header (startDate, targetDate, releasedOn); ComponentDef (rangeStart, rangeEnd). computeRelease menerima gabungan keduanya agar pemanggil lama mudah diadaptasi.",
+            "parentId": "39"
+          },
+          {
+            "id": 4,
+            "title": "Tes unit",
+            "description": "tests/release-model.test.ts.",
+            "status": "pending",
+            "details": "Tambahkan kasus agregasi: contoh PRD 70%, satu komponen kosong, semua kosong (No tasks), komponen terhambat menandai At risk dan disebut, overdue, released, gap dari persen gabungan (bukan rata-rata).",
+            "parentId": "39"
+          }
+        ]
+      },
+      {
+        "id": "40",
+        "title": "Release multi-aplikasi: repo, validasi, dan pemuatan data",
+        "description": "Lapisan data: ReleaseRow tanpa aplikasi, komponen, form multi-komponen, load gabungan.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "38",
+          "39"
+        ],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Data dan Aplikasi dan tag tidak ditemukan. src/lib/releases/repo.ts, validate.ts, load.ts, summary.ts, params.ts.",
+        "testStrategy": "Tes unit repo/validasi/load lolos dengan mock; tes live baca release 2 komponen dari Supabase.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "repo.ts",
+            "description": "ReleaseRow, ReleaseComponentRow, simpan via save_release.",
+            "status": "pending",
+            "details": "ReleaseRow tanpa sourceId/tag/range; RELEASE_COLUMNS diperbarui; getRelease memuat komponen; createRelease/updateRelease memanggil rpc save_release (admin client); DuplicateReleaseError dari unique_violation nama; assertSourceTag dipakai per komponen; setReleasedOn dan deleteRelease tetap (cascade menghapus komponen).",
+            "parentId": "40"
+          },
+          {
+            "id": 2,
+            "title": "validate.ts",
+            "description": "parseReleaseForm dengan daftar komponen.",
+            "status": "pending",
+            "details": "Komponen dikirim sebagai field berulang (components[i].sourceId/tag/rangeStart/rangeEnd); 1..10 komponen; tiap rentang divalidasi seperti sekarang; (aplikasi, tag) ganda ditolak; galat per baris dengan indeks komponen; pesan bahasa Inggris.",
+            "parentId": "40"
+          },
+          {
+            "id": 3,
+            "title": "load.ts",
+            "description": "ReleaseOverview gabungan.",
+            "status": "pending",
+            "details": "ReleaseOverview = { release, components: [{ component, sourceName, sourceActive, syncStatus, lastSyncedAt, tagFound, stats }], stats (agregat), tagsMissing }. Task dibaca sekali per pasangan (aplikasi, tag). Filter sourceId = release yang punya komponen aplikasi itu. sortOverviews dan previewRange dipertahankan; getSourceOptions tetap.",
+            "parentId": "40"
+          },
+          {
+            "id": 4,
+            "title": "summary.ts dan params.ts",
+            "description": "Ringkasan per aplikasi untuk Dashboard.",
+            "status": "pending",
+            "details": "summarizeReleases menghasilkan, per aplikasi, release yang memuat komponennya: nama, progres komponen aplikasi itu, risiko release, tanggal target. params tidak berubah selain bila perlu.",
+            "parentId": "40"
+          },
+          {
+            "id": 5,
+            "title": "Tes",
+            "description": "Perbarui tests/release-validate, release-load, release-summary, release-actions.",
+            "status": "pending",
+            "details": "Mock Supabase mengikuti bentuk baru; kasus duplikat komponen, 0 dan 11 komponen, nama ganda, filter aplikasi, tag tidak ditemukan pada satu komponen tidak menyembunyikan komponen lain.",
+            "parentId": "40"
+          }
+        ]
+      },
+      {
+        "id": "41",
+        "title": "Release multi-aplikasi: form admin dan server action",
+        "description": "Form dengan komponen berulang dan saveRelease multi-komponen.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "40"
+        ],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Form admin. src/app/release/release-form.tsx, actions.ts, baru/page.tsx, [id]/ubah/page.tsx. Teks bahasa Inggris. requireAdmin() tetap baris pertama action.",
+        "testStrategy": "Tes render form (satu dan dua komponen), tes action, pemeriksaan interaksi puppeteer: tambah/hapus komponen, pratinjau, simpan, duplikat nama.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Daftar komponen berulang di form",
+            "description": "release-form.tsx (client).",
+            "status": "pending",
+            "details": "Header: nama, tanggal mulai, tanggal target. Baris komponen: aplikasi, tag (otomatis bila satu), task awal/akhir, pratinjau jumlah task per baris (previewRange, debounce seperti sekarang). Tombol Add component (maks 10) dan hapus per baris (minimal 1). Nilai awal dari release saat ubah.",
+            "parentId": "41"
+          },
+          {
+            "id": 2,
+            "title": "saveRelease",
+            "description": "actions.ts.",
+            "status": "pending",
+            "details": "Parse komponen lewat validate.ts, assertSourceTag per komponen, simpan atomik; galat per baris dikembalikan dengan indeks; DuplicateReleaseError menjadi galat pada nama; revalidatePath /release dan /.",
+            "parentId": "41"
+          },
+          {
+            "id": 3,
+            "title": "Halaman baru dan ubah",
+            "description": "Muat opsi aplikasi dan komponen release.",
+            "status": "pending",
+            "details": "[id]/ubah mengisi komponen yang ada; baru dimulai dengan satu komponen kosong. Tautan dan breadcrumb tetap.",
+            "parentId": "41"
+          },
+          {
+            "id": 4,
+            "title": "Tes dan pemeriksaan interaksi",
+            "description": "Vitest dan puppeteer.",
+            "status": "pending",
+            "details": "Tes render dan action; puppeteer: buat release dua komponen (aplikasi nyata), ubah, nama ganda ditolak, tag ganda ditolak; bersihkan data uji (jangan menyentuh release 2.1).",
+            "parentId": "41"
+          }
+        ]
+      },
+      {
+        "id": "42",
+        "title": "Release multi-aplikasi: kartu, detail, dan daftar release",
+        "description": "Tampilan progres gabungan dan rincian per komponen.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "40"
+        ],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Daftar Release dan Detail Release. src/components/releases/*, src/app/release/page.tsx dan [id]/page.tsx.",
+        "testStrategy": "Tes render kartu dan detail (satu dan dua komponen); tangkapan layar terang/gelap/ponsel; tanpa overflow.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "release-card",
+            "description": "Kartu daftar.",
+            "status": "pending",
+            "details": "Progres gabungan, risiko, sisa hari, dan satu baris ringkas per komponen (\"Web #100-150 · 75%\"); komponen dengan tag tidak ditemukan atau sinkronisasi gagal diberi penanda.",
+            "parentId": "42"
+          },
+          {
+            "id": 2,
+            "title": "release-detail: ringkasan dan Components",
+            "description": "Detail.",
+            "status": "pending",
+            "details": "Ringkasan gabungan (total, selesai, progres, sisa hari, risiko). Bagian Components: blok per komponen (aplikasi, tag, rentang, jumlah task, progres, rincian status, risiko, sinkronisasi). Komponen penyebab At risk disebut.",
+            "parentId": "42"
+          },
+          {
+            "id": 3,
+            "title": "release-detail: daftar task dan perhatian",
+            "description": "Per komponen.",
+            "status": "pending",
+            "details": "Tabel task dikelompokkan per komponen; bagian Needs attention (terhambat, menunggu dependensi, ditunda, dibatalkan) dengan label aplikasi pada tiap baris. Tombol Edit/Mark as released/Delete tetap untuk seluruh release; dialog hapus menyebut jumlah komponen.",
+            "parentId": "42"
+          },
+          {
+            "id": 4,
+            "title": "release-filter dan page",
+            "description": "Filter aplikasi.",
+            "status": "pending",
+            "details": "Filter menampilkan release yang memuat aplikasi itu; urutan dan show released tidak berubah.",
+            "parentId": "42"
+          },
+          {
+            "id": 5,
+            "title": "Tes dan visual",
+            "description": "Vitest dan puppeteer.",
+            "status": "pending",
+            "details": "Tes render untuk 1 dan 2 komponen; tangkapan layar desktop dan ponsel, terang dan gelap.",
+            "parentId": "42"
+          }
+        ]
+      },
+      {
+        "id": "43",
+        "title": "Release multi-aplikasi: kartu Dashboard per aplikasi",
+        "description": "Release lintas aplikasi muncul di kartu tiap aplikasi yang terlibat.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "40"
+        ],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Dashboard. src/lib/dashboard/cards.ts, data.ts, src/components/dashboard/source-card.tsx.",
+        "testStrategy": "Tes kartu: release dua aplikasi muncul di kedua kartu dengan progres komponen masing-masing dan risiko release.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Data Dashboard",
+            "description": "cards.ts dan data.ts.",
+            "status": "pending",
+            "details": "ReleaseSummary per aplikasi dari summarizeReleases bentuk baru; kegagalan memuat release tetap ditoleransi (kartu tanpa baris release).",
+            "parentId": "43"
+          },
+          {
+            "id": 2,
+            "title": "source-card",
+            "description": "Baris release.",
+            "status": "pending",
+            "details": "Nama release, progres komponen aplikasi itu, penanda risiko release, sisa hari; \"+N more releases\" tetap.",
+            "parentId": "43"
+          },
+          {
+            "id": 3,
+            "title": "Tes",
+            "description": "tests/dashboard-card.test.tsx, dashboard-cards.test.ts.",
+            "status": "pending",
+            "details": "Kasus: release dua aplikasi pada kedua kartu; release satu komponen sama seperti sekarang; kegagalan memuat release.",
+            "parentId": "43"
+          }
+        ]
+      },
+      {
+        "id": "44",
+        "title": "Release multi-aplikasi: verifikasi end-to-end dan dokumentasi",
+        "description": "Uji live, pencocokan angka, visual, dan README.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "41",
+          "42",
+          "43"
+        ],
+        "details": "PRD-Release-Multi-Aplikasi.md, bagian Kriteria penerimaan (1 sampai 9) dan Metrik.",
+        "testStrategy": "Sembilan kriteria penerimaan terpenuhi; tsc, eslint, vitest, build, tes live bersih; release 2.1 tidak berubah.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Perbarui tes live",
+            "description": "tests/releases.live.test.ts.",
+            "status": "pending",
+            "details": "Release dua komponen pada dua aplikasi nyata (atau dua tag): total = jumlah, progres gabungan, risiko terburuk, hapus release menghapus komponen, pasangan ganda ditolak, filter aplikasi. User uji ber-email @envisions.app. Bersihkan data uji.",
+            "parentId": "44"
+          },
+          {
+            "id": 2,
+            "title": "Pencocokan angka release lama",
+            "description": "Sebelum vs sesudah.",
+            "status": "pending",
+            "details": "Bandingkan release 2.1 dengan angka pembanding task 38: jumlah task, selesai, progres identik; sampel manual minimal dua release lintas aplikasi dicocokkan dengan tasks.json repo asal.",
+            "parentId": "44"
+          },
+          {
+            "id": 3,
+            "title": "Pemeriksaan visual dan kualitas",
+            "description": "Seluruh pemeriksaan.",
+            "status": "pending",
+            "details": "Tangkapan layar Daftar, Detail, Form, Dashboard (terang, gelap, ponsel); tidak ada galat konsol; waktu muat halaman Release di bawah 2 detik; tsc, eslint, vitest, npm run build, dan pemeriksaan log dev bersih.",
+            "parentId": "44"
+          },
+          {
+            "id": 4,
+            "title": "Dokumentasi",
+            "description": "README dan PRD.",
+            "status": "pending",
+            "details": "Perbarui bagian Fitur Release di README (komponen, progres gabungan, risiko, nama unik) dan supabase/README.md; tautkan PRD-Release-Multi-Aplikasi.md dari PRD-Fitur-Release-Tracking.md.",
+            "parentId": "44"
+          }
+        ]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:33:07.812Z",
-      "taskCount": 37,
+      "lastModified": "2026-11-14T03:55:31.493Z",
+      "taskCount": 44,
       "completedCount": 27,
       "tags": [
         "master"
