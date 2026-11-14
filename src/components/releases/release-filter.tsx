@@ -1,28 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import type { ReleaseListParams } from "@/lib/releases/params";
 
 /**
- * Filter lewat <form method="get">: jalan tanpa JavaScript (tombol Terapkan) dan otomatis diterapkan
- * saat pilihan berubah, seperti filter pada Daftar task.
+ * Filter lewat <form method="get">: baru diterapkan saat tombol Apply ditekan (mengubah pilihan saja tidak
+ * memuat ulang halaman). Jalan tanpa JavaScript.
  */
 export function ReleaseFilter({
   params, sources,
 }: { params: ReleaseListParams; sources: { id: string; name: string }[] }) {
-  const form = useRef<HTMLFormElement>(null);
   const active = Boolean(params.source || params.showReleased);
 
   return (
     <form
-      ref={form}
       method="get"
       action="/release"
-      onChange={() => form.current?.requestSubmit()}
       className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
     >
       <div className="min-w-48 space-y-1.5">
