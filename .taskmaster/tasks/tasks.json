@@ -1546,7 +1546,7 @@
         "id": "35",
         "title": "SSO: tombol Google dan pesan galat di halaman login",
         "description": "Antarmuka login: pembatas 'or', tombol Continue with Google, dan pesan galat.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "34"
@@ -1558,35 +1558,40 @@
             "id": 1,
             "title": "Tombol dan pembatas",
             "description": "src/app/login/login-form.tsx.",
-            "status": "pending",
+            "status": "done",
             "details": "Form kedua yang memanggil loginWithGoogle; ikon Google (SVG inline, tanpa dependensi baru); status pending 'Redirecting…'.",
-            "parentId": "35"
+            "parentId": "35",
+            "updatedAt": "2026-11-14T03:29:49.817Z"
           },
           {
             "id": 2,
             "title": "Pesan galat dari query",
             "description": "src/app/login/page.tsx.",
-            "status": "pending",
+            "status": "done",
             "details": "Baca searchParams.error (di dalam Suspense sesuai pola cacheComponents). oauth -> 'Google sign-in failed. Try again.'; domain -> 'Only verified @envisions.app Google accounts can sign in.'. Nilai lain diabaikan.",
-            "parentId": "35"
+            "parentId": "35",
+            "updatedAt": "2026-11-14T03:29:49.817Z"
           },
           {
             "id": 3,
             "title": "Tes render",
             "description": "Perluas tes login yang ada atau buat baru.",
-            "status": "pending",
+            "status": "done",
             "details": "renderToStaticMarkup untuk tombol dan pesan.",
-            "parentId": "35"
+            "parentId": "35",
+            "updatedAt": "2026-11-14T03:29:49.817Z"
           },
           {
             "id": 4,
             "title": "Pemeriksaan visual",
             "description": "Tangkapan layar puppeteer.",
-            "status": "pending",
+            "status": "done",
             "details": "Desktop dan ponsel, terang dan gelap; tidak ada overflow.",
-            "parentId": "35"
+            "parentId": "35",
+            "updatedAt": "2026-11-14T03:29:49.817Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T03:29:49.817Z"
       },
       {
         "id": "36",
@@ -1668,9 +1673,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:25:52.635Z",
+      "lastModified": "2026-11-14T03:29:49.817Z",
       "taskCount": 37,
-      "completedCount": 25,
+      "completedCount": 26,
       "tags": [
         "master"
       ]

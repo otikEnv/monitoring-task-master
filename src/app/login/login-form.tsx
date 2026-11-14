@@ -32,3 +32,13 @@ export function LoginForm() {
     </form>
   );
 }
+
+export function LoginDivider() {
+  return (
+    <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground" role="separator">
+      <span className="h-px flex-1 bg-border" />
+      or
+      <span className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
