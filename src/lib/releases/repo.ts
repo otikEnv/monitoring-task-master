@@ -21,6 +21,8 @@ export type ReleaseRow = {
   targetDate: string;
   releasedOn: string | null;
   createdAt: string;
+  /** Waktu diarsipkan; null = aktif (PRD-Archive.md). */
+  archivedAt: string | null;
   components: ComponentRow[];
 };
 
@@ -48,11 +50,12 @@ export class SourceTagError extends Error {
   }
 }
 
-export const RELEASE_COLUMNS = "id, name, start_date, target_date, released_on, created_at";
+export const RELEASE_COLUMNS = "id, name, start_date, target_date, released_on, created_at, archived_at";
 export const COMPONENT_COLUMNS = "id, release_id, source_id, tag, range_start, range_end";
 
 type Row = {
   id: string; name: string; start_date: string; target_date: string; released_on: string | null; created_at: string;
+  archived_at: string | null;
 };
 type ComponentDbRow = {
   id: string; release_id: string; source_id: string; tag: string; range_start: number; range_end: number;
@@ -78,6 +81,7 @@ export function toRelease(r: Row, components: ComponentRow[] = []): ReleaseRow {
     targetDate: r.target_date,
     releasedOn: r.released_on,
     createdAt: r.created_at,
+    archivedAt: r.archived_at,
     components,
   };
 }
@@ -178,6 +182,43 @@ export async function setReleasedOn(
   const { data, error } = await db.from("releases").update({ released_on: releasedOn }).eq("id", id).select("id");
   if (error) throw new Error(`Gagal mengubah status rilis: ${error.message}`);
   if (!data?.length) throw new ReleaseNotFoundError();
+}
+
+/**
+ * Mengarsipkan (true) atau mengembalikan (false) release. Hanya menyembunyikan: tanggal rilis dan komponen
+ * tidak berubah. Mengarsipkan yang sudah terarsip menjaga waktu arsip yang lama (idempoten).
+ */
+export async function setReleaseArchived(
+  id: string,
+  archived: boolean,
+  db: SupabaseClient = createAdminClient(),
+): Promise<void> {
+  const base = db.from("releases").update({ archived_at: archived ? new Date().toISOString() : null }).eq("id", id);
+  const { data, error } = await (archived ? base.is("archived_at", null) : base).select("id");
+  if (error) throw new Error(`Gagal mengubah status arsip release: ${error.message}`);
+  if (data?.length) return;
+  const { data: exists, error: e2 } = await db.from("releases").select("id").eq("id", id).maybeSingle();
+  if (e2) throw new Error(`Gagal membaca release: ${e2.message}`);
+  if (!exists) throw new ReleaseNotFoundError();
+}
+
+/**
+ * Jumlah release aktif (belum rilis, belum diarsipkan) yang masih punya komponen dari aplikasi ini.
+ * Dipakai dialog konfirmasi saat mengarsipkan aplikasi.
+ */
+export async function countOpenReleasesForSource(
+  sourceId: string,
+  db: SupabaseClient = createAdminClient(),
+): Promise<number> {
+  const comps = await db.from("release_components").select("release_id").eq("source_id", sourceId);
+  if (comps.error) throw new Error(`Gagal membaca komponen release: ${comps.error.message}`);
+  const ids = [...new Set((comps.data as { release_id: string }[]).map((c) => c.release_id))];
+  if (ids.length === 0) return 0;
+  const { count, error } = await db
+    .from("releases").select("id", { count: "exact", head: true })
+    .in("id", ids).is("released_on", null).is("archived_at", null);
+  if (error) throw new Error(`Gagal menghitung release: ${error.message}`);
+  return count ?? 0;
 }
 
 /** Komponen ikut terhapus (cascade). */

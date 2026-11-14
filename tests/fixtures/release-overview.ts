@@ -46,7 +46,7 @@ export function overviewOf(
     };
   });
   return {
-    release: { id: REL_ID, name, ...header, createdAt: "2026-11-01T00:00:00Z", components: components.map((c) => c.component) },
+    release: { id: REL_ID, name, ...header, createdAt: "2026-11-01T00:00:00Z", archivedAt: null, components: components.map((c) => c.component) },
     components,
     stats: aggregateRelease(header, components.map((c) => c.stats), at),
   };

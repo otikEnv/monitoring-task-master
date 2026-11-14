@@ -28,6 +28,8 @@ export type SourceView = {
   lastError: string | null;
   lastCommitAt: string | null;
   createdAt: string;
+  /** Waktu diarsipkan; null = aktif (PRD-Archive.md). */
+  archivedAt: string | null;
 };
 
 export class DuplicateSourceError extends Error {
@@ -45,14 +47,14 @@ export class SourceNotFoundError extends Error {
 
 const COLUMNS =
   "id, name, provider, repo_url, branch, file_path, is_active, token_encrypted, token_expires_at, " +
-  "last_sync_status, last_attempt_at, last_synced_at, last_error, last_commit_at, created_at";
+  "last_sync_status, last_attempt_at, last_synced_at, last_error, last_commit_at, created_at, archived_at";
 
 type Row = {
   id: string; name: string; provider: Provider; repo_url: string; branch: string; file_path: string;
   is_active: boolean; token_encrypted: string | null; token_expires_at: string | null;
   last_sync_status: SourceView["lastSyncStatus"]; last_attempt_at: string | null;
   last_synced_at: string | null; last_error: string | null; last_commit_at: string | null;
-  created_at: string;
+  created_at: string; archived_at: string | null;
 };
 
 /** Satu-satunya tempat baris database dipetakan ke tampilan; token_encrypted dibuang di sini. */
@@ -74,6 +76,7 @@ function toView(r: Row): SourceView {
     lastError: r.last_error,
     lastCommitAt: r.last_commit_at,
     createdAt: r.created_at,
+    archivedAt: r.archived_at,
   };
 }
 
@@ -179,6 +182,26 @@ export async function setSourceActive(
   const { data, error } = await db.from("sources").update({ is_active: isActive }).eq("id", id).select("id");
   if (error) throw new Error(`Gagal mengubah status sumber: ${error.message}`);
   if (!data?.length) throw new SourceNotFoundError();
+}
+
+/**
+ * Mengarsipkan (true) atau mengembalikan (false) aplikasi. Hanya menyembunyikan dari tampilan sehari-hari:
+ * data, sinkronisasi, dan status aktif tidak berubah. Mengarsipkan yang sudah terarsip menjaga waktu
+ * arsip yang lama (idempoten).
+ */
+export async function setSourceArchived(
+  id: string,
+  archived: boolean,
+  db: SupabaseClient = createAdminClient(),
+): Promise<void> {
+  const base = db.from("sources").update({ archived_at: archived ? new Date().toISOString() : null }).eq("id", id);
+  const { data, error } = await (archived ? base.is("archived_at", null) : base).select("id");
+  if (error) throw new Error(`Gagal mengubah status arsip sumber: ${error.message}`);
+  if (data?.length) return;
+  // Tidak ada baris yang berubah: sudah dalam keadaan itu, atau memang tidak ada.
+  const { data: exists, error: e2 } = await db.from("sources").select("id").eq("id", id).maybeSingle();
+  if (e2) throw new Error(`Gagal membaca sumber: ${e2.message}`);
+  if (!exists) throw new SourceNotFoundError();
 }
 
 /** Menghapus sumber beserta semua task dan snapshot-nya (cascade). */

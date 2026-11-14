@@ -20,6 +20,7 @@ const view = (over: Partial<SourceView> = {}): SourceView => ({
   lastError: null,
   lastCommitAt: "2026-11-06T03:52:39Z",
   createdAt: "2026-11-01T00:00:00Z",
+  archivedAt: null,
   ...over,
 });
 const render = (...sources: SourceView[]) => renderToStaticMarkup(<SourcesTable sources={sources} />);

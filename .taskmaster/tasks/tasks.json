@@ -2112,7 +2112,7 @@
         "id": "46",
         "title": "Archive: lapisan data dan server action",
         "description": "Fungsi arsip dan restore untuk aplikasi dan release, hanya admin.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "45"
@@ -2124,43 +2124,49 @@
             "id": 1,
             "title": "Repo aplikasi",
             "description": "archiveSource, restoreSource, hitung release terdampak.",
-            "status": "pending",
+            "status": "done",
             "details": "src/lib/sources/repo.ts: setArchived(id, archived) menulis archived_at = now() atau null dan melempar SourceNotFound bila tidak ada; fungsi hitung jumlah release belum rilis yang punya komponen aplikasi itu (untuk dialog konfirmasi). Kolom archived_at ikut di tipe baris dan pemetaan.",
-            "parentId": "46"
+            "parentId": "46",
+            "updatedAt": "2026-11-14T05:06:58.427Z"
           },
           {
             "id": 2,
             "title": "Repo release",
             "description": "archiveRelease dan restoreRelease.",
-            "status": "pending",
+            "status": "done",
             "details": "src/lib/releases/repo.ts: setArchived(id, archived) dengan ReleaseNotFoundError; ReleaseRow memuat archivedAt; RELEASE_COLUMNS diperbarui. Arsip tidak menyentuh released_on maupun komponen.",
-            "parentId": "46"
+            "parentId": "46",
+            "updatedAt": "2026-11-14T05:06:58.427Z"
           },
           {
             "id": 3,
             "title": "Server action",
             "description": "Empat action admin.",
-            "status": "pending",
+            "status": "done",
             "details": "archiveSourceAction, restoreSourceAction, archiveReleaseAction, restoreReleaseAction: requireAdmin() pertama, validasi UUID, hasil { ok } atau { ok:false, error } berbahasa Inggris, revalidatePath untuk / , /release, /tasks, /tren, /archive dan detail terkait. Mengarsipkan item yang sudah terarsip atau memulihkan yang sudah aktif tidak galat (idempoten).",
-            "parentId": "46"
+            "parentId": "46",
+            "updatedAt": "2026-11-14T05:06:58.427Z"
           },
           {
             "id": 4,
             "title": "Pemuat data halaman Archive",
             "description": "load daftar terarsip berhalaman.",
-            "status": "pending",
+            "status": "done",
             "details": "Fungsi baca (klien bersesi) untuk aplikasi dan release terarsip: urut archived_at terbaru, berhalaman 10 per halaman dengan total (count). Aplikasi: nama, jumlah task, sinkronisasi terakhir, status aktif. Release: nama, released_on, target, jumlah komponen.",
-            "parentId": "46"
+            "parentId": "46",
+            "updatedAt": "2026-11-14T05:06:58.427Z"
           },
           {
             "id": 5,
             "title": "Tes",
             "description": "tests/archive-actions.test.ts dan tes repo.",
-            "status": "pending",
+            "status": "done",
             "details": "Pola vi.mock seperti release-actions.test.ts dengan vi.resetAllMocks di beforeEach: bukan admin ditolak sebelum menyentuh data, UUID tidak valid, tidak ditemukan, idempoten, revalidatePath dipanggil.",
-            "parentId": "46"
+            "parentId": "46",
+            "updatedAt": "2026-11-14T05:06:58.427Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T05:06:58.427Z"
       },
       {
         "id": "47",
@@ -2383,9 +2389,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T05:02:50.663Z",
+      "lastModified": "2026-11-14T05:06:58.427Z",
       "taskCount": 50,
-      "completedCount": 35,
+      "completedCount": 36,
       "tags": [
         "master"
       ]
