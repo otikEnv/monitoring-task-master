@@ -18,9 +18,9 @@ const STATUS_OPTIONS = [
 ];
 
 /**
- * Filter lewat <form method="get">: bekerja tanpa JavaScript (tombol Terapkan) dan otomatis
- * diterapkan saat pilihan berubah. Mengubah filter selalu kembali ke halaman 1 (halaman tidak
- * ikut dikirim); urutan dipertahankan lewat input tersembunyi.
+ * Filter lewat <form method="get">: baru diterapkan saat tombol Apply ditekan; mengubah pilihan saja tidak
+ * memuat ulang halaman. Mengubah filter selalu kembali ke halaman 1 (halaman tidak ikut dikirim);
+ * urutan dipertahankan lewat input tersembunyi.
  */
 export function FilterBar({
   params, sources, tags,
@@ -39,7 +39,6 @@ export function FilterBar({
       const tag = f.elements.namedItem("tag") as HTMLSelectElement | null;
       if (tag) tag.value = "";
     }
-    f.requestSubmit();
   }
 
   // Tag yang dipilih tetap tampil walau tidak ada di daftar (mis. dari URL lama), supaya tidak diam-diam hilang.

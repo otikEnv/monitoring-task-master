@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -10,14 +9,12 @@ import { DEFAULT_RANGE, RANGES, RANGE_LABEL, trendHref, type TrendParams } from 
 
 /**
  * Satu baris filter di atas semua grafik (tidak per grafik): rentang waktu dan aplikasi.
- * Rentang berupa tautan (bekerja tanpa JavaScript); aplikasi berupa <form method="get"> yang otomatis dikirim
- * saat pilihan berubah dan tetap berfungsi tanpa JavaScript lewat tombol Terapkan.
+ * Rentang berupa tautan (bekerja tanpa JavaScript); aplikasi berupa <form method="get"> yang baru diterapkan
+ * saat tombol Apply ditekan (mengubah pilihan saja tidak memuat ulang halaman).
  */
 export function TrendControls({
   params, sources,
 }: { params: TrendParams; sources: { id: string; name: string; isActive: boolean }[] }) {
-  const form = useRef<HTMLFormElement>(null);
-
   return (
     <div className="flex flex-wrap items-end gap-x-6 gap-y-3 rounded-xl border bg-card p-4">
       <div className="space-y-1.5">
@@ -42,7 +39,7 @@ export function TrendControls({
         </div>
       </div>
 
-      <form ref={form} method="get" action="/tren" onChange={() => form.current?.requestSubmit()} className="flex items-end gap-2">
+      <form method="get" action="/tren" className="flex items-end gap-2">
         {params.range !== DEFAULT_RANGE && <input type="hidden" name="range" value={params.range} />}
         <div className="space-y-1.5">
           <Label htmlFor="trend-source" className="text-xs text-muted-foreground">Application</Label>
