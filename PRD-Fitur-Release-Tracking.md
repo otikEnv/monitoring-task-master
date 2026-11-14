@@ -2,6 +2,8 @@
 
 7 November 2026 · Otik · Tambahan untuk [PRD Web Monitoring Task Master](PRD-Web-Monitoring-Task-Master.md)
 
+> Diperluas pada 14 November 2026: satu release kini dapat memuat beberapa komponen (aplikasi + tag + rentang), lihat [PRD Release Lintas Aplikasi](PRD-Release-Multi-Aplikasi.md). Bagian "satu aplikasi, satu tag, satu rentang per release" di bawah berlaku untuk **satu komponen**.
+
 ## Ringkasan dan latar belakang
 
 Dashboard saat ini menampilkan progres per aplikasi secara keseluruhan. Itu belum menjawab pertanyaan yang paling sering muncul menjelang rilis: "versi 2.1 yang dijadwalkan 20 November sudah sampai mana?" Sebuah release biasanya hanya mencakup sebagian task (misalnya task 100 sampai 200), sedangkan sisanya milik release sebelumnya atau berikutnya, sehingga persentase selesai satu aplikasi tidak mewakili kesiapan satu release.

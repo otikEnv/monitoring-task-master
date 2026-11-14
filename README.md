@@ -6,14 +6,15 @@ Dashboard hanya-baca yang menggabungkan `tasks.json` banyak repo. Spesifikasi: [
 
 ### Fitur Release
 
-Menu **Release** melacak target rilis per aplikasi, misalnya "v2.1, task #100 sampai #200, target 20 November".
+Menu **Release** melacak target rilis, misalnya "2.1, web task #100 sampai #150 + backend task #20 sampai #45, target 20 November". Spesifikasi: [PRD Release Tracking](PRD-Fitur-Release-Tracking.md) dan [PRD Release Lintas Aplikasi](PRD-Release-Multi-Aplikasi.md).
 
-- **Membuat release (admin):** Release > Tambah release. Pilih aplikasi dan tag, isi nama/versi, task awal dan akhir (inklusif), tanggal target, dan opsional tanggal mulai (bawaannya tanggal release dibuat). Form menampilkan pratinjau jumlah task di rentang itu. Satu aplikasi boleh punya banyak release; satu release = satu aplikasi, satu tag, satu rentang.
-- **Isi release dihitung, bukan disimpan:** semua task pada tag itu dengan ID angka di dalam rentang. ID yang bolong atau non-angka tidak dihitung; task baru di dalam rentang otomatis ikut setelah sinkronisasi.
-- **Progres** = task selesai ÷ total. Total mencakup semua status; task ditunda dan dibatalkan tetap dihitung dan disorot di bagian "Perlu dievaluasi".
-- **Penanda risiko** (aturan di `src/lib/releases/model.ts`): dibandingkan antara persen waktu yang sudah lewat (mulai ke target, kalender WIB) dan persen progres. Tertinggal lebih dari 10 poin = Berisiko, lebih dari 25 poin = Tertinggal; task terhambat atau dependensi di luar rentang yang belum selesai juga menandai Berisiko; target lewat dan belum 100% = Lewat target. Ini panduan, bukan prediksi.
-- **Tandai rilis** (admin) mengisi tanggal rilis hari ini; bisa dibatalkan. Kartu aplikasi di Dashboard menampilkan release belum rilis dengan target terdekat.
-- Semua pengguna login boleh melihat; hanya admin yang mengelola (RLS: peran klien hanya `SELECT`).
+- **Membuat release (admin):** Release > Add release. Isi nama/versi, tanggal target, dan opsional tanggal mulai (bawaannya tanggal release dibuat). Lalu tambahkan **komponen**: tiap komponen = satu aplikasi + satu tag + satu rentang task (awal dan akhir inklusif), dengan pratinjau jumlah task per baris. Satu release punya 1 sampai 10 komponen (mis. web dan backend); satu aplikasi boleh ada di banyak release. **Nama release unik di seluruh aplikasi.**
+- **Isi komponen dihitung, bukan disimpan:** semua task pada tag itu dengan ID angka di dalam rentang. ID yang bolong atau non-angka tidak dihitung; task baru di dalam rentang otomatis ikut setelah sinkronisasi.
+- **Progres gabungan** = total task selesai ÷ total task seluruh komponen (bukan rata-rata persen); progres tiap komponen tetap ditampilkan. Total mencakup semua status; task ditunda dan dibatalkan tetap dihitung dan disorot di "Needs attention".
+- **Penanda risiko** (aturan di `src/lib/releases/model.ts`, `riskLevel` dan `aggregateRelease`): persen waktu yang sudah lewat (mulai ke target, kalender WIB, satu untuk seluruh release) dibandingkan dengan progres gabungan. Tertinggal lebih dari 10 poin = At risk, lebih dari 25 poin = Behind; task terhambat atau dependensi di luar rentang yang belum selesai pada komponen mana pun juga menandai At risk (komponen penyebabnya disebut); target lewat dan belum 100% = Overdue. Dependensi yang tidak ditemukan hanya peringatan. Ini panduan, bukan prediksi.
+- **Tandai rilis** (admin) berlaku untuk seluruh release dan mengisi tanggal rilis hari ini; bisa dibatalkan. Kartu tiap aplikasi di Dashboard menampilkan release belum rilis dengan target terdekat yang memuat komponennya (progres komponen aplikasi itu, risiko release). Release lintas aplikasi muncul di kartu semua aplikasi yang terlibat.
+- **Penyimpanan atomik:** release dan seluruh komponennya disimpan lewat fungsi database `save_release` (hanya service role). Bila aplikasi sebuah komponen dihapus, komponennya ikut terhapus dan release tetap ada.
+- Semua pengguna login boleh melihat; hanya admin yang mengelola (RLS: peran klien hanya `SELECT` pada `releases` dan `release_components`).
 
 ### Login Google (SSO)
 

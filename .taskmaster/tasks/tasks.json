@@ -2001,7 +2001,7 @@
         "id": "44",
         "title": "Release multi-aplikasi: verifikasi end-to-end dan dokumentasi",
         "description": "Uji live, pencocokan angka, visual, dan README.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "41",
@@ -2015,42 +2015,47 @@
             "id": 1,
             "title": "Perbarui tes live",
             "description": "tests/releases.live.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Release dua komponen pada dua aplikasi nyata (atau dua tag): total = jumlah, progres gabungan, risiko terburuk, hapus release menghapus komponen, pasangan ganda ditolak, filter aplikasi. User uji ber-email @envisions.app. Bersihkan data uji.",
-            "parentId": "44"
+            "parentId": "44",
+            "updatedAt": "2026-11-14T04:21:19.351Z"
           },
           {
             "id": 2,
             "title": "Pencocokan angka release lama",
             "description": "Sebelum vs sesudah.",
-            "status": "pending",
+            "status": "done",
             "details": "Bandingkan release 2.1 dengan angka pembanding task 38: jumlah task, selesai, progres identik; sampel manual minimal dua release lintas aplikasi dicocokkan dengan tasks.json repo asal.",
-            "parentId": "44"
+            "parentId": "44",
+            "updatedAt": "2026-11-14T04:21:19.351Z"
           },
           {
             "id": 3,
             "title": "Pemeriksaan visual dan kualitas",
             "description": "Seluruh pemeriksaan.",
-            "status": "pending",
+            "status": "done",
             "details": "Tangkapan layar Daftar, Detail, Form, Dashboard (terang, gelap, ponsel); tidak ada galat konsol; waktu muat halaman Release di bawah 2 detik; tsc, eslint, vitest, npm run build, dan pemeriksaan log dev bersih.",
-            "parentId": "44"
+            "parentId": "44",
+            "updatedAt": "2026-11-14T04:21:19.351Z"
           },
           {
             "id": 4,
             "title": "Dokumentasi",
             "description": "README dan PRD.",
-            "status": "pending",
+            "status": "done",
             "details": "Perbarui bagian Fitur Release di README (komponen, progres gabungan, risiko, nama unik) dan supabase/README.md; tautkan PRD-Release-Multi-Aplikasi.md dari PRD-Fitur-Release-Tracking.md.",
-            "parentId": "44"
+            "parentId": "44",
+            "updatedAt": "2026-11-14T04:21:19.351Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T04:21:19.351Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:17:56.001Z",
+      "lastModified": "2026-11-14T04:21:19.351Z",
       "taskCount": 44,
-      "completedCount": 33,
+      "completedCount": 34,
       "tags": [
         "master"
       ]
