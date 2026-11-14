@@ -5,7 +5,7 @@ import { STATUS_RAW } from "@/lib/status";
  * bisa dibagikan dan kartu dashboard cukup menautkan ?source=<id>. Murni: tanpa server maupun React.
  */
 
-export const PAGE_SIZE = 50;
+export const PAGE_SIZE = 10;
 
 export const SORT_KEYS = ["app", "tag", "id", "title", "status", "priority", "subtasks"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];

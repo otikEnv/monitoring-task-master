@@ -259,37 +259,37 @@ describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
     it("hitungan total tidak terpotong pada 1000+ task (batas baris PostgREST)", async () => {
       const r = await list(B());
       expect(r.total).toBe(1200);
-      expect(r.pageCount).toBe(24);
-      expect(r.pageSize).toBe(50);
+      expect(r.pageCount).toBe(1200 / PAGE_SIZE);
+      expect(r.pageSize).toBe(PAGE_SIZE);
     });
 
     it("semua halaman bersama-sama memuat tepat 1200 task unik, berurutan, tanpa celah atau tumpang tindih", async () => {
       const all: string[] = [];
-      for (let page = 1; page <= 24; page++) {
+      for (let page = 1; page <= 1200 / PAGE_SIZE; page++) {
         const r = await list({ ...B(), page });
         expect(r.page).toBe(page);
-        expect(r.rows).toHaveLength(50);
+        expect(r.rows).toHaveLength(PAGE_SIZE);
         all.push(...r.rows.map((x) => x.taskId));
       }
       expect(new Set(all).size).toBe(1200);
       expect(all).toEqual(Array.from({ length: 1200 }, (_, i) => String(i + 1)));
-    }, 60_000);
+    }, 120_000);
 
     it("urutan stabil untuk nilai kolom yang sama (status) antar halaman", async () => {
       const seen = new Set<string>();
-      for (let page = 1; page <= 24; page++) {
+      for (let page = 1; page <= 1200 / PAGE_SIZE; page++) {
         for (const r of (await list({ ...B(), sort: "status", page })).rows) {
           expect(seen.has(r.taskId)).toBe(false);
           seen.add(r.taskId);
         }
       }
       expect(seen.size).toBe(1200);
-    }, 60_000);
+    }, 120_000);
 
     it("halaman melewati akhir -> dipotong ke halaman terakhir (tanpa galat 416)", async () => {
       const r = await list({ ...B(), page: 999 });
-      expect(r.page).toBe(24);
-      expect(r.rows).toHaveLength(50);
+      expect(r.page).toBe(1200 / PAGE_SIZE);
+      expect(r.rows).toHaveLength(PAGE_SIZE);
       expect(r.rows.at(-1)?.taskId).toBe("1200");
     });
 
@@ -301,7 +301,7 @@ describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
     it("filter mengurangi total dengan benar pada dataset besar", async () => {
       const r = await list({ ...B(), status: "done" });
       expect(r.total).toBe(400);
-      expect(r.pageCount).toBe(8);
+      expect(r.pageCount).toBe(400 / PAGE_SIZE);
     });
 
     it("waktu muat satu halaman pada 1200+ task wajar (< 1,5 dtk)", async () => {
