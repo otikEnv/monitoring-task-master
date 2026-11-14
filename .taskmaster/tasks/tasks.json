@@ -1959,7 +1959,7 @@
         "id": "43",
         "title": "Release multi-aplikasi: kartu Dashboard per aplikasi",
         "description": "Release lintas aplikasi muncul di kartu tiap aplikasi yang terlibat.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "40"
@@ -1971,27 +1971,31 @@
             "id": 1,
             "title": "Data Dashboard",
             "description": "cards.ts dan data.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "ReleaseSummary per aplikasi dari summarizeReleases bentuk baru; kegagalan memuat release tetap ditoleransi (kartu tanpa baris release).",
-            "parentId": "43"
+            "parentId": "43",
+            "updatedAt": "2026-11-14T04:17:56.001Z"
           },
           {
             "id": 2,
             "title": "source-card",
             "description": "Baris release.",
-            "status": "pending",
+            "status": "done",
             "details": "Nama release, progres komponen aplikasi itu, penanda risiko release, sisa hari; \"+N more releases\" tetap.",
-            "parentId": "43"
+            "parentId": "43",
+            "updatedAt": "2026-11-14T04:17:56.001Z"
           },
           {
             "id": 3,
             "title": "Tes",
             "description": "tests/dashboard-card.test.tsx, dashboard-cards.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Kasus: release dua aplikasi pada kedua kartu; release satu komponen sama seperti sekarang; kegagalan memuat release.",
-            "parentId": "43"
+            "parentId": "43",
+            "updatedAt": "2026-11-14T04:17:56.001Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T04:17:56.001Z"
       },
       {
         "id": "44",
@@ -2044,9 +2048,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:16:46.874Z",
+      "lastModified": "2026-11-14T04:17:56.001Z",
       "taskCount": 44,
-      "completedCount": 32,
+      "completedCount": 33,
       "tags": [
         "master"
       ]

@@ -124,6 +124,8 @@ export function SourceCard({
             <span className="font-medium">Release {card.release.name}</span>
             <span className="text-muted-foreground">
               {card.release.percent === null ? "no tasks" : `${card.release.percent}%`} · {formatDaysLeft(card.release.daysLeft)}
+              {/* Release lintas aplikasi: persen di atas hanya bagian aplikasi ini. */}
+              {card.release.componentCount > 1 && <> · this app, {card.release.componentCount} components</>}
             </span>
             <RiskBadge risk={card.release.risk} />
           </Link>

@@ -180,7 +180,7 @@ describe("tombol Refresh dan hasilnya", () => {
 });
 
 describe("baris release pada kartu", () => {
-  const release = { releaseId: "22222222-2222-4222-8222-222222222222", name: "v2.1", percent: 62, total: 87, daysLeft: 13, risk: "at_risk" as const, extra: 0 };
+  const release = { releaseId: "22222222-2222-4222-8222-222222222222", name: "v2.1", percent: 62, total: 87, daysLeft: 13, risk: "at_risk" as const, componentCount: 1, extra: 0 };
 
   it("tanpa release aktif: tidak ada baris tambahan", () => {
     for (const r of [undefined, null]) {
@@ -198,6 +198,18 @@ describe("baris release pada kartu", () => {
     expect(html).toContain("At risk");
     expect(html).toContain(`href="/release/${release.releaseId}"`);
     expect(html).not.toContain("more releases");
+  });
+
+  it("satu komponen: tanpa keterangan lintas aplikasi", () => {
+    expect(render(card({ release }))).not.toContain("components");
+  });
+
+  it("release lintas aplikasi: persen adalah bagian aplikasi ini dan jumlah komponen disebut", () => {
+    const html = render(card({ release: { ...release, name: "2.1", percent: 80, componentCount: 2 } }));
+    expect(html).toContain("Release 2.1");
+    expect(html).toContain("80%");
+    expect(html).toContain("this app, 2 components");
+    expect(html).toContain(`href="/release/${release.releaseId}"`);
   });
 
   it("baris release berada di atas tautan membentang (z-10) agar tetap bisa diklik", () => {
