@@ -1597,13 +1597,13 @@
         "id": "36",
         "title": "SSO: verifikasi end-to-end dan kualitas",
         "description": "Uji alur nyata dan seluruh pemeriksaan kualitas.",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "dependencies": [
           "33",
           "35"
         ],
-        "details": "PRD-Login-SSO-Google.md, bagian Kriteria penerimaan (1 sampai 8). Prasyarat konfigurasi manual sudah dikerjakan: Google Cloud Audience Internal + OAuth client, provider Google di Supabase aktif, Redirect URLs, sign up aktif.",
+        "details": "PRD-Login-SSO-Google.md, bagian Kriteria penerimaan (1 sampai 8). Prasyarat konfigurasi manual sudah dikerjakan: Google Cloud Audience Internal + OAuth client, provider Google di Supabase aktif, Redirect URLs, sign up aktif.\n\nCatatan: subtask 1 menunggu pengguna (login Google nyata di browser). Subtask 2 sampai 4 sudah diverifikasi otomatis (skrip sso-verify, vitest 796 lolos, tsc, eslint, build, tes live release 14 lolos).",
         "testStrategy": "Delapan kriteria penerimaan terpenuhi; tsc, eslint, vitest, build bersih; log dev tanpa galat baru.",
         "subtasks": [
           {
@@ -1618,25 +1618,28 @@
             "id": 2,
             "title": "Uji penolakan",
             "description": "Domain luar dan API pendaftaran.",
-            "status": "pending",
+            "status": "done",
             "details": "signUp email non-@envisions.app lewat anon key gagal dan tidak ada baris di auth.users; akun Google non-domain (bila ada akun uji) ditolak dengan pesan galat.",
-            "parentId": "36"
+            "parentId": "36",
+            "updatedAt": "2026-11-14T03:33:07.554Z"
           },
           {
             "id": 3,
             "title": "Uji login password dan proteksi rute",
             "description": "Regresi.",
-            "status": "pending",
+            "status": "done",
             "details": "Login email+password tetap jalan; halaman lain tanpa login diarahkan ke /login; /auth/callback terbuka tanpa login.",
-            "parentId": "36"
+            "parentId": "36",
+            "updatedAt": "2026-11-14T03:33:07.554Z"
           },
           {
             "id": 4,
             "title": "Pemeriksaan kualitas",
             "description": "Seluruh pemeriksaan otomatis.",
-            "status": "pending",
+            "status": "done",
             "details": "npx tsc --noEmit, eslint, npx vitest run, npm run build, tes live relevan, dan pemeriksaan log dev (nol galat).",
-            "parentId": "36"
+            "parentId": "36",
+            "updatedAt": "2026-11-14T03:33:07.554Z"
           }
         ]
       },
@@ -1644,7 +1647,7 @@
         "id": "37",
         "title": "SSO: dokumentasi dan penyelesaian",
         "description": "README dan catatan operasional.",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "36"
@@ -1656,26 +1659,29 @@
             "id": 1,
             "title": "README: bagian Login Google",
             "description": "README.md.",
-            "status": "pending",
+            "status": "done",
             "details": "Cara kerja, batas domain berlapis, peran admin otomatis, langkah konfigurasi Google Cloud dan Supabase, serta cara mengubah peran bawaan menjadi viewer.",
-            "parentId": "37"
+            "parentId": "37",
+            "updatedAt": "2026-11-14T03:33:07.812Z"
           },
           {
             "id": 2,
             "title": "Pastikan tidak ada rahasia di repo",
             "description": "Client secret hanya di Supabase.",
-            "status": "pending",
+            "status": "done",
             "details": "Grep repo untuk client secret/ID; tidak ada variabel env baru.",
-            "parentId": "37"
+            "parentId": "37",
+            "updatedAt": "2026-11-14T03:33:07.812Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T03:33:07.812Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:29:49.817Z",
+      "lastModified": "2026-11-14T03:33:07.812Z",
       "taskCount": 37,
-      "completedCount": 26,
+      "completedCount": 27,
       "tags": [
         "master"
       ]

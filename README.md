@@ -15,6 +15,17 @@ Menu **Release** melacak target rilis per aplikasi, misalnya "v2.1, task #100 sa
 - **Tandai rilis** (admin) mengisi tanggal rilis hari ini; bisa dibatalkan. Kartu aplikasi di Dashboard menampilkan release belum rilis dengan target terdekat.
 - Semua pengguna login boleh melihat; hanya admin yang mengelola (RLS: peran klien hanya `SELECT`).
 
+### Login Google (SSO)
+
+Halaman login punya tombol **Continue with Google** di samping login email + password. Spesifikasi: [PRD Login SSO Google](PRD-Login-SSO-Google.md).
+
+- **Akun baru otomatis terdaftar** saat login Google pertama dan berperan **admin**. Akun lama (email yang sama) ditautkan ke pengguna yang sama dan perannya tidak berubah. Akun email + password dibuat lewat `npm run seed:users` dan berperan `viewer` kecuali dinaikkan.
+- **Hanya `@envisions.app`.** Ditegakkan berlapis: Audience **Internal** di Google Cloud; trigger database `enforce_allowed_email_domain` pada `auth.users` menolak akun baru bukan `@envisions.app` dari semua jalur (Google, `signUp` email, admin API); `/auth/callback` memeriksa email dan statusnya terverifikasi. Parameter `hd` hanya petunjuk tampilan.
+- **Alur kode:** `loginWithGoogle` di `src/app/login/actions.ts` lalu `src/app/auth/callback/route.ts` (tujuan akhir selalu `/` atau `/login`, tanpa parameter `next`). Batas domain di `src/lib/auth-domain.ts`.
+- **Konfigurasi sekali jalan:** (1) Google Cloud > Google Auth Platform: Audience Internal, buat OAuth client Web dengan redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`. (2) Supabase > Authentication: aktifkan provider Google (Client ID dan Secret hanya diisi di sana, bukan di repo atau `.env`), biarkan **Allow new users to sign up** dan **Confirm email** aktif, tambahkan `http://localhost:3000/**` dan URL produksi `/**` ke Redirect URLs. (3) Terapkan migrasi `20261114000000_google_sso.sql` (`npm run db:run`). Tidak ada variabel env baru.
+- **Mengubah peran bawaan** akun Google menjadi `viewer`: ganti `'admin'` menjadi `'viewer'` pada `handle_new_user()` lewat migrasi baru.
+- **Skrip uji:** user uji lewat admin API harus ber-email `@envisions.app` (hapus di akhir tes); skrip uji SQL yang memasukkan email lain memanggil `select set_config('app.allow_any_domain', 'on', true);` setelah `begin;` (hanya berlaku untuk koneksi `postgres`).
+
 ### Database dan uji
 
 - Migrasi dan uji SQL: lihat [supabase/README.md](supabase/README.md). Jalankan berkas SQL dengan `npm run db:run -- <berkas.sql>` (memakai `POSTGRES_URL_NON_POOLING` dari `.env.local`).
