@@ -3,6 +3,7 @@
 -- Gagal = ada EXCEPTION 'FAIL: ...'. Sukses = muncul NOTICE 'SEMUA UJI LOLOS'.
 
 begin;
+select set_config('app.allow_any_domain', 'on', true); -- email uji non-@envisions.app (lihat migrasi google_sso)
 
 -- Data uji (sebagai superuser/postgres)
 insert into auth.users (id, email) values

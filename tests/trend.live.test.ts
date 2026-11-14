@@ -20,7 +20,7 @@ const HOUR = 60 * 60 * 1000;
 describe.skipIf(!ENABLED)("data tren (Supabase asli, sesi viewer)", () => {
   const opt = { auth: { persistSession: false, autoRefreshToken: false } };
   const run = randomBytes(3).toString("hex");
-  const email = `tmp-tren-${run}@example.com`;
+  const email = `tmp-tren-${run}@envisions.app`;
   const password = "Tmp!" + randomBytes(9).toString("base64url");
   const NOW = Date.now();
   const ago = (days: number) => new Date(NOW - days * DAY).toISOString();

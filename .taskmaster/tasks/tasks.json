@@ -1444,7 +1444,7 @@
         "id": "33",
         "title": "SSO: penyesuaian skrip dan tes yang memakai @example.test",
         "description": "Trigger domain menolak email uji; pastikan tes dan skrip tetap berjalan.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "32"
@@ -1456,35 +1456,40 @@
             "id": 1,
             "title": "Inventaris pemakai email uji",
             "description": "Cari semua tempat yang membuat user uji.",
-            "status": "pending",
+            "status": "done",
             "details": "Grep example.test di tests/, scripts/, supabase/tests/. Catat yang memakai auth.admin.createUser atau insert ke auth.users.",
-            "parentId": "33"
+            "parentId": "33",
+            "updatedAt": "2026-11-14T03:22:47.864Z"
           },
           {
             "id": 2,
             "title": "Pilih mekanisme pengecualian",
             "description": "Domain uji yang diizinkan tanpa melemahkan produksi.",
-            "status": "pending",
+            "status": "done",
             "details": "Rekomendasi: pakai email uji bertipe <acak>@envisions.app yang dihapus di akhir tes (tanpa mengubah trigger), atau tambahkan pengecualian eksplisit bersyarat yang tidak bisa dipicu dari klien. Hindari pengecualian yang bisa dipakai dari API publik.",
-            "parentId": "33"
+            "parentId": "33",
+            "updatedAt": "2026-11-14T03:22:47.864Z"
           },
           {
             "id": 3,
             "title": "Perbarui tes dan skrip",
             "description": "Terapkan mekanisme terpilih.",
-            "status": "pending",
+            "status": "done",
             "details": "Ubah helper pembuat user uji di tests/ dan skrip sementara; pastikan pembersihan user tetap berjalan.",
-            "parentId": "33"
+            "parentId": "33",
+            "updatedAt": "2026-11-14T03:22:47.864Z"
           },
           {
             "id": 4,
             "title": "Jalankan tes live",
             "description": "npm run test:live.",
-            "status": "pending",
+            "status": "done",
             "details": "Seluruh tes live relevan lolos. Kegagalan sync yang sudah ada sebelumnya (sources_unique_target) tidak terkait dan dicatat terpisah.",
-            "parentId": "33"
+            "parentId": "33",
+            "updatedAt": "2026-11-14T03:22:47.864Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T03:22:47.864Z"
       },
       {
         "id": "34",
@@ -1658,9 +1663,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:21:04.853Z",
+      "lastModified": "2026-11-14T03:22:47.864Z",
       "taskCount": 37,
-      "completedCount": 23,
+      "completedCount": 24,
       "tags": [
         "master"
       ]

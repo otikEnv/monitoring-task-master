@@ -17,7 +17,7 @@ const ENABLED = Boolean(URL_ && ANON && SERVICE);
 describe.skipIf(!ENABLED)("daftar task (Supabase asli, sesi viewer)", () => {
   const opt = { auth: { persistSession: false, autoRefreshToken: false } };
   const run = randomBytes(3).toString("hex");
-  const email = `tmp-list-${run}@example.com`;
+  const email = `tmp-list-${run}@envisions.app`;
   const password = "Tmp!" + randomBytes(9).toString("base64url");
   let admin: SupabaseClient;
   let viewer: SupabaseClient;

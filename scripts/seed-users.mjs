@@ -1,5 +1,6 @@
 // Seeder akun awal (tanpa pendaftaran publik).
 // Jalankan: npm run seed:users
+// Catatan: trigger database menolak akun baru yang emailnya bukan @envisions.app (migrasi google_sso).
 // Baca dari .env.local:
 //   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 //   SEED_ADMIN_EMAIL, SEED_ADMIN_PASSWORD            (wajib)

@@ -2,6 +2,7 @@
 -- Di dalam transaksi dan di-ROLLBACK. Sukses = NOTICE 'UJI VIEW TREN LOLOS'.
 
 begin;
+select set_config('app.allow_any_domain', 'on', true); -- email uji non-@envisions.app (lihat migrasi google_sso)
 
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000d9', 'viewer-trend@test.local');
 insert into public.sources (id, name, provider, repo_url) values

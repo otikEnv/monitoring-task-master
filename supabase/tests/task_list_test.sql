@@ -2,6 +2,7 @@
 -- Di dalam transaksi dan di-ROLLBACK. Sukses = NOTICE 'UJI TASK LIST LOLOS'.
 
 begin;
+select set_config('app.allow_any_domain', 'on', true); -- email uji non-@envisions.app (lihat migrasi google_sso)
 
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000c9', 'viewer-list@test.local');
 
