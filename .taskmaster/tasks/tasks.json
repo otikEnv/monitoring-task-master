@@ -2049,12 +2049,336 @@
           }
         ],
         "updatedAt": "2026-11-14T04:21:19.351Z"
+      },
+      {
+        "id": "45",
+        "title": "Archive: migrasi database kolom archived_at dan view",
+        "description": "Kolom archived_at pada sources dan releases, view yang menyembunyikan aplikasi terarsip.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD-Archive.md, bagian Data dan migrasi. Dijalankan langsung dengan npm run db:run. View yang terdampak: source_status_counts, task_list, source_tags, source_snapshot_totals. Tautan langsung ke detail task aplikasi terarsip tetap harus bisa dibaca.",
+        "testStrategy": "Tes SQL lolos: kolom ada, view menyembunyikan aplikasi terarsip, release terarsip tetap bisa dibaca dari tabel, hak akses tidak berubah; angka Dashboard dan release 2.1 tidak berubah sebelum dan sesudah migrasi.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Catat keadaan view dan angka pembanding",
+            "description": "Sebelum migrasi.",
+            "status": "pending",
+            "details": "Simpan definisi keempat view (pg_get_viewdef) dan hasil SELECT-nya, serta angka release 2.1 (scratchpad release-baseline.mjs before). Cek siapa saja yang membaca view: src/lib/dashboard/data.ts, src/lib/tasks/list.ts, src/lib/trend/data.ts, src/lib/releases/load.ts.",
+            "parentId": "45"
+          },
+          {
+            "id": 2,
+            "title": "Tulis migrasi archive",
+            "description": "supabase/migrations/<ts>_archive.sql.",
+            "status": "pending",
+            "details": "alter table sources dan releases add column archived_at timestamptz (null = aktif); indeks parsial bila perlu. Perbarui view dengan create or replace atau drop+create sesuai kolom: source_status_counts, task_list, source_tags, source_snapshot_totals menyaring sources.archived_at is null. Pertahankan security_invoker dan grant yang sama seperti migrasi view aslinya. Jangan mengubah hak tulis (klien tetap hanya SELECT).",
+            "parentId": "45"
+          },
+          {
+            "id": 3,
+            "title": "Jalur baca detail tanpa penyaringan",
+            "description": "Detail task aplikasi terarsip tetap terbuka.",
+            "status": "pending",
+            "details": "src/lib/tasks/detail.ts membaca tabel tasks langsung (bukan view task_list); pastikan tetap begitu. Bila ada view lain yang dipakai halaman detail, sediakan jalur yang tidak disaring.",
+            "parentId": "45"
+          },
+          {
+            "id": 4,
+            "title": "Tes SQL",
+            "description": "supabase/tests/archive_test.sql.",
+            "status": "pending",
+            "details": "Awali dengan set_config('app.allow_any_domain','on',true) untuk user uji. Kasus: kolom default null; mengarsipkan aplikasi menghilangkannya dari keempat view dan memulihkannya setelah dikosongkan; release terarsip tetap terbaca dari tabel; klien authenticated tidak bisa UPDATE archived_at; tidak bergantung pada data nyata (hanya data berawalan uji).",
+            "parentId": "45"
+          },
+          {
+            "id": 5,
+            "title": "Terapkan dan cocokkan angka",
+            "description": "npm run db:run lalu bandingkan.",
+            "status": "pending",
+            "details": "Jalankan migrasi dan tes SQL; bandingkan SELECT view dengan catatan awal (sama selama tidak ada yang terarsip) dan angka release 2.1. Perbarui supabase/README.md.",
+            "parentId": "45"
+          }
+        ]
+      },
+      {
+        "id": "46",
+        "title": "Archive: lapisan data dan server action",
+        "description": "Fungsi arsip dan restore untuk aplikasi dan release, hanya admin.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "45"
+        ],
+        "details": "PRD-Archive.md, bagian Konsep dan aturan. Pola: repo di src/lib/sources/repo.ts dan src/lib/releases/repo.ts, action di src/app/**/actions.ts dengan requireAdmin() di baris pertama.",
+        "testStrategy": "Tes unit action (admin vs bukan admin, id tidak valid, tidak ditemukan, idempoten) dan tes live arsip/restore tanpa mengubah data lain.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Repo aplikasi",
+            "description": "archiveSource, restoreSource, hitung release terdampak.",
+            "status": "pending",
+            "details": "src/lib/sources/repo.ts: setArchived(id, archived) menulis archived_at = now() atau null dan melempar SourceNotFound bila tidak ada; fungsi hitung jumlah release belum rilis yang punya komponen aplikasi itu (untuk dialog konfirmasi). Kolom archived_at ikut di tipe baris dan pemetaan.",
+            "parentId": "46"
+          },
+          {
+            "id": 2,
+            "title": "Repo release",
+            "description": "archiveRelease dan restoreRelease.",
+            "status": "pending",
+            "details": "src/lib/releases/repo.ts: setArchived(id, archived) dengan ReleaseNotFoundError; ReleaseRow memuat archivedAt; RELEASE_COLUMNS diperbarui. Arsip tidak menyentuh released_on maupun komponen.",
+            "parentId": "46"
+          },
+          {
+            "id": 3,
+            "title": "Server action",
+            "description": "Empat action admin.",
+            "status": "pending",
+            "details": "archiveSourceAction, restoreSourceAction, archiveReleaseAction, restoreReleaseAction: requireAdmin() pertama, validasi UUID, hasil { ok } atau { ok:false, error } berbahasa Inggris, revalidatePath untuk / , /release, /tasks, /tren, /archive dan detail terkait. Mengarsipkan item yang sudah terarsip atau memulihkan yang sudah aktif tidak galat (idempoten).",
+            "parentId": "46"
+          },
+          {
+            "id": 4,
+            "title": "Pemuat data halaman Archive",
+            "description": "load daftar terarsip berhalaman.",
+            "status": "pending",
+            "details": "Fungsi baca (klien bersesi) untuk aplikasi dan release terarsip: urut archived_at terbaru, berhalaman 10 per halaman dengan total (count). Aplikasi: nama, jumlah task, sinkronisasi terakhir, status aktif. Release: nama, released_on, target, jumlah komponen.",
+            "parentId": "46"
+          },
+          {
+            "id": 5,
+            "title": "Tes",
+            "description": "tests/archive-actions.test.ts dan tes repo.",
+            "status": "pending",
+            "details": "Pola vi.mock seperti release-actions.test.ts dengan vi.resetAllMocks di beforeEach: bukan admin ditolak sebelum menyentuh data, UUID tidak valid, tidak ditemukan, idempoten, revalidatePath dipanggil.",
+            "parentId": "46"
+          }
+        ]
+      },
+      {
+        "id": "47",
+        "title": "Archive: sembunyikan item terarsip di Dashboard, Release, Task list, Trend",
+        "description": "Penyaringan di semua tempat sesuai PRD, kecuali jalur detail dan Source settings.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "46"
+        ],
+        "details": "PRD-Archive.md, tabel aplikasi dan release yang diarsipkan. Source settings tetap menampilkan aplikasi terarsip dengan penanda; release berjalan tetap menghitung komponen dari aplikasi terarsip.",
+        "testStrategy": "Tes unit penyaringan per halaman; tes live: arsipkan aplikasi dan release uji, pastikan hilang dari tiap tampilan dan kembali setelah restore; release lintas aplikasi tetap dihitung.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Dashboard",
+            "description": "src/lib/dashboard/data.ts.",
+            "status": "pending",
+            "details": "Kartu aplikasi terarsip tidak dimuat (filter archived_at is null pada sources); ringkasan release (summarizeReleases) mengabaikan release terarsip. Ringkasan angka Dashboard tidak menghitung aplikasi terarsip.",
+            "parentId": "47"
+          },
+          {
+            "id": 2,
+            "title": "Daftar Release",
+            "description": "src/lib/releases/load.ts dan src/app/release/page.tsx.",
+            "status": "pending",
+            "details": "loadReleaseOverviews menyaring release terarsip (kecuali jalur detail by id dan jalur halaman Archive); filter aplikasi dan pilihan aplikasi tidak menawarkan aplikasi terarsip; 'Show released' tidak memunculkan release terarsip.",
+            "parentId": "47"
+          },
+          {
+            "id": 3,
+            "title": "Form release",
+            "description": "Pilihan aplikasi komponen baru.",
+            "status": "pending",
+            "details": "loadSourceOptions tidak menawarkan aplikasi terarsip untuk komponen baru, tetapi komponen yang sudah memakai aplikasi terarsip tetap tampil saat ubah (pola 'tag lama tetap tampil').",
+            "parentId": "47"
+          },
+          {
+            "id": 4,
+            "title": "Task list dan Trend",
+            "description": "src/lib/tasks/list.ts dan src/lib/trend/data.ts.",
+            "status": "pending",
+            "details": "Pilihan filter aplikasi dan hasil menyaring aplikasi terarsip (lewat view yang diperbarui di task 45 dan filter pada query sources). Gabungan 'All applications' di Trend tidak menghitungnya.",
+            "parentId": "47"
+          },
+          {
+            "id": 5,
+            "title": "Source settings",
+            "description": "Penanda Archived.",
+            "status": "pending",
+            "details": "src/lib/sources/repo.ts tetap membaca semua aplikasi; tabel di Source settings menampilkan badge 'Archived' pada baris terarsip.",
+            "parentId": "47"
+          },
+          {
+            "id": 6,
+            "title": "Tes",
+            "description": "Perbarui tes yang ada dan tambah kasus arsip.",
+            "status": "pending",
+            "details": "release-load, release-summary, dashboard-cards, task-list/trend (mock) dan tes live: arsipkan lalu pulihkan; release yang memuat aplikasi terarsip tetap dihitung.",
+            "parentId": "47"
+          }
+        ]
+      },
+      {
+        "id": "48",
+        "title": "Archive: menu tiga titik pada kartu, konfirmasi, dan toast Undo",
+        "description": "Details dan Archive pada kartu aplikasi dan kartu release.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "46"
+        ],
+        "details": "PRD-Archive.md, bagian Menu tiga titik pada kartu. Komponen shadcn/ui yang ada (DropdownMenu bila tersedia, AlertDialog, sonner). Kartu aplikasi: src/components/dashboard/source-card.tsx; kartu release: src/components/releases/release-card.tsx. Kartu memakai tautan 'membentang' (after:absolute) sehingga tombol harus berada di atasnya (relative z-10).",
+        "testStrategy": "Tes render menu (admin vs viewer), tes dialog konfirmasi, pemeriksaan interaksi puppeteer: buka menu, Archive, toast, Undo, keyboard.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Komponen menu kartu",
+            "description": "CardMenu bersama.",
+            "status": "pending",
+            "details": "Tombol tiga titik (ikon MoreVertical/Ellipsis) berlabel aksesibel 'Actions for <nama>', menu berisi Details (tautan ke detail, semua pengguna) dan Archive (hanya admin). Tambahkan komponen DropdownMenu lewat shadcn bila belum ada, tanpa dependensi baru di luar @base-ui/react yang sudah dipakai.",
+            "parentId": "48"
+          },
+          {
+            "id": 2,
+            "title": "Pasang pada kedua kartu",
+            "description": "Source card dan release card.",
+            "status": "pending",
+            "details": "Tombol di pojok kanan atas, di atas tautan membentang (z-10), tidak memicu navigasi kartu saat diklik; bisa dioperasikan dengan keyboard (Enter/Space, Escape menutup).",
+            "parentId": "48"
+          },
+          {
+            "id": 3,
+            "title": "Dialog konfirmasi",
+            "description": "AlertDialog sebelum Archive.",
+            "status": "pending",
+            "details": "Aplikasi: menyebut jumlah release belum rilis yang masih memakai aplikasi ini ('they keep running') dan bahwa Archive hanya menyembunyikan, tidak menghentikan sinkronisasi (gunakan Deactivate untuk itu). Release: penjelasan singkat bisa dikembalikan dari menu Archive.",
+            "parentId": "48"
+          },
+          {
+            "id": 4,
+            "title": "Toast Undo",
+            "description": "sonner dengan tombol Undo.",
+            "status": "pending",
+            "details": "Setelah berhasil: toast 'Archived <nama>' dengan aksi Undo yang memanggil action Restore; galat server ditampilkan sebagai toast galat. Daftar disegarkan (router.refresh atau revalidasi dari action).",
+            "parentId": "48"
+          },
+          {
+            "id": 5,
+            "title": "Tes",
+            "description": "Vitest dan puppeteer.",
+            "status": "pending",
+            "details": "Render: admin melihat Archive, viewer hanya Details. Puppeteer pada data uji (jangan menyentuh release 2.1 atau aplikasi nyata): buka menu, Archive, kartu hilang, Undo mengembalikan; tidak ada galat konsol; tampilan terang, gelap, ponsel.",
+            "parentId": "48"
+          }
+        ]
+      },
+      {
+        "id": "49",
+        "title": "Archive: halaman Archive dan penanda pada halaman detail",
+        "description": "Menu sidebar, dua tab, berhalaman, Restore, dan penanda Archived.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "46"
+        ],
+        "details": "PRD-Archive.md, bagian Halaman Archive dan Halaman detail. Rute /archive (searchParams tab dan page; di dalam Suspense karena Cache Components). Sidebar: src/components/layout/app-sidebar.tsx (kelompok Manage).",
+        "testStrategy": "Tes render halaman dan baris, tes paginasi dan parameter URL, pemeriksaan puppeteer: arsipkan lalu Restore dari halaman Archive.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Rute dan sidebar",
+            "description": "src/app/archive/page.tsx dan app-sidebar.",
+            "status": "pending",
+            "details": "Item 'Archive' (ikon Archive dari lucide) pada kelompok Manage; halaman memakai AppShell dan PageHeader; requireUser (bukan admin-only). Parameter tab (applications|releases, bawaan applications) dan page divalidasi seperti parseReleaseListParams; nilai tidak valid diabaikan.",
+            "parentId": "49"
+          },
+          {
+            "id": 2,
+            "title": "Tab Applications dan Releases",
+            "description": "Daftar berhalaman 10 per halaman.",
+            "status": "pending",
+            "details": "Tab sebagai tautan (bekerja tanpa JavaScript). Baris aplikasi: nama, jumlah task, sinkronisasi terakhir, tanggal arsip. Baris release: nama, released atau belum, target, jumlah komponen, tanggal arsip. Pager yang sama dengan Task list; keadaan kosong 'Nothing is archived.'.",
+            "parentId": "49"
+          },
+          {
+            "id": 3,
+            "title": "Menu Restore per baris",
+            "description": "Details dan Restore.",
+            "status": "pending",
+            "details": "Menu tiga titik: Details (semua) dan Restore (hanya admin) yang memanggil action restore dengan toast; baris hilang setelah Restore. Gunakan CardMenu dari task 48 atau varian baris.",
+            "parentId": "49"
+          },
+          {
+            "id": 4,
+            "title": "Penanda Archived pada detail",
+            "description": "Detail release dan halaman aplikasi/task.",
+            "status": "pending",
+            "details": "Detail release terarsip menampilkan badge 'Archived' dan tombol Restore untuk admin (di samping Edit/Mark as released/Delete). Detail task aplikasi terarsip tetap terbuka dengan badge di header.",
+            "parentId": "49"
+          },
+          {
+            "id": 5,
+            "title": "Tes",
+            "description": "tests/archive-page.test.tsx dan parameter.",
+            "status": "pending",
+            "details": "Render tab, baris, kosong, paginasi, viewer tanpa tombol Restore; parameter URL tidak valid diabaikan.",
+            "parentId": "49"
+          }
+        ]
+      },
+      {
+        "id": "50",
+        "title": "Archive: verifikasi end-to-end dan dokumentasi",
+        "description": "Uji live, pemeriksaan visual, README.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "47",
+          "48",
+          "49"
+        ],
+        "details": "PRD-Archive.md, bagian Kriteria penerimaan (1 sampai 10) dan Metrik.",
+        "testStrategy": "Sepuluh kriteria penerimaan terpenuhi; tsc, eslint, vitest, build, tes live bersih; data nyata (release 2.1, aplikasi nyata) tidak berubah.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tes live arsip",
+            "description": "tests/archive.live.test.ts.",
+            "status": "pending",
+            "details": "Data uji berawalan TMP-ARC-: arsipkan aplikasi dan release lalu pastikan hilang dari Dashboard, daftar Release, Task list, Trend, dan pilihan form; muncul di daftar Archive; Restore mengembalikan status lain (aktif/nonaktif, released) persis; release lintas aplikasi tetap dihitung; viewer tidak bisa menulis; data task dan snapshot tidak berubah. User uji ber-email @envisions.app. Bersihkan semuanya.",
+            "parentId": "50"
+          },
+          {
+            "id": 2,
+            "title": "Pemeriksaan interaksi di browser",
+            "description": "Puppeteer pada data uji.",
+            "status": "pending",
+            "details": "Alur penuh: Archive dari kartu Dashboard dan kartu Release, toast Undo, halaman Archive (dua tab, paginasi), Restore, tautan langsung ke item terarsip, viewer tidak melihat Archive/Restore. Tidak boleh menyentuh release 2.1 atau aplikasi nyata.",
+            "parentId": "50"
+          },
+          {
+            "id": 3,
+            "title": "Pemeriksaan visual dan kualitas",
+            "description": "Seluruh pemeriksaan.",
+            "status": "pending",
+            "details": "Tangkapan layar Dashboard, Release, Archive (terang, gelap, ponsel) tanpa overflow dan tanpa galat konsol; waktu muat halaman Archive di bawah 2 detik; tsc, eslint, vitest, npm run build, tes live yang relevan bersih; angka release 2.1 sama dengan baseline.",
+            "parentId": "50"
+          },
+          {
+            "id": 4,
+            "title": "Dokumentasi",
+            "description": "README dan supabase/README.",
+            "status": "pending",
+            "details": "Bagian Archive di README (arti Archive vs Deactivate vs Delete, siapa yang boleh, halaman Archive, Undo) dan supabase/README.md; tautkan PRD-Archive.md dari PRD utama.",
+            "parentId": "50"
+          }
+        ]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:21:19.351Z",
-      "taskCount": 44,
+      "lastModified": "2026-11-14T04:55:38.600Z",
+      "taskCount": 50,
       "completedCount": 34,
       "tags": [
         "master"
