@@ -1390,12 +1390,271 @@
         "testStrategy": "Notifikasi terkirim sekali per perubahan penanda; model baru tidak merusak release yang sudah ada.",
         "subtasks": [],
         "updatedAt": "2026-11-07T01:11:01.413Z"
+      },
+      {
+        "id": "32",
+        "title": "SSO: migrasi database domain dan peran admin",
+        "description": "Trigger penolak akun non-@envisions.app dan peran admin otomatis untuk akun Google.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD-Login-SSO-Google.md, bagian Penegakan batas domain dan Peran admin otomatis. Dijalankan langsung dengan npm run db:run (bukan manual di SQL editor).",
+        "testStrategy": "Tes SQL lolos: Google @envisions.app menjadi admin; email+password @envisions.app menjadi viewer; email domain lain (Google maupun signUp email) ditolak dan tidak ada baris di auth.users.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tulis migrasi google_sso",
+            "description": "supabase/migrations/<ts>_google_sso.sql.",
+            "status": "pending",
+            "details": "BEFORE INSERT trigger pada auth.users: tolak SEMUA akun baru (semua penyedia) yang emailnya tidak berakhiran @envisions.app (perbandingan huruf kecil) dengan raise exception. Ganti handle_new_user(): raw_app_meta_data->>'provider' = 'google' mendapat role admin, selain itu viewer. Fungsi security definer, search_path kosong, revoke execute dari public/anon/authenticated seperti fungsi yang ada.",
+            "parentId": "32"
+          },
+          {
+            "id": 2,
+            "title": "Tes SQL",
+            "description": "supabase/tests/google_sso_test.sql.",
+            "status": "pending",
+            "details": "Pola sama dengan releases_test.sql (rollback di akhir, notice 'UJI GOOGLE SSO LOLOS'): kasus google envisions -> admin, email envisions -> viewer, google domain lain -> exception, email domain lain -> exception, huruf besar pada domain tetap diterima.",
+            "parentId": "32"
+          },
+          {
+            "id": 3,
+            "title": "Terapkan dan verifikasi",
+            "description": "npm run db:run untuk migrasi dan tes.",
+            "status": "pending",
+            "details": "Jalankan migrasi lalu tes SQL. Pastikan akun lama tidak berubah perannya. Catat bahwa toggle 'Allow new users to sign up' sudah menyala, jadi migrasi ini harus segera diterapkan.",
+            "parentId": "32"
+          },
+          {
+            "id": 4,
+            "title": "Perbarui supabase/README.md",
+            "description": "Dokumentasi migrasi baru.",
+            "status": "pending",
+            "details": "Tambahkan baris migrasi, tes, dan penjelasan singkat aturan domain serta peran bawaan.",
+            "parentId": "32"
+          }
+        ]
+      },
+      {
+        "id": "33",
+        "title": "SSO: penyesuaian skrip dan tes yang memakai @example.test",
+        "description": "Trigger domain menolak email uji; pastikan tes dan skrip tetap berjalan.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "32"
+        ],
+        "details": "PRD-Login-SSO-Google.md, risiko \"Pengguna script uji memakai email @example.test\". Tes live dan skrip sementara membuat user lewat admin API dengan email @example.test.",
+        "testStrategy": "npm run test:live (release, tasks, rls) dan skrip puppeteer tetap lolos setelah migrasi diterapkan.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Inventaris pemakai email uji",
+            "description": "Cari semua tempat yang membuat user uji.",
+            "status": "pending",
+            "details": "Grep example.test di tests/, scripts/, supabase/tests/. Catat yang memakai auth.admin.createUser atau insert ke auth.users.",
+            "parentId": "33"
+          },
+          {
+            "id": 2,
+            "title": "Pilih mekanisme pengecualian",
+            "description": "Domain uji yang diizinkan tanpa melemahkan produksi.",
+            "status": "pending",
+            "details": "Rekomendasi: pakai email uji bertipe <acak>@envisions.app yang dihapus di akhir tes (tanpa mengubah trigger), atau tambahkan pengecualian eksplisit bersyarat yang tidak bisa dipicu dari klien. Hindari pengecualian yang bisa dipakai dari API publik.",
+            "parentId": "33"
+          },
+          {
+            "id": 3,
+            "title": "Perbarui tes dan skrip",
+            "description": "Terapkan mekanisme terpilih.",
+            "status": "pending",
+            "details": "Ubah helper pembuat user uji di tests/ dan skrip sementara; pastikan pembersihan user tetap berjalan.",
+            "parentId": "33"
+          },
+          {
+            "id": 4,
+            "title": "Jalankan tes live",
+            "description": "npm run test:live.",
+            "status": "pending",
+            "details": "Seluruh tes live relevan lolos. Kegagalan sync yang sudah ada sebelumnya (sources_unique_target) tidak terkait dan dicatat terpisah.",
+            "parentId": "33"
+          }
+        ]
+      },
+      {
+        "id": "34",
+        "title": "SSO: server action loginWithGoogle dan rute callback",
+        "description": "Mulai OAuth Google dan tukar kode menjadi sesi dengan pengecekan domain.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "32"
+        ],
+        "details": "PRD-Login-SSO-Google.md, bagian Alur login. Pola: server action di src/app/login/actions.ts, klien dari src/lib/supabase/server.ts (sudah memakai connection()). Tujuan setelah login tetap \"/\" tanpa parameter next.",
+        "testStrategy": "Tes unit dengan mock Supabase: arah redirect, parameter provider dan hd, penanganan sukses, gagal tukar kode, dan domain salah.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Action loginWithGoogle",
+            "description": "src/app/login/actions.ts.",
+            "status": "pending",
+            "details": "signInWithOAuth({ provider: 'google', options: { redirectTo: <origin>/auth/callback, queryParams: { hd: 'envisions.app' } } }) lalu redirect(data.url). Origin dari headers() (x-forwarded-host/proto, lalu host); jangan menerima origin dari input pengguna.",
+            "parentId": "34"
+          },
+          {
+            "id": 2,
+            "title": "Rute /auth/callback",
+            "description": "src/app/auth/callback/route.ts (baru).",
+            "status": "pending",
+            "details": "GET: ambil code, exchangeCodeForSession. Gagal atau tanpa code -> redirect /login?error=oauth. Sukses -> baca user; bila email tidak berakhiran @envisions.app (huruf kecil) atau belum terverifikasi -> signOut lalu /login?error=domain. Selain itu redirect /.",
+            "parentId": "34"
+          },
+          {
+            "id": 3,
+            "title": "Izinkan /auth/callback tanpa login",
+            "description": "src/lib/supabase/proxy.ts.",
+            "status": "pending",
+            "details": "Tambahkan ke PUBLIC_PATHS. Pastikan pengguna yang sudah login yang membuka /auth/callback tetap tidak membuat lingkaran redirect.",
+            "parentId": "34"
+          },
+          {
+            "id": 4,
+            "title": "Tes unit",
+            "description": "tests/login-google.test.ts dan tests/auth-callback.test.ts.",
+            "status": "pending",
+            "details": "Pola vi.mock seperti release-actions.test.ts; gunakan vi.resetAllMocks di beforeEach.",
+            "parentId": "34"
+          }
+        ]
+      },
+      {
+        "id": "35",
+        "title": "SSO: tombol Google dan pesan galat di halaman login",
+        "description": "Antarmuka login: pembatas 'or', tombol Continue with Google, dan pesan galat.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "34"
+        ],
+        "details": "PRD-Login-SSO-Google.md, bagian Antarmuka. Komponen shadcn/ui yang ada (Button); seluruh teks bahasa Inggris.",
+        "testStrategy": "Tes render: tombol Google ada, form password tetap ada, pesan galat muncul untuk ?error=oauth dan ?error=domain; cek visual terang/gelap/ponsel.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tombol dan pembatas",
+            "description": "src/app/login/login-form.tsx.",
+            "status": "pending",
+            "details": "Form kedua yang memanggil loginWithGoogle; ikon Google (SVG inline, tanpa dependensi baru); status pending 'Redirecting…'.",
+            "parentId": "35"
+          },
+          {
+            "id": 2,
+            "title": "Pesan galat dari query",
+            "description": "src/app/login/page.tsx.",
+            "status": "pending",
+            "details": "Baca searchParams.error (di dalam Suspense sesuai pola cacheComponents). oauth -> 'Google sign-in failed. Try again.'; domain -> 'Only verified @envisions.app Google accounts can sign in.'. Nilai lain diabaikan.",
+            "parentId": "35"
+          },
+          {
+            "id": 3,
+            "title": "Tes render",
+            "description": "Perluas tes login yang ada atau buat baru.",
+            "status": "pending",
+            "details": "renderToStaticMarkup untuk tombol dan pesan.",
+            "parentId": "35"
+          },
+          {
+            "id": 4,
+            "title": "Pemeriksaan visual",
+            "description": "Tangkapan layar puppeteer.",
+            "status": "pending",
+            "details": "Desktop dan ponsel, terang dan gelap; tidak ada overflow.",
+            "parentId": "35"
+          }
+        ]
+      },
+      {
+        "id": "36",
+        "title": "SSO: verifikasi end-to-end dan kualitas",
+        "description": "Uji alur nyata dan seluruh pemeriksaan kualitas.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "33",
+          "35"
+        ],
+        "details": "PRD-Login-SSO-Google.md, bagian Kriteria penerimaan (1 sampai 8). Prasyarat konfigurasi manual sudah dikerjakan: Google Cloud Audience Internal + OAuth client, provider Google di Supabase aktif, Redirect URLs, sign up aktif.",
+        "testStrategy": "Delapan kriteria penerimaan terpenuhi; tsc, eslint, vitest, build bersih; log dev tanpa galat baru.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Uji login Google nyata (bersama pengguna)",
+            "description": "Dilakukan pengguna di browser.",
+            "status": "pending",
+            "details": "Akun @envisions.app baru -> sampai di / dan profiles.role = admin; login kedua -> user yang sama; akun lama dengan email sama -> satu user dengan dua identity dan peran semula.",
+            "parentId": "36"
+          },
+          {
+            "id": 2,
+            "title": "Uji penolakan",
+            "description": "Domain luar dan API pendaftaran.",
+            "status": "pending",
+            "details": "signUp email non-@envisions.app lewat anon key gagal dan tidak ada baris di auth.users; akun Google non-domain (bila ada akun uji) ditolak dengan pesan galat.",
+            "parentId": "36"
+          },
+          {
+            "id": 3,
+            "title": "Uji login password dan proteksi rute",
+            "description": "Regresi.",
+            "status": "pending",
+            "details": "Login email+password tetap jalan; halaman lain tanpa login diarahkan ke /login; /auth/callback terbuka tanpa login.",
+            "parentId": "36"
+          },
+          {
+            "id": 4,
+            "title": "Pemeriksaan kualitas",
+            "description": "Seluruh pemeriksaan otomatis.",
+            "status": "pending",
+            "details": "npx tsc --noEmit, eslint, npx vitest run, npm run build, tes live relevan, dan pemeriksaan log dev (nol galat).",
+            "parentId": "36"
+          }
+        ]
+      },
+      {
+        "id": "37",
+        "title": "SSO: dokumentasi dan penyelesaian",
+        "description": "README dan catatan operasional.",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          "36"
+        ],
+        "details": "PRD-Login-SSO-Google.md, bagian Konfigurasi dan Keamanan.",
+        "testStrategy": "README memuat langkah setup yang bisa diikuti orang baru; tidak ada rahasia di repo.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "README: bagian Login Google",
+            "description": "README.md.",
+            "status": "pending",
+            "details": "Cara kerja, batas domain berlapis, peran admin otomatis, langkah konfigurasi Google Cloud dan Supabase, serta cara mengubah peran bawaan menjadi viewer.",
+            "parentId": "37"
+          },
+          {
+            "id": 2,
+            "title": "Pastikan tidak ada rahasia di repo",
+            "description": "Client secret hanya di Supabase.",
+            "status": "pending",
+            "details": "Grep repo untuk client secret/ID; tidak ada variabel env baru.",
+            "parentId": "37"
+          }
+        ]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-07T01:43:56.717Z",
-      "taskCount": 31,
+      "lastModified": "2026-11-14T03:13:24.295Z",
+      "taskCount": 37,
       "completedCount": 22,
       "tags": [
         "master"
