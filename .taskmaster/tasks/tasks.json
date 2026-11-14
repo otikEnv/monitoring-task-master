@@ -1787,7 +1787,7 @@
         "id": "40",
         "title": "Release multi-aplikasi: repo, validasi, dan pemuatan data",
         "description": "Lapisan data: ReleaseRow tanpa aplikasi, komponen, form multi-komponen, load gabungan.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "38",
@@ -1800,43 +1800,49 @@
             "id": 1,
             "title": "repo.ts",
             "description": "ReleaseRow, ReleaseComponentRow, simpan via save_release.",
-            "status": "pending",
+            "status": "done",
             "details": "ReleaseRow tanpa sourceId/tag/range; RELEASE_COLUMNS diperbarui; getRelease memuat komponen; createRelease/updateRelease memanggil rpc save_release (admin client); DuplicateReleaseError dari unique_violation nama; assertSourceTag dipakai per komponen; setReleasedOn dan deleteRelease tetap (cascade menghapus komponen).",
-            "parentId": "40"
+            "parentId": "40",
+            "updatedAt": "2026-11-14T04:04:29.730Z"
           },
           {
             "id": 2,
             "title": "validate.ts",
             "description": "parseReleaseForm dengan daftar komponen.",
-            "status": "pending",
+            "status": "done",
             "details": "Komponen dikirim sebagai field berulang (components[i].sourceId/tag/rangeStart/rangeEnd); 1..10 komponen; tiap rentang divalidasi seperti sekarang; (aplikasi, tag) ganda ditolak; galat per baris dengan indeks komponen; pesan bahasa Inggris.",
-            "parentId": "40"
+            "parentId": "40",
+            "updatedAt": "2026-11-14T04:04:29.730Z"
           },
           {
             "id": 3,
             "title": "load.ts",
             "description": "ReleaseOverview gabungan.",
-            "status": "pending",
+            "status": "done",
             "details": "ReleaseOverview = { release, components: [{ component, sourceName, sourceActive, syncStatus, lastSyncedAt, tagFound, stats }], stats (agregat), tagsMissing }. Task dibaca sekali per pasangan (aplikasi, tag). Filter sourceId = release yang punya komponen aplikasi itu. sortOverviews dan previewRange dipertahankan; getSourceOptions tetap.",
-            "parentId": "40"
+            "parentId": "40",
+            "updatedAt": "2026-11-14T04:04:29.730Z"
           },
           {
             "id": 4,
             "title": "summary.ts dan params.ts",
             "description": "Ringkasan per aplikasi untuk Dashboard.",
-            "status": "pending",
+            "status": "done",
             "details": "summarizeReleases menghasilkan, per aplikasi, release yang memuat komponennya: nama, progres komponen aplikasi itu, risiko release, tanggal target. params tidak berubah selain bila perlu.",
-            "parentId": "40"
+            "parentId": "40",
+            "updatedAt": "2026-11-14T04:04:29.730Z"
           },
           {
             "id": 5,
             "title": "Tes",
             "description": "Perbarui tests/release-validate, release-load, release-summary, release-actions.",
-            "status": "pending",
+            "status": "done",
             "details": "Mock Supabase mengikuti bentuk baru; kasus duplikat komponen, 0 dan 11 komponen, nama ganda, filter aplikasi, tag tidak ditemukan pada satu komponen tidak menyembunyikan komponen lain.",
-            "parentId": "40"
+            "parentId": "40",
+            "updatedAt": "2026-11-14T04:04:29.730Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T04:04:29.730Z"
       },
       {
         "id": "41",
@@ -2027,9 +2033,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:00:27.290Z",
+      "lastModified": "2026-11-14T04:04:29.730Z",
       "taskCount": 44,
-      "completedCount": 29,
+      "completedCount": 30,
       "tags": [
         "master"
       ]

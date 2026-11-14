@@ -1,11 +1,15 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { computeRelease, tasksInRange, type ReleaseStats, type TaskInput } from "./model";
-import { RELEASE_COLUMNS, toRelease, type ReleaseRow } from "./repo";
+import {
+  aggregateRelease, computeRelease, tasksInRange,
+  type ReleaseAggregate, type ReleaseStats, type TaskInput,
+} from "./model";
+import { COMPONENT_COLUMNS, RELEASE_COLUMNS, toComponent, toRelease, type ComponentRow, type ReleaseRow } from "./repo";
 
-export type ReleaseOverview = {
-  release: ReleaseRow;
+/** Satu komponen release beserta sumbernya dan statistiknya sendiri (tanggal dari header release). */
+export type ComponentOverview = {
+  component: ComponentRow;
   sourceName: string;
   sourceActive: boolean;
   syncStatus: "never" | "success" | "failed";
@@ -13,6 +17,14 @@ export type ReleaseOverview = {
   /** false bila tag tidak punya task sama sekali pada data terakhir (tag berubah atau hilang). */
   tagFound: boolean;
   stats: ReleaseStats;
+};
+
+export type ReleaseOverview = {
+  release: ReleaseRow;
+  /** Urut menurut nama aplikasi lalu tag. Kosong bila semua aplikasinya sudah dihapus. */
+  components: ComponentOverview[];
+  /** Gabungan seluruh komponen. */
+  stats: ReleaseAggregate;
 };
 
 export type OverviewFilter = { id?: string; sourceId?: string; includeReleased?: boolean };
@@ -52,7 +64,6 @@ export function sortOverviews(list: ReleaseOverview[]): ReleaseOverview[] {
     if (ar && br) return br.localeCompare(ar) || a.release.name.localeCompare(b.release.name, "en");
     return (
       a.release.targetDate.localeCompare(b.release.targetDate) ||
-      a.sourceName.localeCompare(b.sourceName, "en") ||
       a.release.name.localeCompare(b.release.name, "en")
     );
   });
@@ -60,7 +71,7 @@ export function sortOverviews(list: ReleaseOverview[]): ReleaseOverview[] {
 
 /**
  * Release beserta statistiknya. Klien HARUS membawa sesi pengguna (RLS berlaku). Task dibaca satu kali
- * per pasangan (aplikasi, tag) yang dipakai, lalu dipakai bersama oleh semua release pada pasangan itu.
+ * per pasangan (aplikasi, tag) yang dipakai, lalu dipakai bersama oleh semua komponen pada pasangan itu.
  */
 export async function loadReleaseOverviews(
   db: SupabaseClient,
@@ -69,24 +80,40 @@ export async function loadReleaseOverviews(
 ): Promise<ReleaseOverview[]> {
   let q = db.from("releases").select(RELEASE_COLUMNS);
   if (filter.id) q = q.eq("id", filter.id);
-  if (filter.sourceId) q = q.eq("source_id", filter.sourceId);
+  if (filter.sourceId) {
+    // Release yang punya komponen dari aplikasi ini.
+    const mine = await db.from("release_components").select("release_id").eq("source_id", filter.sourceId);
+    if (mine.error) throw new Error(`Gagal membaca komponen release: ${mine.error.message}`);
+    const ids = [...new Set((mine.data as { release_id: string }[]).map((r) => r.release_id))];
+    if (ids.length === 0) return [];
+    q = q.in("id", ids);
+  }
   if (!filter.includeReleased && !filter.id) q = q.is("released_on", null);
   const rel = await q;
   if (rel.error) throw new Error(`Gagal membaca release: ${rel.error.message}`);
-  const releases = (rel.data as unknown as Parameters<typeof toRelease>[0][]).map(toRelease);
-  if (releases.length === 0) return [];
+  const headers = rel.data as unknown as Parameters<typeof toRelease>[0][];
+  if (headers.length === 0) return [];
 
-  const sourceIds = [...new Set(releases.map((r) => r.sourceId))];
-  const src = await db
-    .from("sources").select("id, name, is_active, last_sync_status, last_synced_at").in("id", sourceIds);
-  if (src.error) throw new Error(`Gagal membaca sumber: ${src.error.message}`);
-  const sources = new Map(
-    (src.data as { id: string; name: string; is_active: boolean; last_sync_status: ReleaseOverview["syncStatus"]; last_synced_at: string | null }[])
-      .map((s) => [s.id, s]),
-  );
+  const comps = await db
+    .from("release_components").select(COMPONENT_COLUMNS).in("release_id", headers.map((h) => h.id));
+  if (comps.error) throw new Error(`Gagal membaca komponen release: ${comps.error.message}`);
+  const components = (comps.data as unknown as Parameters<typeof toComponent>[0][]).map(toComponent);
+
+  const sourceIds = [...new Set(components.map((c) => c.sourceId))];
+  const sources = new Map<string, {
+    id: string; name: string; is_active: boolean; last_sync_status: ComponentOverview["syncStatus"]; last_synced_at: string | null;
+  }>();
+  if (sourceIds.length > 0) {
+    const src = await db
+      .from("sources").select("id, name, is_active, last_sync_status, last_synced_at").in("id", sourceIds);
+    if (src.error) throw new Error(`Gagal membaca sumber: ${src.error.message}`);
+    for (const s of src.data as { id: string; name: string; is_active: boolean; last_sync_status: ComponentOverview["syncStatus"]; last_synced_at: string | null }[]) {
+      sources.set(s.id, s);
+    }
+  }
 
   const pairs = new Map<string, { sourceId: string; tag: string }>();
-  for (const r of releases) pairs.set(`${r.sourceId}\u0000${r.tag}`, { sourceId: r.sourceId, tag: r.tag });
+  for (const c of components) pairs.set(`${c.sourceId}\u0000${c.tag}`, { sourceId: c.sourceId, tag: c.tag });
   const taskSets = new Map(
     await Promise.all(
       [...pairs].map(async ([key, p]) => [key, await fetchTagTasks(db, p.sourceId, p.tag)] as const),
@@ -94,18 +121,26 @@ export async function loadReleaseOverviews(
   );
 
   return sortOverviews(
-    releases.map((release): ReleaseOverview => {
-      const s = sources.get(release.sourceId);
-      const tasks = taskSets.get(`${release.sourceId}\u0000${release.tag}`) ?? [];
-      return {
-        release,
-        sourceName: s?.name ?? "(application not found)",
-        sourceActive: s?.is_active ?? false,
-        syncStatus: s?.last_sync_status ?? "never",
-        lastSyncedAt: s?.last_synced_at ?? null,
-        tagFound: tasks.length > 0,
-        stats: computeRelease(release, tasks, now),
-      };
+    headers.map((h): ReleaseOverview => {
+      const mine = components.filter((c) => c.releaseId === h.id);
+      const release = toRelease(h, mine);
+      const overviews = mine
+        .map((component): ComponentOverview => {
+          const s = sources.get(component.sourceId);
+          const tasks = taskSets.get(`${component.sourceId}\u0000${component.tag}`) ?? [];
+          return {
+            component,
+            sourceName: s?.name ?? "(application not found)",
+            sourceActive: s?.is_active ?? false,
+            syncStatus: s?.last_sync_status ?? "never",
+            lastSyncedAt: s?.last_synced_at ?? null,
+            tagFound: tasks.length > 0,
+            stats: computeRelease({ ...release, ...component }, tasks, now),
+          };
+        })
+        .sort((a, b) => a.sourceName.localeCompare(b.sourceName, "en") || a.component.tag.localeCompare(b.component.tag, "en"));
+      release.components = overviews.map((o) => o.component);
+      return { release, components: overviews, stats: aggregateRelease(release, overviews.map((o) => o.stats), now) };
     }),
   );
 }
