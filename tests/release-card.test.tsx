@@ -5,25 +5,13 @@ import { RiskBadge } from "@/components/releases/risk-badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
 import { formatDaysLeft, formatRange, formatYmd } from "@/lib/releases/format";
 import type { ReleaseOverview } from "@/lib/releases/load";
-import { computeRelease, type RiskLevel, type TaskInput } from "@/lib/releases/model";
+import type { RiskLevel } from "@/lib/releases/model";
 import { parseReleaseListParams, releaseListHref } from "@/lib/releases/params";
+import { overviewOf, REL_ID, SRC, SRC2, task, type Part } from "./fixtures/release-overview";
 
-const SRC = "11111111-1111-4111-8111-111111111111";
-const task = (id: number, status: string): TaskInput => ({
-  taskId: String(id), title: `T${id}`, status, priority: null, dependencies: [], subtasksTotal: 0, subtasksDone: 0,
-});
-
-function overview(tasks: TaskInput[], over: Partial<ReleaseOverview> = {}, releasedOn: string | null = null, now = "2026-11-11"): ReleaseOverview {
-  const release = {
-    id: "22222222-2222-4222-8222-222222222222", sourceId: SRC, tag: "master", name: "v2.1",
-    rangeStart: 100, rangeEnd: 200, startDate: "2026-11-01", targetDate: "2026-11-21", releasedOn, createdAt: "2026-11-01T00:00:00Z",
-  };
-  return {
-    release, sourceName: "Echo App", sourceActive: true, syncStatus: "success", lastSyncedAt: "2026-11-10T03:00:00Z",
-    tagFound: tasks.length > 0, stats: computeRelease(release, tasks, new Date(`${now}T12:00:00+07:00`)), ...over,
-  };
-}
 const html = (o: ReleaseOverview) => renderToStaticMarkup(<ReleaseCard overview={o} />);
+const one = (tasks: Part["tasks"], extra: Partial<Part> = {}, opts: Parameters<typeof overviewOf>[1] = {}) =>
+  overviewOf([{ tasks, ...extra }], opts);
 
 // 10 task (#100–#109): 5 selesai, 2 in progress, 1 pending, 1 blocked, 1 ditunda
 const mixed = [
@@ -31,13 +19,11 @@ const mixed = [
   task(107, "pending"), task(108, "blocked"), task(109, "deferred"),
 ];
 
-describe("kartu release", () => {
-  it("menampilkan aplikasi, nama, tag, rentang, jumlah, target, sisa hari, dan persen", () => {
-    const out = html(overview(mixed));
-    expect(out).toContain("Echo App · v2.1");
-    expect(out).toContain("Tag <strong>master</strong>");
-    expect(out).toContain("Range #100–#200");
-    expect(out).toContain("10 task");
+describe("kartu release (satu komponen)", () => {
+  it("menampilkan nama, jumlah, komponen, target, sisa hari, dan persen", () => {
+    const out = html(one(mixed));
+    expect(out).toContain(">v2.1<");
+    expect(out).toContain("10 tasks · 1 component");
     expect(out).toContain("Target 21 Nov 2026");
     expect(out).toContain("10 days left");
     expect(out).toContain(">50%<");
@@ -45,12 +31,19 @@ describe("kartu release", () => {
     expect(out).toContain("time elapsed 50%");
   });
 
+  it("baris komponen memuat aplikasi, tag, rentang, dan progres komponen", () => {
+    const out = html(one(mixed));
+    expect(out).toContain("Echo App");
+    expect(out).toContain("master · #100–#200");
+    expect(out).toContain("50% · 5/10");
+  });
+
   it("seluruh kartu menaut ke detail release", () => {
-    expect(html(overview(mixed))).toContain('href="/release/22222222-2222-4222-8222-222222222222"');
+    expect(html(one(mixed))).toContain(`href="/release/${REL_ID}"`);
   });
 
   it("ringkasan status: in progress (termasuk ditinjau), pending, blocked, deferred/cancelled terpisah", () => {
-    const out = html(overview(mixed));
+    const out = html(one(mixed));
     expect(out).toContain("2 in progress");
     expect(out).toContain("1 pending");
     expect(out).toContain("1 blocked");
@@ -58,33 +51,34 @@ describe("kartu release", () => {
   });
 
   it("tanpa blocked dan ditunda: bagian itu tidak ditampilkan", () => {
-    const out = html(overview([task(100, "done"), task(101, "pending")]));
+    const out = html(one([task(100, "done"), task(101, "pending")]));
     expect(out).not.toContain("blocked");
     expect(out).not.toContain("deferred/cancelled");
   });
 
   it("bar progres memakai role progressbar dengan nilai dan label", () => {
-    const out = html(overview(mixed));
+    const out = html(one(mixed));
     expect(out).toContain('role="progressbar"');
-    expect(out).toContain('aria-label="Progress Echo App v2.1"');
+    expect(out).toContain('aria-label="Progress v2.1"');
     expect(out).toContain('aria-valuenow="50"');
     expect(out).toContain('aria-valuetext="50% done"');
   });
 
   it("total nol: pesan jelas, bukan 0%", () => {
-    const out = html(overview([task(5, "done")]));
-    expect(out).toContain("No tasks in this range yet.");
+    const out = html(one([task(5, "done")]));
+    expect(out).toContain("No tasks in the ranges yet.");
+    expect(out).toContain("no tasks");
     expect(out).not.toContain(">0%<");
     expect(out).not.toContain("progressbar");
   });
 
-  it("tag hilang dari data: pesan khusus", () => {
-    const out = html(overview([], { tagFound: false }));
-    expect(out).toContain("Tag not found in the latest data.");
+  it("tag hilang dari data: catatan pada baris komponen", () => {
+    const out = html(one([], { tagFound: false }));
+    expect(out).toContain("tag not found in the latest data");
   });
 
   it("sudah rilis: tanggal rilis dan target, tanpa sisa hari", () => {
-    const out = html(overview(mixed, {}, "2026-11-19"));
+    const out = html(one(mixed, {}, { releasedOn: "2026-11-19" }));
     expect(out).toContain("Released 19 Nov 2026");
     expect(out).toContain("target 21 Nov 2026");
     expect(out).not.toContain("days left");
@@ -93,16 +87,58 @@ describe("kartu release", () => {
   });
 
   it("lewat target: sisa hari negatif ditandai merah dan penanda Overdue", () => {
-    const out = html(overview(mixed, {}, null, "2026-11-25"));
+    const out = html(one(mixed, {}, { now: "2026-11-25" }));
     expect(out).toContain("4 days overdue");
     expect(out).toContain("text-red-700");
     expect(out).toContain("Overdue");
   });
 
-  it("aplikasi nonaktif dan sinkron gagal diberi catatan", () => {
-    const out = html(overview(mixed, { sourceActive: false, syncStatus: "failed" }));
-    expect(out).toContain("Application is inactive.");
-    expect(out).toContain("The last sync failed; data is from");
+  it("aplikasi nonaktif dan sinkron gagal diberi catatan pada komponennya", () => {
+    const out = html(one(mixed, { sourceActive: false, syncStatus: "failed" }));
+    expect(out).toContain("application inactive");
+    expect(out).toContain("last sync failed, data from");
+  });
+});
+
+describe("kartu release (lintas aplikasi)", () => {
+  // Web 8 dari 10 selesai, Backend 1 dari 4 selesai.
+  const web = Array.from({ length: 10 }, (_, i) => task(100 + i, i < 8 ? "done" : "pending"));
+  const api = Array.from({ length: 4 }, (_, i) => task(20 + i, i < 1 ? "done" : "pending"));
+  const parts: Part[] = [
+    { tasks: web, sourceId: SRC, sourceName: "Web", tag: "master", rangeStart: 100, rangeEnd: 150 },
+    { tasks: api, sourceId: SRC2, sourceName: "Backend", tag: "main", rangeStart: 20, rangeEnd: 45 },
+  ];
+
+  it("progres gabungan dari jumlah task dan satu baris per komponen", () => {
+    const out = html(overviewOf(parts, { name: "2.1" }));
+    expect(out).toContain("14 tasks · 2 components");
+    expect(out).toContain(">64%<"); // 9 dari 14
+    expect(out).toContain("9 of 14 done");
+    expect(out).toContain("Web");
+    expect(out).toContain("master · #100–#150");
+    expect(out).toContain("80% · 8/10");
+    expect(out).toContain("Backend");
+    expect(out).toContain("main · #20–#45");
+    expect(out).toContain("25% · 1/4");
+  });
+
+  it("catatan data hanya pada komponen yang bermasalah", () => {
+    const out = html(overviewOf([parts[0], { ...parts[1], syncStatus: "failed" }]));
+    expect(out.match(/last sync failed/g)).toHaveLength(1);
+  });
+
+  it("komponen kosong tampil 'no tasks' tanpa mengganggu komponen lain", () => {
+    const out = html(overviewOf([parts[0], { ...parts[1], tasks: [] }]));
+    expect(out).toContain("no tasks");
+    expect(out).toContain("80% · 8/10");
+  });
+
+  it("release tanpa komponen (aplikasinya dihapus)", () => {
+    const o = overviewOf(parts);
+    const empty: ReleaseOverview = { ...o, components: [], release: { ...o.release, components: [] } };
+    const out = html({ ...empty, stats: { ...empty.stats, total: 0, percentDone: null } });
+    expect(out).toContain("No components");
+    expect(out).not.toContain("progressbar");
   });
 });
 

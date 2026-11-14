@@ -1899,7 +1899,7 @@
         "id": "42",
         "title": "Release multi-aplikasi: kartu, detail, dan daftar release",
         "description": "Tampilan progres gabungan dan rincian per komponen.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "40"
@@ -1911,43 +1911,49 @@
             "id": 1,
             "title": "release-card",
             "description": "Kartu daftar.",
-            "status": "pending",
+            "status": "done",
             "details": "Progres gabungan, risiko, sisa hari, dan satu baris ringkas per komponen (\"Web #100-150 · 75%\"); komponen dengan tag tidak ditemukan atau sinkronisasi gagal diberi penanda.",
-            "parentId": "42"
+            "parentId": "42",
+            "updatedAt": "2026-11-14T04:16:46.874Z"
           },
           {
             "id": 2,
             "title": "release-detail: ringkasan dan Components",
             "description": "Detail.",
-            "status": "pending",
+            "status": "done",
             "details": "Ringkasan gabungan (total, selesai, progres, sisa hari, risiko). Bagian Components: blok per komponen (aplikasi, tag, rentang, jumlah task, progres, rincian status, risiko, sinkronisasi). Komponen penyebab At risk disebut.",
-            "parentId": "42"
+            "parentId": "42",
+            "updatedAt": "2026-11-14T04:16:46.874Z"
           },
           {
             "id": 3,
             "title": "release-detail: daftar task dan perhatian",
             "description": "Per komponen.",
-            "status": "pending",
+            "status": "done",
             "details": "Tabel task dikelompokkan per komponen; bagian Needs attention (terhambat, menunggu dependensi, ditunda, dibatalkan) dengan label aplikasi pada tiap baris. Tombol Edit/Mark as released/Delete tetap untuk seluruh release; dialog hapus menyebut jumlah komponen.",
-            "parentId": "42"
+            "parentId": "42",
+            "updatedAt": "2026-11-14T04:16:46.874Z"
           },
           {
             "id": 4,
             "title": "release-filter dan page",
             "description": "Filter aplikasi.",
-            "status": "pending",
+            "status": "done",
             "details": "Filter menampilkan release yang memuat aplikasi itu; urutan dan show released tidak berubah.",
-            "parentId": "42"
+            "parentId": "42",
+            "updatedAt": "2026-11-14T04:16:46.874Z"
           },
           {
             "id": 5,
             "title": "Tes dan visual",
             "description": "Vitest dan puppeteer.",
-            "status": "pending",
+            "status": "done",
             "details": "Tes render untuk 1 dan 2 komponen; tangkapan layar desktop dan ponsel, terang dan gelap.",
-            "parentId": "42"
+            "parentId": "42",
+            "updatedAt": "2026-11-14T04:16:46.874Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T04:16:46.874Z"
       },
       {
         "id": "43",
@@ -2038,9 +2044,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:08:14.448Z",
+      "lastModified": "2026-11-14T04:16:46.874Z",
       "taskCount": 44,
-      "completedCount": 31,
+      "completedCount": 32,
       "tags": [
         "master"
       ]

@@ -49,11 +49,11 @@ async function ReleaseContent({ searchParams }: { searchParams: SearchParams }) 
     <AppShell user={user}>
       <PageHeader
         title="Release"
-        description="Release targets per application: task range, progress, time left, and blockers."
+        description="Release targets across one or more applications: task ranges, progress, time left, and blockers."
         actions={
           isAdmin && (
             <Link href="/release/baru" className={buttonVariants()}>
-              <Plus aria-hidden="true" /> Tambah release
+              <Plus aria-hidden="true" /> Add release
             </Link>
           )
         }

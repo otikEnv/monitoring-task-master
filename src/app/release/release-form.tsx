@@ -188,8 +188,11 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
 
-  const patchRow = (key: number, patch: Partial<ComponentInitial>) =>
+  const patchRow = (key: number, patch: Partial<ComponentInitial>) => {
     setList((l) => ({ ...l, rows: l.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) }));
+    // Galat server pada baris ini sudah tidak berlaku setelah isiannya diubah.
+    setErrors((e) => (e.items?.[key] ? { ...e, items: { ...e.items, [key]: {} } } : e));
+  };
   const addRow = () =>
     setList((l) => (l.rows.length >= MAX_COMPONENTS ? l : { rows: [...l.rows, { ...EMPTY_ROW, key: l.next }], next: l.next + 1 }));
   const removeRow = (key: number) =>
