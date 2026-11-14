@@ -6,10 +6,12 @@ import { requireAdmin } from "@/lib/auth";
 import { previewRange as loadPreview } from "@/lib/releases/load";
 import { wibDay } from "@/lib/releases/model";
 import {
-  DuplicateReleaseError, ReleaseNotFoundError, SourceTagError, assertSourceTag, createRelease,
+  DuplicateReleaseError, ReleaseNotFoundError, SourceTagError, assertComponents, createRelease,
   deleteRelease, setReleasedOn, updateRelease,
 } from "@/lib/releases/repo";
-import { UUID, parseRangeNumber, parseReleaseForm, type ReleaseFieldErrors } from "@/lib/releases/validate";
+import {
+  UUID, componentIndexes, parseRangeNumber, parseReleaseForm, type ReleaseFieldErrors,
+} from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
 
 // Semua action di sini dipanggil dari klien lewat HTTP: requireAdmin() WAJIB di baris pertama
@@ -28,7 +30,10 @@ const idFrom = (fd: FormData): string | null => {
   return typeof v === "string" && UUID.test(v) ? v : null;
 };
 
-/** Menyimpan release baru (tanpa id) atau perubahan (dengan id). Sukses = redirect ke detail release. */
+/**
+ * Menyimpan release baru (tanpa id) atau perubahan (dengan id) beserta seluruh komponennya, secara atomik.
+ * Sukses = redirect ke detail release.
+ */
 export async function saveRelease(formData: FormData): Promise<SaveReleaseResult> {
   await requireAdmin();
 
@@ -41,11 +46,15 @@ export async function saveRelease(formData: FormData): Promise<SaveReleaseResult
 
   let savedId = id;
   try {
-    await assertSourceTag(parsed.value.sourceId, parsed.value.tag);
+    await assertComponents(parsed.value.components);
     if (id) await updateRelease(id, parsed.value);
     else savedId = (await createRelease(parsed.value)).id;
   } catch (e) {
-    if (e instanceof SourceTagError) return { ok: false, fieldErrors: { [e.field]: e.message } };
+    if (e instanceof SourceTagError) {
+      // e.index = posisi pada daftar tervalidasi; galat dipetakan ke nomor baris pada form.
+      const row = componentIndexes(formData)[e.index] ?? e.index;
+      return { ok: false, fieldErrors: { items: { [row]: { [e.field]: e.message } } } };
+    }
     if (e instanceof DuplicateReleaseError) return { ok: false, fieldErrors: { name: e.message } };
     if (e instanceof ReleaseNotFoundError) return { ok: false, error: e.message };
     fail("menyimpan", e);

@@ -37,20 +37,22 @@ async function NewReleaseContent({ searchParams }: { searchParams: SearchParams 
 
   return (
     <AppShell user={user} width="narrow">
-      <PageHeader title="Add release" description="A release target with a task number range on one application and tag." />
+      <PageHeader title="Add release" description="A release target with a task number range for each application it covers." />
       {!sources ? (
         <LoadError title="The application options could not be loaded." />
       ) : (
         <ReleaseForm
           sources={sources}
           initial={{
-            sourceId: preset?.id ?? "",
-            tag: preset && preset.tags.length === 1 ? preset.tags[0] : "",
             name: "",
-            rangeStart: "",
-            rangeEnd: "",
             startDate: "",
             targetDate: "",
+            components: [{
+              sourceId: preset?.id ?? "",
+              tag: preset && preset.tags.length === 1 ? preset.tags[0] : "",
+              rangeStart: "",
+              rangeEnd: "",
+            }],
           }}
         />
       )}

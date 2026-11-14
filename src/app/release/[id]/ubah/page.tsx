@@ -41,22 +41,25 @@ async function EditReleaseContent({ params }: { params: Promise<{ id: string }> 
   }
   if (!release) notFound();
 
+  // Urut menurut nama aplikasi lalu tag, sama dengan halaman detail.
+  const nameOf = (sourceId: string) => sources.find((s) => s.id === sourceId)?.name ?? "";
+  const components = [...release.components]
+    .sort((a, b) => nameOf(a.sourceId).localeCompare(nameOf(b.sourceId), "en") || a.tag.localeCompare(b.tag, "en"))
+    .map((c) => ({ sourceId: c.sourceId, tag: c.tag, rangeStart: String(c.rangeStart), rangeEnd: String(c.rangeEnd) }));
+
   return (
     <AppShell user={user} width="narrow">
       <PageHeader title={`Edit release: ${release.name}`} />
       {/* key: form dibangun ulang bila data release berubah */}
       <ReleaseForm
-        key={`${release.id}-${release.tag}-${release.rangeStart}-${release.rangeEnd}-${release.targetDate}-${release.startDate}`}
+        key={`${release.id}-${release.name}-${release.targetDate}-${release.startDate}-${JSON.stringify(components)}`}
         sources={sources}
         initial={{
           id: release.id,
-          sourceId: release.sourceId,
-          tag: release.tag,
           name: release.name,
-          rangeStart: String(release.rangeStart),
-          rangeEnd: String(release.rangeEnd),
           startDate: release.startDate,
           targetDate: release.targetDate,
+          components,
         }}
       />
     </AppShell>

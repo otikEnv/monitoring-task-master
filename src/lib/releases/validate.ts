@@ -64,7 +64,7 @@ export function parseRangeNumber(raw: string): number | null {
 }
 
 /** Nomor baris komponen yang ada pada form, urut naik. */
-function componentIndexes(fd: FormData): number[] {
+export function componentIndexes(fd: FormData): number[] {
   const set = new Set<number>();
   for (const key of fd.keys()) {
     const m = COMPONENT_KEY.exec(key);

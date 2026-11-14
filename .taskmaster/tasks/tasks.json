@@ -1848,7 +1848,7 @@
         "id": "41",
         "title": "Release multi-aplikasi: form admin dan server action",
         "description": "Form dengan komponen berulang dan saveRelease multi-komponen.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "40"
@@ -1860,35 +1860,40 @@
             "id": 1,
             "title": "Daftar komponen berulang di form",
             "description": "release-form.tsx (client).",
-            "status": "pending",
+            "status": "done",
             "details": "Header: nama, tanggal mulai, tanggal target. Baris komponen: aplikasi, tag (otomatis bila satu), task awal/akhir, pratinjau jumlah task per baris (previewRange, debounce seperti sekarang). Tombol Add component (maks 10) dan hapus per baris (minimal 1). Nilai awal dari release saat ubah.",
-            "parentId": "41"
+            "parentId": "41",
+            "updatedAt": "2026-11-14T04:08:14.448Z"
           },
           {
             "id": 2,
             "title": "saveRelease",
             "description": "actions.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Parse komponen lewat validate.ts, assertSourceTag per komponen, simpan atomik; galat per baris dikembalikan dengan indeks; DuplicateReleaseError menjadi galat pada nama; revalidatePath /release dan /.",
-            "parentId": "41"
+            "parentId": "41",
+            "updatedAt": "2026-11-14T04:08:14.448Z"
           },
           {
             "id": 3,
             "title": "Halaman baru dan ubah",
             "description": "Muat opsi aplikasi dan komponen release.",
-            "status": "pending",
+            "status": "done",
             "details": "[id]/ubah mengisi komponen yang ada; baru dimulai dengan satu komponen kosong. Tautan dan breadcrumb tetap.",
-            "parentId": "41"
+            "parentId": "41",
+            "updatedAt": "2026-11-14T04:08:14.448Z"
           },
           {
             "id": 4,
             "title": "Tes dan pemeriksaan interaksi",
             "description": "Vitest dan puppeteer.",
-            "status": "pending",
+            "status": "done",
             "details": "Tes render dan action; puppeteer: buat release dua komponen (aplikasi nyata), ubah, nama ganda ditolak, tag ganda ditolak; bersihkan data uji (jangan menyentuh release 2.1).",
-            "parentId": "41"
+            "parentId": "41",
+            "updatedAt": "2026-11-14T04:08:14.448Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T04:08:14.448Z"
       },
       {
         "id": "42",
@@ -2033,9 +2038,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:04:29.730Z",
+      "lastModified": "2026-11-14T04:08:14.448Z",
       "taskCount": 44,
-      "completedCount": 30,
+      "completedCount": 31,
       "tags": [
         "master"
       ]
