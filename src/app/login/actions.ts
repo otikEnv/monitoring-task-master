@@ -1,6 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ALLOWED_EMAIL_DOMAIN } from "@/lib/auth-domain";
 import { createClient } from "@/lib/supabase/server";
 
 export type LoginState = { error?: string } | undefined;
@@ -26,6 +28,30 @@ export async function login(
 
   // Tujuan tetap "/" (tanpa parameter next) untuk menghindari open redirect.
   redirect("/");
+}
+
+export async function loginWithGoogle() {
+  // Alamat aplikasi dari header permintaan (Vercel mengisi x-forwarded-*). Supabase hanya
+  // menerima redirectTo yang cocok dengan daftar Redirect URLs, jadi nilai palsu ditolak.
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const isLocal = !host || /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host);
+  const proto = h.get("x-forwarded-proto") ?? (isLocal ? "http" : "https");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${proto}://${host ?? "localhost:3000"}/auth/callback`,
+      // Hanya petunjuk tampilan pemilih akun Google; batas domain ditegakkan di database dan callback.
+      queryParams: { hd: ALLOWED_EMAIL_DOMAIN },
+    },
+  });
+
+  if (error || !data.url) {
+    redirect("/login?error=oauth");
+  }
+  redirect(data.url);
 }
 
 export async function logout() {

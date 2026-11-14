@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Rute yang boleh diakses tanpa login.
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/auth/callback"];
 
 /**
  * Menyegarkan sesi Supabase dan melakukan cek awal (optimistic) login.

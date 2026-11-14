@@ -1495,7 +1495,7 @@
         "id": "34",
         "title": "SSO: server action loginWithGoogle dan rute callback",
         "description": "Mulai OAuth Google dan tukar kode menjadi sesi dengan pengecekan domain.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "32"
@@ -1507,35 +1507,40 @@
             "id": 1,
             "title": "Action loginWithGoogle",
             "description": "src/app/login/actions.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "signInWithOAuth({ provider: 'google', options: { redirectTo: <origin>/auth/callback, queryParams: { hd: 'envisions.app' } } }) lalu redirect(data.url). Origin dari headers() (x-forwarded-host/proto, lalu host); jangan menerima origin dari input pengguna.",
-            "parentId": "34"
+            "parentId": "34",
+            "updatedAt": "2026-11-14T03:25:52.635Z"
           },
           {
             "id": 2,
             "title": "Rute /auth/callback",
             "description": "src/app/auth/callback/route.ts (baru).",
-            "status": "pending",
+            "status": "done",
             "details": "GET: ambil code, exchangeCodeForSession. Gagal atau tanpa code -> redirect /login?error=oauth. Sukses -> baca user; bila email tidak berakhiran @envisions.app (huruf kecil) atau belum terverifikasi -> signOut lalu /login?error=domain. Selain itu redirect /.",
-            "parentId": "34"
+            "parentId": "34",
+            "updatedAt": "2026-11-14T03:25:52.635Z"
           },
           {
             "id": 3,
             "title": "Izinkan /auth/callback tanpa login",
             "description": "src/lib/supabase/proxy.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambahkan ke PUBLIC_PATHS. Pastikan pengguna yang sudah login yang membuka /auth/callback tetap tidak membuat lingkaran redirect.",
-            "parentId": "34"
+            "parentId": "34",
+            "updatedAt": "2026-11-14T03:25:52.635Z"
           },
           {
             "id": 4,
             "title": "Tes unit",
             "description": "tests/login-google.test.ts dan tests/auth-callback.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Pola vi.mock seperti release-actions.test.ts; gunakan vi.resetAllMocks di beforeEach.",
-            "parentId": "34"
+            "parentId": "34",
+            "updatedAt": "2026-11-14T03:25:52.635Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T03:25:52.635Z"
       },
       {
         "id": "35",
@@ -1663,9 +1668,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:22:47.864Z",
+      "lastModified": "2026-11-14T03:25:52.635Z",
       "taskCount": 37,
-      "completedCount": 24,
+      "completedCount": 25,
       "tags": [
         "master"
       ]
