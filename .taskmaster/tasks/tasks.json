@@ -1395,7 +1395,7 @@
         "id": "32",
         "title": "SSO: migrasi database domain dan peran admin",
         "description": "Trigger penolak akun non-@envisions.app dan peran admin otomatis untuk akun Google.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-Login-SSO-Google.md, bagian Penegakan batas domain dan Peran admin otomatis. Dijalankan langsung dengan npm run db:run (bukan manual di SQL editor).",
@@ -1405,35 +1405,40 @@
             "id": 1,
             "title": "Tulis migrasi google_sso",
             "description": "supabase/migrations/<ts>_google_sso.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "BEFORE INSERT trigger pada auth.users: tolak SEMUA akun baru (semua penyedia) yang emailnya tidak berakhiran @envisions.app (perbandingan huruf kecil) dengan raise exception. Ganti handle_new_user(): raw_app_meta_data->>'provider' = 'google' mendapat role admin, selain itu viewer. Fungsi security definer, search_path kosong, revoke execute dari public/anon/authenticated seperti fungsi yang ada.",
-            "parentId": "32"
+            "parentId": "32",
+            "updatedAt": "2026-11-14T03:21:04.853Z"
           },
           {
             "id": 2,
             "title": "Tes SQL",
             "description": "supabase/tests/google_sso_test.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Pola sama dengan releases_test.sql (rollback di akhir, notice 'UJI GOOGLE SSO LOLOS'): kasus google envisions -> admin, email envisions -> viewer, google domain lain -> exception, email domain lain -> exception, huruf besar pada domain tetap diterima.",
-            "parentId": "32"
+            "parentId": "32",
+            "updatedAt": "2026-11-14T03:21:04.853Z"
           },
           {
             "id": 3,
             "title": "Terapkan dan verifikasi",
             "description": "npm run db:run untuk migrasi dan tes.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan migrasi lalu tes SQL. Pastikan akun lama tidak berubah perannya. Catat bahwa toggle 'Allow new users to sign up' sudah menyala, jadi migrasi ini harus segera diterapkan.",
-            "parentId": "32"
+            "parentId": "32",
+            "updatedAt": "2026-11-14T03:21:04.853Z"
           },
           {
             "id": 4,
             "title": "Perbarui supabase/README.md",
             "description": "Dokumentasi migrasi baru.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambahkan baris migrasi, tes, dan penjelasan singkat aturan domain serta peran bawaan.",
-            "parentId": "32"
+            "parentId": "32",
+            "updatedAt": "2026-11-14T03:21:04.853Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T03:21:04.853Z"
       },
       {
         "id": "33",
@@ -1653,9 +1658,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T03:13:24.295Z",
+      "lastModified": "2026-11-14T03:21:04.853Z",
       "taskCount": 37,
-      "completedCount": 22,
+      "completedCount": 23,
       "tags": [
         "master"
       ]
