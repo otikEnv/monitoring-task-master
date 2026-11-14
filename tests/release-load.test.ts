@@ -19,6 +19,7 @@ function fakeDb(handlers: Record<string, (q: Q) => unknown>) {
       for (const m of ["select", "order"]) chain[m] = () => chain;
       for (const m of ["eq", "in", "is"]) chain[m] = (col: string, v: unknown) => { q.filters[`${m}:${col}`] = v; return chain; };
       chain.range = (a: number, b: number) => { q.range = [a, b]; return chain; };
+      chain.or = (expr: string) => { q.filters.or = expr; return chain; };
       chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
         calls.push(table);
         return Promise.resolve(handlers[table](q)).then(res, rej);
@@ -146,6 +147,19 @@ describe("loadReleaseOverviews", () => {
     expect(seen).not.toHaveProperty("is:released_on");
   });
 
+  it("release terarsip disembunyikan secara bawaan; tetap terbaca lewat id atau includeArchived", async () => {
+    let seen: Record<string, unknown> = {};
+    const { db } = fakeDb({ releases: (q) => { seen = q.filters; return { data: [], error: null }; } });
+    await loadReleaseOverviews(db);
+    expect(seen).toMatchObject({ "is:archived_at": null });
+    await loadReleaseOverviews(db, { includeReleased: true });
+    expect(seen).toMatchObject({ "is:archived_at": null });
+    await loadReleaseOverviews(db, { includeArchived: true });
+    expect(seen).not.toHaveProperty("is:archived_at");
+    await loadReleaseOverviews(db, { id: "x" });
+    expect(seen).not.toHaveProperty("is:archived_at");
+  });
+
   it("filter aplikasi: release yang punya komponen aplikasi itu", async () => {
     let seen: Record<string, unknown> = {};
     const { db, calls } = fakeDb({
@@ -200,6 +214,25 @@ describe("loadSourceOptions", () => {
       { id: "a", name: "Alfa", tags: ["master", "mobile"] },
       { id: "b", name: "Beta", tags: [] },
     ]);
+  });
+
+  it("aplikasi terarsip tidak ditawarkan, kecuali yang dipertahankan (komponen release yang diubah)", async () => {
+    let seen: Record<string, unknown> = {};
+    const { db } = fakeDb({
+      sources: (q) => { seen = q.filters; return { data: [], error: null }; },
+      source_tags: () => ({ data: [], error: null }),
+    });
+    await loadSourceOptions(db);
+    expect(seen).toMatchObject({ "is:archived_at": null });
+    expect(seen).not.toHaveProperty("or");
+
+    const id = "11111111-1111-4111-8111-111111111111";
+    await loadSourceOptions(db, [id]);
+    expect(seen.or).toBe(`archived_at.is.null,id.in.(${id})`);
+    // id yang bukan UUID tidak pernah disisipkan ke ekspresi filter
+    await loadSourceOptions(db, ["x),id.eq.1"]);
+    expect(seen).toMatchObject({ "is:archived_at": null });
+    expect(seen).not.toHaveProperty("or");
   });
 
   it("galat database dilaporkan", async () => {

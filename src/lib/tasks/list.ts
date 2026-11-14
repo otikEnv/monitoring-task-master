@@ -60,12 +60,15 @@ const TIE_BREAKERS: Array<{ column: string; nullsLast?: boolean }> = [
 export async function loadTaskList(db: SupabaseClient, requested: TaskListParams): Promise<TaskListResult> {
   // 1. Opsi filter dulu: tag dari URL yang tidak ada pada aplikasi terpilih (mis. URL lama, atau aplikasi
   //    diganti) diabaikan dan dilaporkan, bukan menghasilkan daftar kosong yang membingungkan.
-  const tagQuery = db.from("source_tags").select("tag");
-  const [sources, tagRows] = await Promise.all([
-    db.from("sources").select("id, name").order("name", { ascending: true }),
-    requested.source ? tagQuery.eq("source_id", requested.source) : tagQuery,
-  ]);
+  //    Aplikasi yang diarsipkan tidak ada di pilihan, dan tag-nya tidak ikut (PRD-Archive.md); daftar task
+  //    sendiri sudah menyaringnya lewat view task_list.
+  const sources = await db.from("sources").select("id, name").is("archived_at", null).order("name", { ascending: true });
   if (sources.error) throw new Error(`Gagal membaca sumber: ${sources.error.message}`);
+  const visibleIds = (sources.data as { id: string }[]).map((s) => s.id);
+  const tagQuery = db.from("source_tags").select("tag");
+  const tagRows = requested.source
+    ? await tagQuery.eq("source_id", requested.source).in("source_id", visibleIds)
+    : visibleIds.length > 0 ? await tagQuery.in("source_id", visibleIds) : { data: [], error: null };
   if (tagRows.error) throw new Error(`Gagal membaca tag: ${tagRows.error.message}`);
 
   const tags = [...new Set((tagRows.data as { tag: string }[]).map((t) => t.tag))].sort((a, b) =>

@@ -35,7 +35,8 @@ export async function loadTrend(
   requested: TrendParams,
   now: number = Date.now(),
 ): Promise<TrendData> {
-  const sourcesRes = await db.from("sources").select("id, name, is_active").order("name", { ascending: true });
+  // Aplikasi yang diarsipkan tidak ada di pilihan maupun gabungan (view source_snapshot_totals juga menyaringnya).
+  const sourcesRes = await db.from("sources").select("id, name, is_active").is("archived_at", null).order("name", { ascending: true });
   if (sourcesRes.error) throw new Error(`Gagal membaca sumber: ${sourcesRes.error.message}`);
   const sources = (sourcesRes.data as { id: string; name: string; is_active: boolean }[]).map((s) => ({
     id: s.id, name: s.name, isActive: s.is_active,

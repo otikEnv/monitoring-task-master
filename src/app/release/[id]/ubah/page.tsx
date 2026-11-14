@@ -30,7 +30,9 @@ async function EditReleaseContent({ params }: { params: Promise<{ id: string }> 
   let release: ReleaseRow | null;
   let sources: SourceOption[];
   try {
-    [release, sources] = await Promise.all([getRelease(await createClient(), id.toLowerCase()), getSourceOptions()]);
+    release = await getRelease(await createClient(), id.toLowerCase());
+    // Komponen yang memakai aplikasi terarsip tetap harus bisa dipilih saat mengubah.
+    sources = await getSourceOptions(release?.components.map((c) => c.sourceId) ?? []);
   } catch (e) {
     console.error("[release] gagal memuat form ubah", { error: (e as Error)?.name });
     return (

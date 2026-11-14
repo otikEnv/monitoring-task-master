@@ -37,7 +37,7 @@ async function ReleaseContent({ searchParams }: { searchParams: SearchParams }) 
     const db = await createClient();
     const [overviews, sources] = await Promise.all([
       loadReleaseOverviews(db, { sourceId: params.source ?? undefined, includeReleased: params.showReleased }),
-      db.from("sources").select("id, name").order("name", { ascending: true }),
+      db.from("sources").select("id, name").is("archived_at", null).order("name", { ascending: true }),
     ]);
     if (sources.error) throw new Error(sources.error.message);
     data = { overviews, sources: sources.data as { id: string; name: string }[] };

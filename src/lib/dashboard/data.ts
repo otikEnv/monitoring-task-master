@@ -19,7 +19,8 @@ export async function loadDashboardData(
   now: number = Date.now(),
 ): Promise<DashboardData> {
   const [sources, counts, releases] = await Promise.all([
-    db.from("sources").select(SOURCE_COLUMNS).order("name", { ascending: true }),
+    // Aplikasi yang diarsipkan tidak tampil di Dashboard (PRD-Archive.md).
+    db.from("sources").select(SOURCE_COLUMNS).is("archived_at", null).order("name", { ascending: true }),
     db.from("source_status_counts").select("*"),
     // Kegagalan memuat release tidak boleh menggagalkan seluruh dashboard.
     loadReleaseOverviews(db, {}, new Date(now))

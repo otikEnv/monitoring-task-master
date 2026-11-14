@@ -2172,7 +2172,7 @@
         "id": "47",
         "title": "Archive: sembunyikan item terarsip di Dashboard, Release, Task list, Trend",
         "description": "Penyaringan di semua tempat sesuai PRD, kecuali jalur detail dan Source settings.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "46"
@@ -2184,51 +2184,58 @@
             "id": 1,
             "title": "Dashboard",
             "description": "src/lib/dashboard/data.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Kartu aplikasi terarsip tidak dimuat (filter archived_at is null pada sources); ringkasan release (summarizeReleases) mengabaikan release terarsip. Ringkasan angka Dashboard tidak menghitung aplikasi terarsip.",
-            "parentId": "47"
+            "parentId": "47",
+            "updatedAt": "2026-11-14T05:12:09.949Z"
           },
           {
             "id": 2,
             "title": "Daftar Release",
             "description": "src/lib/releases/load.ts dan src/app/release/page.tsx.",
-            "status": "pending",
+            "status": "done",
             "details": "loadReleaseOverviews menyaring release terarsip (kecuali jalur detail by id dan jalur halaman Archive); filter aplikasi dan pilihan aplikasi tidak menawarkan aplikasi terarsip; 'Show released' tidak memunculkan release terarsip.",
-            "parentId": "47"
+            "parentId": "47",
+            "updatedAt": "2026-11-14T05:12:09.949Z"
           },
           {
             "id": 3,
             "title": "Form release",
             "description": "Pilihan aplikasi komponen baru.",
-            "status": "pending",
+            "status": "done",
             "details": "loadSourceOptions tidak menawarkan aplikasi terarsip untuk komponen baru, tetapi komponen yang sudah memakai aplikasi terarsip tetap tampil saat ubah (pola 'tag lama tetap tampil').",
-            "parentId": "47"
+            "parentId": "47",
+            "updatedAt": "2026-11-14T05:12:09.949Z"
           },
           {
             "id": 4,
             "title": "Task list dan Trend",
             "description": "src/lib/tasks/list.ts dan src/lib/trend/data.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Pilihan filter aplikasi dan hasil menyaring aplikasi terarsip (lewat view yang diperbarui di task 45 dan filter pada query sources). Gabungan 'All applications' di Trend tidak menghitungnya.",
-            "parentId": "47"
+            "parentId": "47",
+            "updatedAt": "2026-11-14T05:12:09.949Z"
           },
           {
             "id": 5,
             "title": "Source settings",
             "description": "Penanda Archived.",
-            "status": "pending",
+            "status": "done",
             "details": "src/lib/sources/repo.ts tetap membaca semua aplikasi; tabel di Source settings menampilkan badge 'Archived' pada baris terarsip.",
-            "parentId": "47"
+            "parentId": "47",
+            "updatedAt": "2026-11-14T05:12:09.949Z"
           },
           {
             "id": 6,
             "title": "Tes",
             "description": "Perbarui tes yang ada dan tambah kasus arsip.",
-            "status": "pending",
+            "status": "done",
             "details": "release-load, release-summary, dashboard-cards, task-list/trend (mock) dan tes live: arsipkan lalu pulihkan; release yang memuat aplikasi terarsip tetap dihitung.",
-            "parentId": "47"
+            "parentId": "47",
+            "updatedAt": "2026-11-14T05:12:09.949Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T05:12:09.949Z"
       },
       {
         "id": "48",
@@ -2389,9 +2396,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T05:06:58.427Z",
+      "lastModified": "2026-11-14T05:12:09.949Z",
       "taskCount": 50,
-      "completedCount": 36,
+      "completedCount": 37,
       "tags": [
         "master"
       ]

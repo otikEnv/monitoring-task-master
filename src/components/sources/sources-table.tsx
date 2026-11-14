@@ -73,7 +73,10 @@ export function SourcesTable({ sources }: { sources: SourceView[] }) {
               <TableCell><TokenCell s={s} /></TableCell>
               <TableCell><SyncBadge s={s} /></TableCell>
               <TableCell>
-                {s.isActive ? <Badge variant="secondary">Active</Badge> : <Badge variant="outline">Inactive</Badge>}
+                <div className="flex flex-wrap gap-1">
+                  {s.isActive ? <Badge variant="secondary">Active</Badge> : <Badge variant="outline">Inactive</Badge>}
+                  {s.archivedAt && <Badge variant="outline">Archived</Badge>}
+                </div>
               </TableCell>
               <TableCell><RowActions id={s.id} name={s.name} isActive={s.isActive} /></TableCell>
             </TableRow>

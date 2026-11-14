@@ -143,3 +143,18 @@ describe("status dan aksi", () => {
     for (const h of ["Application", "Repo", "Token", "Sync", "Status", "Actions"]) expect(html).toContain(`>${h}</th>`);
   });
 });
+
+describe("status arsip", () => {
+  it("aplikasi terarsip diberi penanda Archived; yang aktif tidak", () => {
+    expect(render(view())).not.toContain("Archived");
+    const html = render(view({ archivedAt: "2026-11-14T00:00:00Z" }));
+    expect(html).toContain("Archived");
+    expect(html).toContain("Active"); // status aktif/nonaktif tetap terlihat, terpisah dari arsip
+  });
+
+  it("penanda arsip bersama status nonaktif", () => {
+    const html = render(view({ isActive: false, archivedAt: "2026-11-14T00:00:00Z" }));
+    expect(html).toContain("Inactive");
+    expect(html).toContain("Archived");
+  });
+});

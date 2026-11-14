@@ -27,7 +27,13 @@ export type ReleaseOverview = {
   stats: ReleaseAggregate;
 };
 
-export type OverviewFilter = { id?: string; sourceId?: string; includeReleased?: boolean };
+export type OverviewFilter = {
+  id?: string;
+  sourceId?: string;
+  includeReleased?: boolean;
+  /** Release yang diarsipkan disembunyikan, kecuali bila dibaca lewat id (detail) atau diminta di sini. */
+  includeArchived?: boolean;
+};
 
 const PAGE = 1000; // batas baris per permintaan PostgREST
 const TASK_COLUMNS = "task_id, title, status, priority, dependencies, subtasks_total, subtasks_done";
@@ -89,6 +95,7 @@ export async function loadReleaseOverviews(
     q = q.in("id", ids);
   }
   if (!filter.includeReleased && !filter.id) q = q.is("released_on", null);
+  if (!filter.includeArchived && !filter.id) q = q.is("archived_at", null);
   const rel = await q;
   if (rel.error) throw new Error(`Gagal membaca release: ${rel.error.message}`);
   const headers = rel.data as unknown as Parameters<typeof toRelease>[0][];
@@ -169,10 +176,19 @@ export async function previewRange(
 
 export type SourceOption = { id: string; name: string; tags: string[] };
 
-/** Aplikasi beserta tag-nya, untuk pilihan pada form release. Klien HARUS membawa sesi pengguna. */
-export async function loadSourceOptions(db: SupabaseClient): Promise<SourceOption[]> {
+/**
+ * Aplikasi beserta tag-nya, untuk pilihan pada form release. Aplikasi yang diarsipkan tidak ditawarkan,
+ * kecuali yang id-nya ada di `keepIds` (komponen release yang sedang diubah tetap harus bisa dipilih).
+ * Klien HARUS membawa sesi pengguna.
+ */
+export async function loadSourceOptions(db: SupabaseClient, keepIds: string[] = []): Promise<SourceOption[]> {
+  const safe = keepIds.filter((id) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+  let sourceQuery = db.from("sources").select("id, name");
+  sourceQuery = safe.length > 0
+    ? sourceQuery.or(`archived_at.is.null,id.in.(${safe.join(",")})`)
+    : sourceQuery.is("archived_at", null);
   const [src, tags] = await Promise.all([
-    db.from("sources").select("id, name").order("name", { ascending: true }),
+    sourceQuery.order("name", { ascending: true }),
     db.from("source_tags").select("source_id, tag"),
   ]);
   if (src.error) throw new Error(`Gagal membaca sumber: ${src.error.message}`);
@@ -188,6 +204,6 @@ export async function loadSourceOptions(db: SupabaseClient): Promise<SourceOptio
   }));
 }
 
-export async function getSourceOptions(): Promise<SourceOption[]> {
-  return loadSourceOptions(await createClient());
+export async function getSourceOptions(keepIds: string[] = []): Promise<SourceOption[]> {
+  return loadSourceOptions(await createClient(), keepIds);
 }

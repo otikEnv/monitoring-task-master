@@ -2,6 +2,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadArchivedReleases, loadArchivedSources } from "@/lib/archive/load";
+import { loadDashboardData } from "@/lib/dashboard/data";
+import { loadReleaseOverviews, loadSourceOptions } from "@/lib/releases/load";
+import { DEFAULT_PARAMS } from "@/lib/tasks/list-params";
+import { loadTaskList } from "@/lib/tasks/list";
+import { loadTrend } from "@/lib/trend/data";
 import {
   countOpenReleasesForSource, createRelease, getRelease, ReleaseNotFoundError, setReleaseArchived, setReleasedOn,
 } from "@/lib/releases/repo";
@@ -53,6 +58,12 @@ describe.skipIf(!ENABLED)("archive (Supabase asli, sesi viewer)", () => {
       { source_id: ids.b, tag: "master", task_id: "1", title: "B1", status: "done" },
     ]);
     if (te) throw te;
+
+    const { error: sn } = await admin.from("snapshots").insert([
+      { source_id: ids.a, tag: "master", total: 2, done: 1, pending: 1 },
+      { source_id: ids.b, tag: "master", total: 1, done: 1, pending: 0 },
+    ]);
+    if (sn) throw sn;
 
     viewer = createClient(URL_!, ANON!, opt);
     const { error: se } = await viewer.auth.signInWithPassword({ email, password });
@@ -178,5 +189,105 @@ describe.skipIf(!ENABLED)("archive (Supabase asli, sesi viewer)", () => {
     await viewer.from("releases").update({ archived_at: new Date().toISOString() }).eq("id", rel.solo);
     expect(await archivedAt("sources", ids.b)).toBe(before);
     expect(await archivedAt("releases", rel.solo)).toBeNull();
+  });
+
+  describe("penyaringan item terarsip di tampilan sehari-hari", () => {
+    const reset = async () => {
+      for (const k of ["a", "b"]) await setSourceArchived(ids[k], false, admin);
+      for (const k of ["open", "done", "solo"]) await setReleaseArchived(rel[k], false, admin);
+    };
+    const cardIds = async () => (await loadDashboardData(viewer)).cards.map((c) => c.id);
+    const taskTotal = async (source: string) => (await loadTaskList(viewer, { ...DEFAULT_PARAMS, source })).total;
+    const relNames = async (filter: Parameters<typeof loadReleaseOverviews>[1]) =>
+      (await loadReleaseOverviews(viewer, filter)).map((o) => o.release.name).filter((n) => n.startsWith(`TMP-ARC-${run}-`)).sort();
+
+    it("aplikasi aktif tampil di Dashboard, Task list, Trend, dan pilihan form", async () => {
+      await reset();
+      expect(await cardIds()).toEqual(expect.arrayContaining([ids.a, ids.b]));
+      expect(await taskTotal(ids.a)).toBe(2);
+      expect(await taskTotal(ids.b)).toBe(1);
+      expect((await loadTrend(viewer, { range: "all", source: null })).sources.map((s) => s.id)).toEqual(expect.arrayContaining([ids.a, ids.b]));
+      expect((await loadSourceOptions(viewer)).map((s) => s.id)).toEqual(expect.arrayContaining([ids.a, ids.b]));
+    });
+
+    it("aplikasi terarsip hilang dari Dashboard, Task list, Trend, dan pilihan form; yang lain tidak terpengaruh", async () => {
+      await reset();
+      await setSourceArchived(ids.a, true, admin);
+
+      const cards = await cardIds();
+      expect(cards).not.toContain(ids.a);
+      expect(cards).toContain(ids.b);
+
+      expect(await taskTotal(ids.a)).toBe(0);
+      expect(await taskTotal(ids.b)).toBe(1);
+      const list = await loadTaskList(viewer, { ...DEFAULT_PARAMS });
+      expect(list.sources.map((s) => s.id)).not.toContain(ids.a);
+      expect(list.sources.map((s) => s.id)).toContain(ids.b);
+      expect(list.rows.every((r) => r.sourceId !== ids.a)).toBe(true);
+
+      const trend = await loadTrend(viewer, { range: "all", source: null });
+      expect(trend.sources.map((s) => s.id)).not.toContain(ids.a);
+      expect(trend.sources.map((s) => s.id)).toContain(ids.b);
+      expect((await loadTrend(viewer, { range: "all", source: ids.a })).ignoredSource).toBe(ids.a);
+
+      expect((await loadSourceOptions(viewer)).map((s) => s.id)).not.toContain(ids.a);
+      // komponen yang sudah memakai aplikasi terarsip tetap bisa dipilih saat mengubah release
+      expect((await loadSourceOptions(viewer, [ids.a])).map((s) => s.id)).toContain(ids.a);
+
+      // data tidak berubah: task dan snapshot tetap ada, hanya disembunyikan
+      const t = await admin.from("tasks").select("task_id", { count: "exact", head: true }).eq("source_id", ids.a);
+      const sn = await admin.from("snapshots").select("id", { count: "exact", head: true }).eq("source_id", ids.a);
+      expect([t.count, sn.count]).toEqual([2, 1]);
+    });
+
+    it("release lintas aplikasi tetap tampil dan dihitung walau salah satu aplikasinya diarsipkan", async () => {
+      await reset();
+      const before = (await loadReleaseOverviews(viewer, { sourceId: ids.b })).find((o) => o.release.id === rel.open)!;
+      await setSourceArchived(ids.a, true, admin);
+      const after = (await loadReleaseOverviews(viewer, { sourceId: ids.b })).find((o) => o.release.id === rel.open)!;
+      expect(after.components).toHaveLength(2);
+      expect(after.stats.total).toBe(3); // 2 task aplikasi A + 1 task aplikasi B
+      expect([after.stats.total, after.stats.done, after.stats.risk]).toEqual([before.stats.total, before.stats.done, before.stats.risk]);
+    });
+
+    it("restore mengembalikan aplikasi ke semua tampilan", async () => {
+      await setSourceArchived(ids.a, true, admin);
+      await setSourceArchived(ids.a, false, admin);
+      expect(await cardIds()).toContain(ids.a);
+      expect(await taskTotal(ids.a)).toBe(2);
+      expect((await loadTrend(viewer, { range: "all", source: null })).sources.map((s) => s.id)).toContain(ids.a);
+      expect((await loadSourceOptions(viewer)).map((s) => s.id)).toContain(ids.a);
+    });
+
+    it("release terarsip hilang dari daftar (juga dengan Show released) dan dari baris Dashboard; detail tetap terbuka", async () => {
+      await reset();
+      expect(await relNames({ includeReleased: true })).toEqual([nm("done"), nm("open"), nm("solo")]);
+
+      await setReleaseArchived(rel.open, true, admin);
+      expect(await relNames({ includeReleased: true })).toEqual([nm("done"), nm("solo")]);
+      expect(await relNames({})).toEqual([nm("solo")]);
+      expect(await relNames({ sourceId: ids.b })).toEqual([nm("solo")]);
+      // diminta eksplisit (halaman Archive atau pemeriksaan): tetap bisa dibaca
+      expect(await relNames({ includeReleased: true, includeArchived: true })).toEqual([nm("done"), nm("open"), nm("solo")]);
+      // detail lewat id tidak disaring
+      const [byId] = await loadReleaseOverviews(viewer, { id: rel.open });
+      expect(byId.release.archivedAt).toBeTruthy();
+
+      // Dashboard: A tidak lagi punya release berjalan (done sudah rilis); B hanya solo
+      const cards = (await loadDashboardData(viewer)).cards;
+      expect(cards.find((c) => c.id === ids.a)?.release ?? null).toBeNull();
+      expect(cards.find((c) => c.id === ids.b)?.release).toMatchObject({ releaseId: rel.solo, extra: 0 });
+
+      await setReleaseArchived(rel.open, false, admin);
+      expect((await loadDashboardData(viewer)).cards.find((c) => c.id === ids.a)?.release).toMatchObject({ releaseId: rel.open });
+    });
+
+    it("release yang sudah rilis dan terarsip tidak muncul walau Show released dicentang", async () => {
+      await reset();
+      await setReleaseArchived(rel.done, true, admin);
+      expect(await relNames({ includeReleased: true })).toEqual([nm("open"), nm("solo")]);
+      await setReleaseArchived(rel.done, false, admin);
+      expect(await relNames({ includeReleased: true })).toEqual([nm("done"), nm("open"), nm("solo")]);
+    });
   });
 });
