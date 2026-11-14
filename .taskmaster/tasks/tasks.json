@@ -2054,7 +2054,7 @@
         "id": "45",
         "title": "Archive: migrasi database kolom archived_at dan view",
         "description": "Kolom archived_at pada sources dan releases, view yang menyembunyikan aplikasi terarsip.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-Archive.md, bagian Data dan migrasi. Dijalankan langsung dengan npm run db:run. View yang terdampak: source_status_counts, task_list, source_tags, source_snapshot_totals. Tautan langsung ke detail task aplikasi terarsip tetap harus bisa dibaca.",
@@ -2064,43 +2064,49 @@
             "id": 1,
             "title": "Catat keadaan view dan angka pembanding",
             "description": "Sebelum migrasi.",
-            "status": "pending",
+            "status": "done",
             "details": "Simpan definisi keempat view (pg_get_viewdef) dan hasil SELECT-nya, serta angka release 2.1 (scratchpad release-baseline.mjs before). Cek siapa saja yang membaca view: src/lib/dashboard/data.ts, src/lib/tasks/list.ts, src/lib/trend/data.ts, src/lib/releases/load.ts.",
-            "parentId": "45"
+            "parentId": "45",
+            "updatedAt": "2026-11-14T05:02:50.663Z"
           },
           {
             "id": 2,
             "title": "Tulis migrasi archive",
             "description": "supabase/migrations/<ts>_archive.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "alter table sources dan releases add column archived_at timestamptz (null = aktif); indeks parsial bila perlu. Perbarui view dengan create or replace atau drop+create sesuai kolom: source_status_counts, task_list, source_tags, source_snapshot_totals menyaring sources.archived_at is null. Pertahankan security_invoker dan grant yang sama seperti migrasi view aslinya. Jangan mengubah hak tulis (klien tetap hanya SELECT).",
-            "parentId": "45"
+            "parentId": "45",
+            "updatedAt": "2026-11-14T05:02:50.663Z"
           },
           {
             "id": 3,
             "title": "Jalur baca detail tanpa penyaringan",
             "description": "Detail task aplikasi terarsip tetap terbuka.",
-            "status": "pending",
+            "status": "done",
             "details": "src/lib/tasks/detail.ts membaca tabel tasks langsung (bukan view task_list); pastikan tetap begitu. Bila ada view lain yang dipakai halaman detail, sediakan jalur yang tidak disaring.",
-            "parentId": "45"
+            "parentId": "45",
+            "updatedAt": "2026-11-14T05:02:50.663Z"
           },
           {
             "id": 4,
             "title": "Tes SQL",
             "description": "supabase/tests/archive_test.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Awali dengan set_config('app.allow_any_domain','on',true) untuk user uji. Kasus: kolom default null; mengarsipkan aplikasi menghilangkannya dari keempat view dan memulihkannya setelah dikosongkan; release terarsip tetap terbaca dari tabel; klien authenticated tidak bisa UPDATE archived_at; tidak bergantung pada data nyata (hanya data berawalan uji).",
-            "parentId": "45"
+            "parentId": "45",
+            "updatedAt": "2026-11-14T05:02:50.663Z"
           },
           {
             "id": 5,
             "title": "Terapkan dan cocokkan angka",
             "description": "npm run db:run lalu bandingkan.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan migrasi dan tes SQL; bandingkan SELECT view dengan catatan awal (sama selama tidak ada yang terarsip) dan angka release 2.1. Perbarui supabase/README.md.",
-            "parentId": "45"
+            "parentId": "45",
+            "updatedAt": "2026-11-14T05:02:50.663Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T05:02:50.663Z"
       },
       {
         "id": "46",
@@ -2377,9 +2383,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T04:55:38.600Z",
+      "lastModified": "2026-11-14T05:02:50.663Z",
       "taskCount": 50,
-      "completedCount": 34,
+      "completedCount": 35,
       "tags": [
         "master"
       ]
