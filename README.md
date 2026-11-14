@@ -16,6 +16,17 @@ Menu **Release** melacak target rilis, misalnya "2.1, web task #100 sampai #150 
 - **Penyimpanan atomik:** release dan seluruh komponennya disimpan lewat fungsi database `save_release` (hanya service role). Bila aplikasi sebuah komponen dihapus, komponennya ikut terhapus dan release tetap ada.
 - Semua pengguna login boleh melihat; hanya admin yang mengelola (RLS: peran klien hanya `SELECT` pada `releases` dan `release_components`).
 
+### Archive dan Restore
+
+Untuk merapikan Dashboard dan daftar Release tanpa menghapus data. Spesifikasi: [PRD Archive](PRD-Archive.md).
+
+- **Archive** (admin): menu tiga titik di kartu aplikasi (Dashboard) dan kartu release (halaman Release) berisi **Details** dan **Archive**. Archive meminta konfirmasi (untuk aplikasi menyebut jumlah release berjalan yang masih memakainya), lalu toast memberi tombol **Undo**. Viewer hanya melihat Details.
+- **Yang disembunyikan:** aplikasi terarsip hilang dari Dashboard, Task list (tanpa pilihan aplikasi), Trend, dan pilihan aplikasi pada form release baru; release terarsip hilang dari daftar Release (juga dengan "Show released") dan dari baris release di Dashboard. Data, sinkronisasi, dan status aktif/nonaktif tidak berubah.
+- **Yang tidak berubah:** release yang punya komponen dari aplikasi terarsip tetap tampil dan tetap dihitung. Tautan langsung ke item terarsip tetap terbuka (Task list aplikasi memberi penanda "(archived)", detail release dan task memberi penanda Archived).
+- **Menu Archive** (sidebar, semua pengguna): dua tab, **Applications** dan **Releases**, berhalaman 10 per halaman (`/archive?tab=releases&page=2`). Tiap baris punya menu **Details** dan **Restore** (Restore hanya admin; detail release terarsip juga punya tombol Restore).
+- **Archive vs Deactivate vs Delete:** Archive hanya menyembunyikan (bisa dikembalikan); Deactivate (Source settings) menghentikan sinkronisasi; Delete menghapus permanen beserta datanya.
+- **Teknis:** kolom `archived_at` pada `sources` dan `releases` (kosong = aktif); fungsi di `src/lib/archive/` dan server action admin-only di `src/app/archive/actions.ts`; hanya view `source_snapshot_totals` yang menyaring di database, sisanya disaring aplikasi (lihat [supabase/README.md](supabase/README.md)).
+
 ### Login Google (SSO)
 
 Halaman login punya tombol **Continue with Google** di samping login email + password. Spesifikasi: [PRD Login SSO Google](PRD-Login-SSO-Google.md).

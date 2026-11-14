@@ -2361,7 +2361,7 @@
         "id": "50",
         "title": "Archive: verifikasi end-to-end dan dokumentasi",
         "description": "Uji live, pemeriksaan visual, README.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "47",
@@ -2375,42 +2375,47 @@
             "id": 1,
             "title": "Tes live arsip",
             "description": "tests/archive.live.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Data uji berawalan TMP-ARC-: arsipkan aplikasi dan release lalu pastikan hilang dari Dashboard, daftar Release, Task list, Trend, dan pilihan form; muncul di daftar Archive; Restore mengembalikan status lain (aktif/nonaktif, released) persis; release lintas aplikasi tetap dihitung; viewer tidak bisa menulis; data task dan snapshot tidak berubah. User uji ber-email @envisions.app. Bersihkan semuanya.",
-            "parentId": "50"
+            "parentId": "50",
+            "updatedAt": "2026-11-14T05:37:46.867Z"
           },
           {
             "id": 2,
             "title": "Pemeriksaan interaksi di browser",
             "description": "Puppeteer pada data uji.",
-            "status": "pending",
+            "status": "done",
             "details": "Alur penuh: Archive dari kartu Dashboard dan kartu Release, toast Undo, halaman Archive (dua tab, paginasi), Restore, tautan langsung ke item terarsip, viewer tidak melihat Archive/Restore. Tidak boleh menyentuh release 2.1 atau aplikasi nyata.",
-            "parentId": "50"
+            "parentId": "50",
+            "updatedAt": "2026-11-14T05:37:46.867Z"
           },
           {
             "id": 3,
             "title": "Pemeriksaan visual dan kualitas",
             "description": "Seluruh pemeriksaan.",
-            "status": "pending",
+            "status": "done",
             "details": "Tangkapan layar Dashboard, Release, Archive (terang, gelap, ponsel) tanpa overflow dan tanpa galat konsol; waktu muat halaman Archive di bawah 2 detik; tsc, eslint, vitest, npm run build, tes live yang relevan bersih; angka release 2.1 sama dengan baseline.",
-            "parentId": "50"
+            "parentId": "50",
+            "updatedAt": "2026-11-14T05:37:46.867Z"
           },
           {
             "id": 4,
             "title": "Dokumentasi",
             "description": "README dan supabase/README.",
-            "status": "pending",
+            "status": "done",
             "details": "Bagian Archive di README (arti Archive vs Deactivate vs Delete, siapa yang boleh, halaman Archive, Undo) dan supabase/README.md; tautkan PRD-Archive.md dari PRD utama.",
-            "parentId": "50"
+            "parentId": "50",
+            "updatedAt": "2026-11-14T05:37:46.867Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-11-14T05:37:46.867Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T05:34:04.048Z",
+      "lastModified": "2026-11-14T05:37:46.867Z",
       "taskCount": 50,
-      "completedCount": 39,
+      "completedCount": 40,
       "tags": [
         "master"
       ]

@@ -2,6 +2,8 @@
 
 6 November 2026 · Otik
 
+> Fitur tambahan: [Release Tracking](PRD-Fitur-Release-Tracking.md), [Release Lintas Aplikasi](PRD-Release-Multi-Aplikasi.md), [Login SSO Google](PRD-Login-SSO-Google.md), dan [Archive dan Restore](PRD-Archive.md).
+
 ## Ringkasan dan latar belakang
 
 Website ini menampilkan task master dari semua aplikasi yang didaftarkan dalam satu dashboard read-only, sehingga progres semua aplikasi terlihat tanpa membuka repository satu per satu.
