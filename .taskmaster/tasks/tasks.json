@@ -2414,7 +2414,7 @@
         "id": "51",
         "title": "Hold dan Catatan: migrasi database release_notes dan kolom hold",
         "description": "Tabel release_notes, kolom held_at dan hold_reason pada releases, fungsi atomik, tes SQL.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-Release-Hold-Catatan.md, bagian Data dan migrasi. Dijalankan langsung dengan npm run db:run. Pola: save_release (security definer, hanya service_role) di migrasi 20261114010000_release_components.sql; RLS baca-saja untuk authenticated seperti tabel releases.",
@@ -2424,7 +2424,7 @@
             "id": 1,
             "title": "Catat keadaan pembanding",
             "description": "Sebelum migrasi.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan scratchpad release-baseline.mjs before (angka release 2.1 dan env 2.1) dan catat definisi fungsi save_release. Cek bahwa tidak ada kolom atau tabel dengan nama yang sama.",
             "parentId": "51"
           },
@@ -2432,7 +2432,7 @@
             "id": 2,
             "title": "Tabel release_notes",
             "description": "Struktur, constraint, RLS.",
-            "status": "pending",
+            "status": "done",
             "details": "Kolom: id, release_id (FK releases on delete cascade), kind (check: note, hold, resume, target_change, released), body (check 1..2000), old_target_date, new_target_date, author_id, author_email, created_at, edited_at, edited_by_email, previous_body. Check: target_change wajib mengisi tanggal lama dan baru; kind lain tidak mengisi tanggal. Indeks (release_id, created_at desc). RLS: select untuk authenticated; revoke insert/update/delete dari anon dan authenticated.",
             "parentId": "51"
           },
@@ -2440,7 +2440,7 @@
             "id": 3,
             "title": "Kolom hold pada releases",
             "description": "held_at dan hold_reason.",
-            "status": "pending",
+            "status": "done",
             "details": "alter table releases add held_at timestamptz, hold_reason text; check hold_reason wajib dan 1..500 bila held_at terisi, kosong bila held_at kosong; check tidak boleh held_at bila released_on terisi. Hak baca kolom baru untuk authenticated (pola archived_at); tulis tetap hanya service role.",
             "parentId": "51"
           },
@@ -2448,7 +2448,7 @@
             "id": 4,
             "title": "Fungsi atomik",
             "description": "hold_release, resume_release, add_release_note, edit_release_note, perubahan target.",
-            "status": "pending",
+            "status": "done",
             "details": "Security definer, hanya service_role. hold_release(p_id, p_reason, p_author_id, p_email) set held_at dan hold_reason + entri kind=hold; menolak bila sudah released, sudah hold, atau diarsipkan. resume_release(p_id, p_reason opsional, ...). add_release_note. edit_release_note(p_note_id, p_body, p_email): hanya mengubah body, previous_body, edited_at, edited_by_email; trigger menolak perubahan kolom terkunci (kind, tanggal, author, created_at). Perluasan save_release atau fungsi baru change_release_target(p_id, p_new_date, p_reason, ...) yang mencatat entri target_change dalam transaksi yang sama dengan perubahan header. Menandai released saat hold: hapus hold dan tulis entri kind=released.",
             "parentId": "51"
           },
@@ -2456,7 +2456,7 @@
             "id": 5,
             "title": "Tes SQL",
             "description": "supabase/tests/release_hold_test.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Awali set_config('app.allow_any_domain','on',true) untuk user uji. Kasus: check constraint; hold lalu resume; hold ganda ditolak; hold pada release rilis/terarsip ditolak; mark released mengakhiri hold; edit hanya mengubah body dan mengisi previous_body; ubah kolom terkunci ditolak; target_change mencatat tanggal lama dan baru; cascade saat release dihapus; authenticated tidak bisa menulis, anon tidak bisa membaca; hanya data uji (berawalan T-).",
             "parentId": "51"
           },
@@ -2464,7 +2464,7 @@
             "id": 6,
             "title": "Terapkan dan cocokkan angka",
             "description": "npm run db:run lalu bandingkan.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan migrasi dan tes SQL, bandingkan angka release 2.1 dengan baseline (harus identik). Perbarui supabase/README.md (daftar migrasi dan fungsi).",
             "parentId": "51"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T10:21:35.971Z",
+      "lastModified": "2026-11-16T10:36:15.416Z",
       "taskCount": 57,
-      "completedCount": 40,
+      "completedCount": 41,
       "tags": [
         "master"
       ]
