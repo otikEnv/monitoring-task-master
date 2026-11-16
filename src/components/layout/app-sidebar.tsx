@@ -99,7 +99,8 @@ export function AppSidebar({ user }: { user: SessionUser }) {
                   <KeyRound aria-hidden="true" /> Change password
                 </DropdownMenuItem>
                 <form action={logout}>
-                  <DropdownMenuItem render={<button type="submit" className="w-full" />}>
+                  {/* nativeButton: item dirender sebagai <button> sungguhan (tombol kirim form). */}
+                  <DropdownMenuItem nativeButton render={<button type="submit" className="w-full" />}>
                     <LogOut aria-hidden="true" /> Sign out
                   </DropdownMenuItem>
                 </form>
