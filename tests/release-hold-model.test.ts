@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { aggregateRelease, computeRelease, holdDays, RISK_LABEL, type ReleaseHeader, type TaskInput } from "@/lib/releases/model";
 import { REL_ID, SRC, overviewOf, task } from "./fixtures/release-overview";
 import { summarizeReleases } from "@/lib/releases/summary";
+import { sortOverviews } from "@/lib/releases/load";
 
 const NOW = new Date("2026-11-11T05:00:00Z"); // 11 Nov 2026 WIB
 const tasks = (statuses: string[]): TaskInput[] => statuses.map((s, i) => task(100 + i, s));
@@ -73,6 +74,28 @@ describe("holdDays", () => {
 
   it("waktu di masa depan tidak pernah negatif", () => {
     expect(holdDays("2026-12-01T00:00:00Z", NOW)).toBe(0);
+  });
+});
+
+describe("ringkasan Dashboard: release ditahan tidak mengalahkan yang berjalan", () => {
+  it("kartu aplikasi menampilkan release berjalan, release yang ditahan masuk '+N more'", () => {
+    const part = [{ tasks: tasks(["done", "pending"]), sourceId: SRC }];
+    const running = overviewOf(part, { name: "berjalan", now: "2026-11-11" });
+    // Target sama; nama yang ditahan lebih dulu menurut abjad, jadi hanya aturan kelompok yang menaruhnya di belakang.
+    const held = overviewOf(part, { name: "a-ditahan", now: "2026-11-11", heldAt: "2026-11-05T00:00:00Z", holdReason: "x" });
+    const sorted = sortOverviews([held, running]);
+    expect(sorted.map((o) => o.release.name)).toEqual(["berjalan", "a-ditahan"]);
+    const s = summarizeReleases(sorted).get(SRC)!;
+    expect([s.name, s.risk, s.extra]).toEqual(["berjalan", running.stats.risk, 1]);
+    expect(held.stats.risk).toBe("on_hold");
+  });
+
+  it("hanya ada release ditahan: kartu menampilkan On hold", () => {
+    const o = overviewOf([{ tasks: tasks(["done", "pending"]), sourceId: SRC }], {
+      name: "ditahan", now: "2026-11-11", heldAt: "2026-11-05T00:00:00Z", holdReason: "x",
+    });
+    const s = summarizeReleases(sortOverviews([o])).get(SRC)!;
+    expect([s.name, s.risk, s.extra]).toEqual(["ditahan", "on_hold", 0]);
   });
 });
 

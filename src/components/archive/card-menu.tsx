@@ -12,6 +12,7 @@ import {
   AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { HoldDialog, type HoldMode } from "@/components/releases/hold-dialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -19,12 +20,18 @@ export type ArchiveKind = "application" | "release";
 
 /**
  * Menu tiga titik pada kartu aplikasi (Dashboard) dan kartu release: Details untuk semua pengguna, Archive
- * hanya untuk admin. Tombol harus berada di atas tautan "membentang" milik kartu (relative z-10).
+ * hanya untuk admin. Kartu release (admin) juga punya Put on hold / Resume lewat `hold` (mode dialog; tanpa
+ * `hold` item itu tidak ada). Tombol harus berada di atas tautan "membentang" milik kartu (relative z-10).
  */
 export function CardMenu({
-  kind, id, name, detailsHref, canArchive,
-}: { kind: ArchiveKind; id: string; name: string; detailsHref: string; canArchive: boolean }) {
+  kind, id, name, detailsHref, canArchive, hold,
+}: {
+  kind: ArchiveKind; id: string; name: string; detailsHref: string; canArchive: boolean;
+  /** Hanya untuk kartu release: "hold" = tawarkan Put on hold, "resume" = tawarkan Resume. */
+  hold?: HoldMode;
+}) {
   const router = useRouter();
+  const [holdOpen, setHoldOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -83,9 +90,16 @@ export function CardMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem render={<Link href={detailsHref} />}>Details</DropdownMenuItem>
+          {canArchive && kind === "release" && hold && (
+            <DropdownMenuItem onClick={() => setHoldOpen(true)}>{hold === "resume" ? "Resume" : "Put on hold"}</DropdownMenuItem>
+          )}
           {canArchive && <DropdownMenuItem onClick={openDialog}>Archive</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {canArchive && kind === "release" && hold && (
+        <HoldDialog mode={hold} releaseId={id} releaseName={name} open={holdOpen} onOpenChange={setHoldOpen} />
+      )}
 
       {canArchive && (
         <AlertDialog open={confirming} onOpenChange={(o) => !pending && setConfirming(o)}>

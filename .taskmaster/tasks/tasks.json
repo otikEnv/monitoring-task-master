@@ -2652,7 +2652,7 @@
         "id": "55",
         "title": "Hold dan Catatan: kartu release dan Dashboard",
         "description": "Lencana On hold, baris catatan terbaru, dan menu tiga titik.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "54"
@@ -2664,7 +2664,7 @@
             "id": 1,
             "title": "Lencana On hold",
             "description": "RiskBadge dan kartu.",
-            "status": "pending",
+            "status": "done",
             "details": "Varian On hold (ikon pause, warna netral-amber yang lolos kontras terang dan gelap) menggantikan lencana risiko di kartu release, detail, dan baris release di kartu aplikasi; alasan satu baris dipotong di kartu release.",
             "parentId": "55"
           },
@@ -2672,7 +2672,7 @@
             "id": 2,
             "title": "Baris catatan terbaru",
             "description": "Kartu release.",
-            "status": "pending",
+            "status": "done",
             "details": "Satu baris catatan Note terbaru dengan tanggal, dipotong satu baris; tidak ada baris bila belum ada catatan; teks di-escape.",
             "parentId": "55"
           },
@@ -2680,7 +2680,7 @@
             "id": 3,
             "title": "Menu tiga titik",
             "description": "Tambah Put on hold dan Resume.",
-            "status": "pending",
+            "status": "done",
             "details": "CardMenu release (admin): Details, Put on hold atau Resume, Archive; viewer hanya Details. Hold dari menu membuka dialog alasan yang sama dengan halaman detail (komponen dipakai ulang).",
             "parentId": "55"
           },
@@ -2688,7 +2688,7 @@
             "id": 4,
             "title": "Dashboard dan urutan",
             "description": "Kartu aplikasi dan daftar.",
-            "status": "pending",
+            "status": "done",
             "details": "Release on hold tidak dihitung sebagai berisiko di kartu aplikasi; urutan daftar sesuai aturan; filter 'Show released' tidak berubah.",
             "parentId": "55"
           },
@@ -2696,7 +2696,7 @@
             "id": 5,
             "title": "Tes",
             "description": "release-card, source-card, release-list.",
-            "status": "pending",
+            "status": "done",
             "details": "Render on hold, catatan, tanpa catatan, admin vs viewer, urutan; tes yang ada tetap lolos.",
             "parentId": "55"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T11:20:38.620Z",
+      "lastModified": "2026-11-16T11:25:03.214Z",
       "taskCount": 57,
-      "completedCount": 44,
+      "completedCount": 45,
       "tags": [
         "master"
       ]

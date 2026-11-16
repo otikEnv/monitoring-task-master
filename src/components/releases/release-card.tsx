@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CardMenu } from "@/components/archive/card-menu";
 import { RiskBadge } from "@/components/releases/risk-badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
-import { formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { formatDaysLeft, formatRange, formatYmd } from "@/lib/releases/format";
 import type { ComponentOverview, ReleaseOverview } from "@/lib/releases/load";
 
@@ -17,11 +17,17 @@ function componentNote(c: ComponentOverview): string | null {
   return notes.length > 0 ? notes.join("; ") : null;
 }
 
+/** Teks satu baris: baris baru menjadi spasi supaya pemotongan (truncate) bekerja pada satu baris. */
+const oneLine = (s: string) => s.split(/\s+/).filter(Boolean).join(" ");
+
 /** Kartu satu release. Presentasional; seluruh kartu menaut ke detail release. */
 export function ReleaseCard({ overview, canArchive = false }: { overview: ReleaseOverview; canArchive?: boolean }) {
   const { release, stats, components } = overview;
   const released = Boolean(release.releasedOn);
   const evaluate = stats.counts.deferred + stats.counts.cancelled;
+  // Menu admin: ditahan -> Resume; belum rilis dan aktif -> Put on hold; selain itu tidak ada aksi hold.
+  const hold = !canArchive ? undefined : release.heldAt ? "resume" : !released && !release.archivedAt ? "hold" : undefined;
+  const note = overview.latestNote;
 
   return (
     <article className="relative flex flex-col gap-3 rounded-xl border bg-card p-5 text-card-foreground shadow-xs transition-all hover:border-foreground/30 hover:shadow-md">
@@ -35,19 +41,33 @@ export function ReleaseCard({ overview, canArchive = false }: { overview: Releas
           </h2>
           <div className="flex shrink-0 items-center gap-1.5">
             <RiskBadge risk={stats.risk} />
-            <CardMenu kind="release" id={release.id} name={release.name} detailsHref={`/release/${release.id}`} canArchive={canArchive} />
+            <CardMenu
+              kind="release" id={release.id} name={release.name} detailsHref={`/release/${release.id}`}
+              canArchive={canArchive} hold={hold}
+            />
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
           {stats.total} tasks · {components.length} {components.length === 1 ? "component" : "components"}
         </p>
+        {stats.heldAt && stats.holdReason && (
+          <p className="truncate text-xs font-medium" title={stats.holdReason}>
+            On hold: <span className="font-normal">{oneLine(stats.holdReason)}</span>
+          </p>
+        )}
+        {note && note.body && (
+          <p className="truncate text-xs text-muted-foreground" title={note.body}>
+            Note ({formatDate(note.createdAt)}): {oneLine(note.body)}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">
           {released ? (
             <>Released {formatYmd(release.releasedOn)} (target {formatYmd(release.targetDate)})</>
           ) : (
             <>
               Target {formatYmd(release.targetDate)} ·{" "}
-              <span className={stats.daysLeft < 0 ? "font-medium text-red-700 dark:text-red-400" : undefined}>
+              {/* Release yang ditahan sengaja terlambat: teksnya tetap ada, tetapi tidak berwarna peringatan. */}
+              <span className={stats.daysLeft < 0 && !stats.heldAt ? "font-medium text-red-700 dark:text-red-400" : undefined}>
                 {formatDaysLeft(stats.daysLeft)}
               </span>
             </>
