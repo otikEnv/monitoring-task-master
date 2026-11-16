@@ -2409,12 +2409,397 @@
           }
         ],
         "updatedAt": "2026-11-14T05:37:46.867Z"
+      },
+      {
+        "id": "51",
+        "title": "Hold dan Catatan: migrasi database release_notes dan kolom hold",
+        "description": "Tabel release_notes, kolom held_at dan hold_reason pada releases, fungsi atomik, tes SQL.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Data dan migrasi. Dijalankan langsung dengan npm run db:run. Pola: save_release (security definer, hanya service_role) di migrasi 20261114010000_release_components.sql; RLS baca-saja untuk authenticated seperti tabel releases.",
+        "testStrategy": "Tes SQL lolos: constraint, RLS, kolom terkunci tidak bisa diubah, cascade saat release dihapus, atomik; angka release 2.1 tidak berubah sebelum dan sesudah migrasi.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Catat keadaan pembanding",
+            "description": "Sebelum migrasi.",
+            "status": "pending",
+            "details": "Jalankan scratchpad release-baseline.mjs before (angka release 2.1 dan env 2.1) dan catat definisi fungsi save_release. Cek bahwa tidak ada kolom atau tabel dengan nama yang sama.",
+            "parentId": "51"
+          },
+          {
+            "id": 2,
+            "title": "Tabel release_notes",
+            "description": "Struktur, constraint, RLS.",
+            "status": "pending",
+            "details": "Kolom: id, release_id (FK releases on delete cascade), kind (check: note, hold, resume, target_change, released), body (check 1..2000), old_target_date, new_target_date, author_id, author_email, created_at, edited_at, edited_by_email, previous_body. Check: target_change wajib mengisi tanggal lama dan baru; kind lain tidak mengisi tanggal. Indeks (release_id, created_at desc). RLS: select untuk authenticated; revoke insert/update/delete dari anon dan authenticated.",
+            "parentId": "51"
+          },
+          {
+            "id": 3,
+            "title": "Kolom hold pada releases",
+            "description": "held_at dan hold_reason.",
+            "status": "pending",
+            "details": "alter table releases add held_at timestamptz, hold_reason text; check hold_reason wajib dan 1..500 bila held_at terisi, kosong bila held_at kosong; check tidak boleh held_at bila released_on terisi. Hak baca kolom baru untuk authenticated (pola archived_at); tulis tetap hanya service role.",
+            "parentId": "51"
+          },
+          {
+            "id": 4,
+            "title": "Fungsi atomik",
+            "description": "hold_release, resume_release, add_release_note, edit_release_note, perubahan target.",
+            "status": "pending",
+            "details": "Security definer, hanya service_role. hold_release(p_id, p_reason, p_author_id, p_email) set held_at dan hold_reason + entri kind=hold; menolak bila sudah released, sudah hold, atau diarsipkan. resume_release(p_id, p_reason opsional, ...). add_release_note. edit_release_note(p_note_id, p_body, p_email): hanya mengubah body, previous_body, edited_at, edited_by_email; trigger menolak perubahan kolom terkunci (kind, tanggal, author, created_at). Perluasan save_release atau fungsi baru change_release_target(p_id, p_new_date, p_reason, ...) yang mencatat entri target_change dalam transaksi yang sama dengan perubahan header. Menandai released saat hold: hapus hold dan tulis entri kind=released.",
+            "parentId": "51"
+          },
+          {
+            "id": 5,
+            "title": "Tes SQL",
+            "description": "supabase/tests/release_hold_test.sql.",
+            "status": "pending",
+            "details": "Awali set_config('app.allow_any_domain','on',true) untuk user uji. Kasus: check constraint; hold lalu resume; hold ganda ditolak; hold pada release rilis/terarsip ditolak; mark released mengakhiri hold; edit hanya mengubah body dan mengisi previous_body; ubah kolom terkunci ditolak; target_change mencatat tanggal lama dan baru; cascade saat release dihapus; authenticated tidak bisa menulis, anon tidak bisa membaca; hanya data uji (berawalan T-).",
+            "parentId": "51"
+          },
+          {
+            "id": 6,
+            "title": "Terapkan dan cocokkan angka",
+            "description": "npm run db:run lalu bandingkan.",
+            "status": "pending",
+            "details": "Jalankan migrasi dan tes SQL, bandingkan angka release 2.1 dengan baseline (harus identik). Perbarui supabase/README.md (daftar migrasi dan fungsi).",
+            "parentId": "51"
+          }
+        ]
+      },
+      {
+        "id": "52",
+        "title": "Hold dan Catatan: model, repo, validasi, dan pemuat data",
+        "description": "Aturan risiko saat hold, repo catatan, validasi, dan pemuatan Activity.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "51"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Konsep dan aturan dan Pengaruh hold pada risiko. Berkas: src/lib/releases/{model,repo,validate,load,summary}.ts, src/lib/dashboard/data.ts.",
+        "testStrategy": "Tes unit model (risiko saat hold, urutan), validasi, repo (mock), dan pemuat; tes live tambahan di task 57.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Model risiko saat hold",
+            "description": "RiskLevel dan agregasi.",
+            "status": "pending",
+            "details": "Tambah tingkat tampilan 'on_hold' tanpa merusak riskLevel(): ReleaseStats memuat heldAt, holdReason, dan wouldBeRisk (risiko yang akan tampil bila tidak di-hold). Label 'On hold' di RISK_LABEL. Hold hanya berlaku bila belum rilis; riskComponents tetap dihitung untuk informasi sekunder.",
+            "parentId": "52"
+          },
+          {
+            "id": 2,
+            "title": "Urutan daftar dan ringkasan",
+            "description": "sortOverviews dan summarizeReleases.",
+            "status": "pending",
+            "details": "Release on hold ditempatkan setelah release berisiko dan sebelum yang sudah rilis; tidak dihitung sebagai berisiko di kartu aplikasi Dashboard (summary.ts) dan ringkasan Dashboard. Baris release on hold pada kartu aplikasi tampil dengan lencana On hold.",
+            "parentId": "52"
+          },
+          {
+            "id": 3,
+            "title": "Repo",
+            "description": "src/lib/releases/repo.ts.",
+            "status": "pending",
+            "details": "ReleaseRow memuat heldAt dan holdReason; fungsi holdRelease, resumeRelease, addReleaseNote, editReleaseNote, changeReleaseTarget memanggil fungsi database lewat service role dan memetakan galat (23514, P0002, 23505) ke galat domain; listReleaseNotes(releaseId, page, pageSize=20) dengan total.",
+            "parentId": "52"
+          },
+          {
+            "id": 4,
+            "title": "Validasi",
+            "description": "src/lib/releases/validate.ts.",
+            "status": "pending",
+            "details": "validateHoldReason (trim, 1..500), validateNoteBody (trim, 1..2000), validateTargetReason; pesan bahasa Inggris; normalisasi spasi dan penolakan teks kosong atau hanya spasi.",
+            "parentId": "52"
+          },
+          {
+            "id": 5,
+            "title": "Pemuat Activity",
+            "description": "src/lib/releases/load.ts.",
+            "status": "pending",
+            "details": "loadReleaseActivity(releaseId, page) memuat entri terbaru di atas dengan penulis, waktu, tanda edited, dan total; loadReleaseOverviews membawa heldAt, holdReason, dan satu catatan Note terbaru per release (satu query IN, bukan N+1).",
+            "parentId": "52"
+          },
+          {
+            "id": 6,
+            "title": "Tes",
+            "description": "Perbarui dan tambah tes unit.",
+            "status": "pending",
+            "details": "release-model (on hold mengganti label dan mempertahankan wouldBeRisk), release-summary, release-validate, release-repo (mock), release-load; tes yang ada tetap lolos.",
+            "parentId": "52"
+          }
+        ]
+      },
+      {
+        "id": "53",
+        "title": "Hold dan Catatan: server action",
+        "description": "Hold, Resume, tambah catatan, edit catatan, dan alasan perubahan target, hanya admin.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "52"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Hak akses dan Kriteria penerimaan 1-3, 6-12. Pola: src/app/release/actions.ts dan src/app/archive/actions.ts (requireAdmin() di baris pertama, hasil { ok } atau { ok:false, error }).",
+        "testStrategy": "Tes unit action (admin vs bukan admin, id tidak valid, validasi, galat tak terduga tidak membocorkan pesan asli).",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Action hold dan resume",
+            "description": "holdRelease, resumeRelease.",
+            "status": "pending",
+            "details": "requireAdmin() pertama, validasi UUID, alasan wajib untuk hold, pesan jelas untuk release sudah rilis, sudah hold, atau terarsip; revalidatePath untuk /, /release, dan /release/<id>.",
+            "parentId": "53"
+          },
+          {
+            "id": 2,
+            "title": "Action catatan",
+            "description": "addReleaseNote, editReleaseNote.",
+            "status": "pending",
+            "details": "Validasi panjang dan teks kosong; edit hanya teks entri yang ada; id catatan UUID; entri sistem hanya boleh diedit teksnya; email penulis diambil dari sesi admin, bukan dari klien.",
+            "parentId": "53"
+          },
+          {
+            "id": 3,
+            "title": "Perubahan target dengan alasan",
+            "description": "saveRelease.",
+            "status": "pending",
+            "details": "Bila target_date berubah pada ubah release, alasan wajib dan dipanggil change_release_target dalam transaksi yang sama; tanpa perubahan target alasan diabaikan. Pembuatan release baru tidak membuat entri.",
+            "parentId": "53"
+          },
+          {
+            "id": 4,
+            "title": "Mark as released saat hold",
+            "description": "Perluas action rilis yang ada.",
+            "status": "pending",
+            "details": "Menandai released mengakhiri hold dan menulis entri kind=released lewat fungsi database; konfirmasi tidak berubah.",
+            "parentId": "53"
+          },
+          {
+            "id": 5,
+            "title": "Tes",
+            "description": "tests/release-hold-actions.test.ts.",
+            "status": "pending",
+            "details": "Pola vi.mock dengan vi.resetAllMocks di beforeEach: bukan admin ditolak sebelum menyentuh data, validasi, tidak ditemukan, idempoten, revalidatePath dipanggil, galat tak terduga tidak bocor.",
+            "parentId": "53"
+          }
+        ]
+      },
+      {
+        "id": "54",
+        "title": "Hold dan Catatan: antarmuka halaman detail",
+        "description": "Bagian Activity, form catatan, dialog Hold, banner On hold, dan edit di tempat.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "53"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Halaman detail release. Berkas: src/components/releases/release-detail.tsx, src/app/release/release-actions.tsx, src/app/release/[id]/page.tsx. Gunakan komponen shadcn yang ada (AlertDialog/Dialog, Textarea, Badge, DropdownMenu) dan sonner.",
+        "testStrategy": "Tes render (admin vs viewer, hold vs aktif, edited, kosong, paginasi) dan pemeriksaan puppeteer pada data uji.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Bagian Activity",
+            "description": "Daftar entri berhalaman 20.",
+            "status": "pending",
+            "details": "Terbaru di atas; tiap entri: jenis (ikon dan label), teks (di-escape, spasi baris dipertahankan), penulis, waktu relatif plus tanggal, tanda 'edited' dengan tooltip 'Edited by <email> on <tanggal>'; entri Target change menampilkan tanggal lama dan baru. Keadaan kosong. Pager memakai komponen Pagination dengan href.",
+            "parentId": "54"
+          },
+          {
+            "id": 2,
+            "title": "Form Add note",
+            "description": "Hanya admin.",
+            "status": "pending",
+            "details": "Textarea dan tombol 'Add note' di atas daftar, penghitung karakter, tombol nonaktif bila kosong, galat tampil sebagai pesan; berhasil mengosongkan form dan menyegarkan.",
+            "parentId": "54"
+          },
+          {
+            "id": 3,
+            "title": "Dialog Hold dan Resume",
+            "description": "Tombol di samping tombol yang ada.",
+            "status": "pending",
+            "details": "'Put on hold' membuka dialog dengan kotak alasan wajib dan penjelasan singkat (hold bukan Archive: tetap tampil, tanggal tidak berubah); saat hold tombol menjadi 'Resume' dengan alasan opsional. Tidak tampil untuk release sudah rilis atau terarsip.",
+            "parentId": "54"
+          },
+          {
+            "id": 4,
+            "title": "Banner On hold dan risiko sekunder",
+            "description": "Bagian atas detail.",
+            "status": "pending",
+            "details": "Banner berisi alasan, penahan, waktu, dan lama hold (hari); lencana On hold menggantikan lencana risiko; teks sekunder 'Would be <risiko>' tetap tampil.",
+            "parentId": "54"
+          },
+          {
+            "id": 5,
+            "title": "Edit di tempat",
+            "description": "Menu tiga titik per entri.",
+            "status": "pending",
+            "details": "Menu berisi Edit (admin): kotak teks di tempat dengan Save dan Cancel, validasi sama dengan tambah; entri sistem hanya teksnya yang bisa diubah; fokus dikelola dan bisa dengan keyboard.",
+            "parentId": "54"
+          },
+          {
+            "id": 6,
+            "title": "Tes",
+            "description": "Render dan puppeteer.",
+            "status": "pending",
+            "details": "release-detail (hold, edited, kosong, viewer tanpa tombol), release-actions; puppeteer pada data uji TMP-: hold, tambah catatan, edit, resume. Jangan menyentuh release 2.1.",
+            "parentId": "54"
+          }
+        ]
+      },
+      {
+        "id": "55",
+        "title": "Hold dan Catatan: kartu release dan Dashboard",
+        "description": "Lencana On hold, baris catatan terbaru, dan menu tiga titik.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "54"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Kartu release dan Pengaruh hold pada risiko. Berkas: src/components/releases/release-card.tsx, src/components/dashboard/source-card.tsx, src/components/archive/card-menu.tsx, src/components/releases/risk-badge.tsx.",
+        "testStrategy": "Tes render kartu (on hold, catatan, viewer vs admin) dan pemeriksaan visual terang, gelap, ponsel.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Lencana On hold",
+            "description": "RiskBadge dan kartu.",
+            "status": "pending",
+            "details": "Varian On hold (ikon pause, warna netral-amber yang lolos kontras terang dan gelap) menggantikan lencana risiko di kartu release, detail, dan baris release di kartu aplikasi; alasan satu baris dipotong di kartu release.",
+            "parentId": "55"
+          },
+          {
+            "id": 2,
+            "title": "Baris catatan terbaru",
+            "description": "Kartu release.",
+            "status": "pending",
+            "details": "Satu baris catatan Note terbaru dengan tanggal, dipotong satu baris; tidak ada baris bila belum ada catatan; teks di-escape.",
+            "parentId": "55"
+          },
+          {
+            "id": 3,
+            "title": "Menu tiga titik",
+            "description": "Tambah Put on hold dan Resume.",
+            "status": "pending",
+            "details": "CardMenu release (admin): Details, Put on hold atau Resume, Archive; viewer hanya Details. Hold dari menu membuka dialog alasan yang sama dengan halaman detail (komponen dipakai ulang).",
+            "parentId": "55"
+          },
+          {
+            "id": 4,
+            "title": "Dashboard dan urutan",
+            "description": "Kartu aplikasi dan daftar.",
+            "status": "pending",
+            "details": "Release on hold tidak dihitung sebagai berisiko di kartu aplikasi; urutan daftar sesuai aturan; filter 'Show released' tidak berubah.",
+            "parentId": "55"
+          },
+          {
+            "id": 5,
+            "title": "Tes",
+            "description": "release-card, source-card, release-list.",
+            "status": "pending",
+            "details": "Render on hold, catatan, tanpa catatan, admin vs viewer, urutan; tes yang ada tetap lolos.",
+            "parentId": "55"
+          }
+        ]
+      },
+      {
+        "id": "56",
+        "title": "Hold dan Catatan: form ubah release dengan alasan perubahan target",
+        "description": "Kotak Reason for change yang wajib saat tanggal target berubah.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "53"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Form edit release. Berkas: src/app/release/release-form.tsx, src/app/release/[id]/ubah/page.tsx, src/app/release/actions.ts.",
+        "testStrategy": "Tes render form dan aturan tampil/wajib; tes aksi dengan dan tanpa perubahan target.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Deteksi perubahan target",
+            "description": "Form klien.",
+            "status": "pending",
+            "details": "Bandingkan tanggal target saat ini dengan nilai awal; bila berbeda tampilkan kotak 'Reason for change' (wajib, 1..500) dan nonaktifkan Save sampai terisi; bila dikembalikan ke nilai awal kotak hilang. Hanya pada mode ubah, bukan baru.",
+            "parentId": "56"
+          },
+          {
+            "id": 2,
+            "title": "Kirim ke action",
+            "description": "Field alasan.",
+            "status": "pending",
+            "details": "Alasan dikirim dalam FormData dan divalidasi di server (tidak cukup validasi klien); pesan galat bahasa Inggris dan fokus ke kotak yang salah; perubahan tanggal mulai saja tidak meminta alasan.",
+            "parentId": "56"
+          },
+          {
+            "id": 3,
+            "title": "Aksesibilitas dan tampilan",
+            "description": "Label dan pesan.",
+            "status": "pending",
+            "details": "Label terhubung ke input, aria-invalid dan aria-describedby saat galat; tampilan benar di ponsel dan mode gelap.",
+            "parentId": "56"
+          },
+          {
+            "id": 4,
+            "title": "Tes",
+            "description": "release-form.test.tsx dan actions.",
+            "status": "pending",
+            "details": "Kotak muncul hanya saat target berubah, Save nonaktif sampai alasan terisi, tanpa perubahan target tidak ada alasan, server menolak alasan kosong.",
+            "parentId": "56"
+          }
+        ]
+      },
+      {
+        "id": "57",
+        "title": "Hold dan Catatan: verifikasi end-to-end dan dokumentasi",
+        "description": "Uji live, pemeriksaan visual, README.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "55",
+          "56"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Kriteria penerimaan (1 sampai 14) dan Metrik.",
+        "testStrategy": "Empat belas kriteria penerimaan terpenuhi; tsc, eslint, vitest, build, tes live bersih; data nyata (release 2.1 dan env 2.1) tidak berubah dan tidak ada data uji tersisa.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tes live",
+            "description": "tests/release-hold.live.test.ts.",
+            "status": "pending",
+            "details": "Data uji berawalan TMP-HOLD-: hold, resume, catatan, edit (previous_body terisi, kolom terkunci tidak berubah), perubahan target dengan alasan, mark released mengakhiri hold, hold + archive + restore, cascade hapus; viewer tidak bisa menulis dan tidak bisa membaca di luar haknya; angka progres tidak berubah akibat hold. User uji @envisions.app. vi.setConfig({ testTimeout: 60_000 }). Bersihkan semuanya.",
+            "parentId": "57"
+          },
+          {
+            "id": 2,
+            "title": "Pemeriksaan interaksi di browser",
+            "description": "Puppeteer pada data uji.",
+            "status": "pending",
+            "details": "Alur: hold dari kartu dan dari detail, banner dan lencana, tambah catatan, edit dengan tanda edited, ubah target dengan alasan wajib, resume, viewer tanpa tombol; tidak ada galat konsol. Tidak menyentuh release 2.1 atau aplikasi nyata.",
+            "parentId": "57"
+          },
+          {
+            "id": 3,
+            "title": "Pemeriksaan visual dan kualitas",
+            "description": "Seluruh pemeriksaan.",
+            "status": "pending",
+            "details": "Tangkapan layar kartu dan detail (terang, gelap, ponsel) tanpa overflow; tsc, eslint, vitest, npm run build, tes live relevan bersih; baseline view dan release identik; semua kriteria PRD dicentang.",
+            "parentId": "57"
+          },
+          {
+            "id": 4,
+            "title": "Dokumentasi",
+            "description": "README dan supabase/README.",
+            "status": "pending",
+            "details": "Bagian 'Hold dan Catatan release' di README (arti Hold vs Archive, siapa yang boleh, aturan edit catatan, alasan perubahan target) dan supabase/README.md; tautkan PRD-Release-Hold-Catatan.md dari PRD Release Multi-Aplikasi dan PRD utama.",
+            "parentId": "57"
+          }
+        ]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-14T05:37:46.867Z",
-      "taskCount": 50,
+      "lastModified": "2026-11-16T10:21:35.971Z",
+      "taskCount": 57,
       "completedCount": 40,
       "tags": [
         "master"
