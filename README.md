@@ -27,6 +27,19 @@ Untuk merapikan Dashboard dan daftar Release tanpa menghapus data. Spesifikasi: 
 - **Archive vs Deactivate vs Delete:** Archive hanya menyembunyikan (bisa dikembalikan); Deactivate (Source settings) menghentikan sinkronisasi; Delete menghapus permanen beserta datanya.
 - **Teknis:** kolom `archived_at` pada `sources` dan `releases` (kosong = aktif); fungsi di `src/lib/archive/` dan server action admin-only di `src/app/archive/actions.ts`; hanya view `source_snapshot_totals` yang menyaring di database, sisanya disaring aplikasi (lihat [supabase/README.md](supabase/README.md)).
 
+### Hold dan Catatan release
+
+Untuk mencatat kenapa sebuah release terlambat atau ditahan. Spesifikasi: [PRD Hold dan Catatan Release](PRD-Release-Hold-Catatan.md).
+
+- **Hold** (admin): tombol **Put on hold** di halaman detail release atau menu tiga titik kartu. **Alasan wajib** (1 sampai 500 karakter). Release tetap tampil, tanggal target dan angka progres tidak berubah, dan **Resume** (alasan opsional) melanjutkannya. Hold hanya untuk release yang belum rilis dan tidak terarsip; menandai release sebagai Released saat hold otomatis mengakhiri hold dan tercatat.
+- **Hold vs Archive:** Hold menahan release yang tetap terlihat dan menggantikan label risiko otomatis dengan **On hold**; Archive menyembunyikannya dari daftar. Hold terbawa saat diarsipkan dan dikembalikan.
+- **Status otomatis tidak dipalsukan:** "Overdue", "Behind", dan "At risk" tetap dihitung dari tanggal dan progres (tidak pernah diisi manual). Saat ditahan, banner di halaman detail menampilkan alasan, siapa dan sejak kapan, serta status otomatis yang akan tampil tanpa hold. Kartu aplikasi di Dashboard tidak menganggap release yang ditahan sebagai berisiko, dan daftar Release menempatkannya setelah yang sedang berjalan.
+- **Activity** (halaman detail): log kronologis berhalaman 20 berisi catatan bebas (1 sampai 2000 karakter) dan kejadian sistem: Hold, Resume, Target changed (tanggal lama dan baru), Released. Semua pengguna login boleh membaca; hanya admin yang menulis. Kartu release menampilkan alasan hold dan catatan bebas terbaru satu baris.
+- **Mengubah tanggal target** pada form Edit wajib disertai **Reason for change**; alasan dan tanggal lama dan baru masuk log. Ditegakkan di form, server action, dan (bila alasan diberikan) di database.
+- **Edit catatan, tanpa hapus:** admin boleh memperbaiki teks entri mana pun (typo). Entri ditandai **edited** (tooltip siapa dan kapan) dan satu versi sebelumnya disimpan (`previous_body`). Jenis entri, tanggal target, penulis, dan waktu **terkunci** oleh trigger database, sehingga riwayat mundurnya jadwal tidak bisa dipalsukan. Mengedit entri Hold terbaru dari release yang masih ditahan ikut memperbarui alasan hold. Tidak ada tombol hapus catatan; hapus release ikut menghapus log-nya.
+- **Teknis:** kolom `held_at` dan `hold_reason` pada `releases`; tabel `release_notes`; view `release_latest_note`; fungsi `hold_release`, `resume_release`, `add_release_note`, `edit_release_note`, `set_release_released` (hanya service role, satu transaksi), dan `save_release` yang mencatat perubahan target. Kode: `src/lib/releases/{model,repo,validate,notes,load}.ts`, server action di `src/app/release/actions.ts` (`putOnHold`, `resumeHold`, `addNote`, `editNote`, `saveRelease`), komponen di `src/components/releases/`. Daftar migrasi: [supabase/README.md](supabase/README.md).
+- **Catatan keterbatasan:** di database, perubahan tanggal target tanpa alasan tetap lolos (agar pemanggil lama tidak rusak); kewajiban alasan dijaga form dan server action. Notifikasi (email atau Slack), catatan oleh viewer, dan hapus catatan belum ada (lihat bagian Tahap berikutnya di PRD).
+
 ### Login Google (SSO)
 
 Halaman login punya tombol **Continue with Google** di samping login email + password. Spesifikasi: [PRD Login SSO Google](PRD-Login-SSO-Google.md).

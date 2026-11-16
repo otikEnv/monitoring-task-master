@@ -1,6 +1,6 @@
 # PRD: Release Lintas Aplikasi
 
-14 November 2026 · Otik · Perluasan [PRD Fitur Release Tracking](PRD-Fitur-Release-Tracking.md)
+14 November 2026 · Otik · Perluasan [PRD Fitur Release Tracking](PRD-Fitur-Release-Tracking.md). Dilanjutkan oleh [PRD Hold dan Catatan Release](PRD-Release-Hold-Catatan.md)
 
 ## Ringkasan dan latar belakang
 

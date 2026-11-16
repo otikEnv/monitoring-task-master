@@ -2752,7 +2752,7 @@
         "id": "57",
         "title": "Hold dan Catatan: verifikasi end-to-end dan dokumentasi",
         "description": "Uji live, pemeriksaan visual, README.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "55",
@@ -2765,7 +2765,7 @@
             "id": 1,
             "title": "Tes live",
             "description": "tests/release-hold.live.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Data uji berawalan TMP-HOLD-: hold, resume, catatan, edit (previous_body terisi, kolom terkunci tidak berubah), perubahan target dengan alasan, mark released mengakhiri hold, hold + archive + restore, cascade hapus; viewer tidak bisa menulis dan tidak bisa membaca di luar haknya; angka progres tidak berubah akibat hold. User uji @envisions.app. vi.setConfig({ testTimeout: 60_000 }). Bersihkan semuanya.",
             "parentId": "57"
           },
@@ -2773,7 +2773,7 @@
             "id": 2,
             "title": "Pemeriksaan interaksi di browser",
             "description": "Puppeteer pada data uji.",
-            "status": "pending",
+            "status": "done",
             "details": "Alur: hold dari kartu dan dari detail, banner dan lencana, tambah catatan, edit dengan tanda edited, ubah target dengan alasan wajib, resume, viewer tanpa tombol; tidak ada galat konsol. Tidak menyentuh release 2.1 atau aplikasi nyata.",
             "parentId": "57"
           },
@@ -2781,7 +2781,7 @@
             "id": 3,
             "title": "Pemeriksaan visual dan kualitas",
             "description": "Seluruh pemeriksaan.",
-            "status": "pending",
+            "status": "done",
             "details": "Tangkapan layar kartu dan detail (terang, gelap, ponsel) tanpa overflow; tsc, eslint, vitest, npm run build, tes live relevan bersih; baseline view dan release identik; semua kriteria PRD dicentang.",
             "parentId": "57"
           },
@@ -2789,7 +2789,7 @@
             "id": 4,
             "title": "Dokumentasi",
             "description": "README dan supabase/README.",
-            "status": "pending",
+            "status": "done",
             "details": "Bagian 'Hold dan Catatan release' di README (arti Hold vs Archive, siapa yang boleh, aturan edit catatan, alasan perubahan target) dan supabase/README.md; tautkan PRD-Release-Hold-Catatan.md dari PRD Release Multi-Aplikasi dan PRD utama.",
             "parentId": "57"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T11:29:38.459Z",
+      "lastModified": "2026-11-16T11:36:09.420Z",
       "taskCount": 57,
-      "completedCount": 46,
+      "completedCount": 47,
       "tags": [
         "master"
       ]
