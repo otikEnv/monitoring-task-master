@@ -5,6 +5,7 @@ import {
   aggregateRelease, computeRelease, tasksInRange,
   type ReleaseAggregate, type ReleaseStats, type TaskInput,
 } from "./model";
+import { loadLatestNotes, type LatestNote } from "./notes";
 import { COMPONENT_COLUMNS, RELEASE_COLUMNS, toComponent, toRelease, type ComponentRow, type ReleaseRow } from "./repo";
 
 /** Satu komponen release beserta sumbernya dan statistiknya sendiri (tanggal dari header release). */
@@ -25,6 +26,8 @@ export type ReleaseOverview = {
   components: ComponentOverview[];
   /** Gabungan seluruh komponen. */
   stats: ReleaseAggregate;
+  /** Catatan bebas terbaru (bukan entri sistem); null bila belum ada. */
+  latestNote: LatestNote | null;
 };
 
 export type OverviewFilter = {
@@ -62,11 +65,18 @@ export async function fetchTagTasks(db: SupabaseClient, sourceId: string, tag: s
   }
 }
 
-/** Yang belum rilis dulu (target terdekat lebih awal), lalu yang sudah rilis (terbaru dulu). */
+/** Urutan kelompok: berjalan (0), ditahan (1), sudah rilis (2). */
+const group = (o: ReleaseOverview) => (o.release.releasedOn ? 2 : o.release.heldAt ? 1 : 0);
+
+/**
+ * Yang berjalan dulu (target terdekat lebih awal), lalu yang ditahan (urutan sama), lalu yang sudah rilis
+ * (terbaru dulu). Release yang ditahan tidak diprioritaskan di atas yang sedang berjalan.
+ */
 export function sortOverviews(list: ReleaseOverview[]): ReleaseOverview[] {
   return [...list].sort((a, b) => {
+    const ga = group(a), gb = group(b);
+    if (ga !== gb) return ga - gb;
     const ar = a.release.releasedOn, br = b.release.releasedOn;
-    if (!ar !== !br) return ar ? 1 : -1;
     if (ar && br) return br.localeCompare(ar) || a.release.name.localeCompare(b.release.name, "en");
     return (
       a.release.targetDate.localeCompare(b.release.targetDate) ||
@@ -119,6 +129,8 @@ export async function loadReleaseOverviews(
     }
   }
 
+  const latestNotes = await loadLatestNotes(db, headers.map((h) => h.id));
+
   const pairs = new Map<string, { sourceId: string; tag: string }>();
   for (const c of components) pairs.set(`${c.sourceId}\u0000${c.tag}`, { sourceId: c.sourceId, tag: c.tag });
   const taskSets = new Map(
@@ -147,7 +159,12 @@ export async function loadReleaseOverviews(
         })
         .sort((a, b) => a.sourceName.localeCompare(b.sourceName, "en") || a.component.tag.localeCompare(b.component.tag, "en"));
       release.components = overviews.map((o) => o.component);
-      return { release, components: overviews, stats: aggregateRelease(release, overviews.map((o) => o.stats), now) };
+      return {
+        release,
+        components: overviews,
+        stats: aggregateRelease(release, overviews.map((o) => o.stats), now),
+        latestNote: latestNotes.get(h.id) ?? null,
+      };
     }),
   );
 }

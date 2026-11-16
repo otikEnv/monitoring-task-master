@@ -2474,7 +2474,7 @@
         "id": "52",
         "title": "Hold dan Catatan: model, repo, validasi, dan pemuat data",
         "description": "Aturan risiko saat hold, repo catatan, validasi, dan pemuatan Activity.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "51"
@@ -2486,7 +2486,7 @@
             "id": 1,
             "title": "Model risiko saat hold",
             "description": "RiskLevel dan agregasi.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambah tingkat tampilan 'on_hold' tanpa merusak riskLevel(): ReleaseStats memuat heldAt, holdReason, dan wouldBeRisk (risiko yang akan tampil bila tidak di-hold). Label 'On hold' di RISK_LABEL. Hold hanya berlaku bila belum rilis; riskComponents tetap dihitung untuk informasi sekunder.",
             "parentId": "52"
           },
@@ -2494,7 +2494,7 @@
             "id": 2,
             "title": "Urutan daftar dan ringkasan",
             "description": "sortOverviews dan summarizeReleases.",
-            "status": "pending",
+            "status": "done",
             "details": "Release on hold ditempatkan setelah release berisiko dan sebelum yang sudah rilis; tidak dihitung sebagai berisiko di kartu aplikasi Dashboard (summary.ts) dan ringkasan Dashboard. Baris release on hold pada kartu aplikasi tampil dengan lencana On hold.",
             "parentId": "52"
           },
@@ -2502,7 +2502,7 @@
             "id": 3,
             "title": "Repo",
             "description": "src/lib/releases/repo.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "ReleaseRow memuat heldAt dan holdReason; fungsi holdRelease, resumeRelease, addReleaseNote, editReleaseNote, changeReleaseTarget memanggil fungsi database lewat service role dan memetakan galat (23514, P0002, 23505) ke galat domain; listReleaseNotes(releaseId, page, pageSize=20) dengan total.",
             "parentId": "52"
           },
@@ -2510,7 +2510,7 @@
             "id": 4,
             "title": "Validasi",
             "description": "src/lib/releases/validate.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "validateHoldReason (trim, 1..500), validateNoteBody (trim, 1..2000), validateTargetReason; pesan bahasa Inggris; normalisasi spasi dan penolakan teks kosong atau hanya spasi.",
             "parentId": "52"
           },
@@ -2518,7 +2518,7 @@
             "id": 5,
             "title": "Pemuat Activity",
             "description": "src/lib/releases/load.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "loadReleaseActivity(releaseId, page) memuat entri terbaru di atas dengan penulis, waktu, tanda edited, dan total; loadReleaseOverviews membawa heldAt, holdReason, dan satu catatan Note terbaru per release (satu query IN, bukan N+1).",
             "parentId": "52"
           },
@@ -2526,7 +2526,7 @@
             "id": 6,
             "title": "Tes",
             "description": "Perbarui dan tambah tes unit.",
-            "status": "pending",
+            "status": "done",
             "details": "release-model (on hold mengganti label dan mempertahankan wouldBeRisk), release-summary, release-validate, release-repo (mock), release-load; tes yang ada tetap lolos.",
             "parentId": "52"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T10:36:15.416Z",
+      "lastModified": "2026-11-16T10:46:26.879Z",
       "taskCount": 57,
-      "completedCount": 41,
+      "completedCount": 42,
       "tags": [
         "master"
       ]

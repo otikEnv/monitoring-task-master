@@ -26,10 +26,13 @@ export type Part = {
 /** ReleaseOverview palsu dengan statistik yang dihitung sungguhan (computeRelease + aggregateRelease). */
 export function overviewOf(
   parts: Part[],
-  { releasedOn = null, now = "2026-11-11", name = "v2.1" }: { releasedOn?: string | null; now?: string; name?: string } = {},
+  { releasedOn = null, now = "2026-11-11", name = "v2.1", heldAt = null, holdReason = null, latestNote = null }: {
+    releasedOn?: string | null; now?: string; name?: string; heldAt?: string | null; holdReason?: string | null;
+    latestNote?: ReleaseOverview["latestNote"];
+  } = {},
 ): ReleaseOverview {
   const at = new Date(`${now}T12:00:00+07:00`);
-  const header = { startDate: "2026-11-01", targetDate: "2026-11-21", releasedOn };
+  const header = { startDate: "2026-11-01", targetDate: "2026-11-21", releasedOn, heldAt, holdReason };
   const components: ComponentOverview[] = parts.map((p, i) => {
     const component = {
       id: `c${i}`, releaseId: REL_ID, sourceId: p.sourceId ?? SRC, tag: p.tag ?? "master",
@@ -46,8 +49,9 @@ export function overviewOf(
     };
   });
   return {
-    release: { id: REL_ID, name, ...header, createdAt: "2026-11-01T00:00:00Z", archivedAt: null, components: components.map((c) => c.component) },
+    release: { id: REL_ID, name, ...header, createdAt: "2026-11-01T00:00:00Z", archivedAt: null, heldAt, holdReason, components: components.map((c) => c.component) },
     components,
     stats: aggregateRelease(header, components.map((c) => c.stats), at),
+    latestNote,
   };
 }

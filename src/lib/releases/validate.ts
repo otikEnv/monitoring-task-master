@@ -147,3 +147,41 @@ export function parseReleaseForm(fd: FormData): ReleaseParseResult {
   if (Object.keys(errors).length > 0) return { ok: false, fieldErrors: errors };
   return { ok: true, value: { name, startDate, targetDate, components } };
 }
+
+// ---------------------------------------------------------------------------
+// Catatan, hold, dan alasan perubahan target (PRD-Release-Hold-Catatan.md)
+// ---------------------------------------------------------------------------
+
+export type NoteKind = "note" | "hold" | "resume" | "target_change" | "released";
+
+/** Batas teks per jenis entri; sama dengan constraint di database (release_notes_body_valid). */
+export const NOTE_LIMITS: Record<NoteKind, { min: number; max: number; label: string }> = {
+  note: { min: 1, max: 2000, label: "Note" },
+  hold: { min: 1, max: 500, label: "Hold reason" },
+  target_change: { min: 1, max: 500, label: "Reason for change" },
+  resume: { min: 0, max: 500, label: "Reason" },
+  released: { min: 0, max: 500, label: "Text" },
+};
+
+/** Semua karakter kontrol kecuali baris baru dan tab. */
+const BAD_CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+
+export type TextResult = { ok: true; value: string } | { ok: false; error: string };
+
+/**
+ * Merapikan dan memeriksa teks catatan/alasan: baris baru dinormalkan ke \n, spasi di tepi dibuang,
+ * lalu panjang dan karakter kontrol diperiksa menurut jenis entri. Pesan berbahasa Inggris untuk UI.
+ */
+export function validateNoteText(raw: unknown, kind: NoteKind): TextResult {
+  const { min, max, label } = NOTE_LIMITS[kind];
+  const text = (typeof raw === "string" ? raw : "").replace(/\r\n?/g, "\n").trim();
+  if (text.length < min) return { ok: false, error: `${label} is required.` };
+  if (text.length > max) return { ok: false, error: `${label} must be at most ${max} characters.` };
+  if (BAD_CONTROL.test(text)) return { ok: false, error: `${label} contains invalid characters.` };
+  return { ok: true, value: text };
+}
+
+export const validateHoldReason = (raw: unknown) => validateNoteText(raw, "hold");
+export const validateNoteBody = (raw: unknown) => validateNoteText(raw, "note");
+export const validateTargetReason = (raw: unknown) => validateNoteText(raw, "target_change");
+export const validateResumeReason = (raw: unknown) => validateNoteText(raw, "resume");

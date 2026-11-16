@@ -236,6 +236,33 @@ begin
   if n <> 0 then raise exception 'FAIL: release baru membuat entri (%)', n; end if;
 end $$;
 
+-- 8b. View release_latest_note: satu baris per release, hanya jenis note, terbaru; teks mengikuti edit.
+do $$
+declare r uuid := (select id from t_ids where k = 'r'); n int; b text; nid uuid;
+begin
+  -- 'r' sudah punya catatan 'Typo di sini' (bagian 6) serta entri hold/resume/released/target_change.
+  select count(*), max(body) into n, b from public.release_latest_note where release_id = r;
+  if n <> 1 or b <> 'Typo di sini' then raise exception 'FAIL: catatan terbaru awal salah (%, %)', n, b; end if;
+
+  nid := public.add_release_note(r, 'Catatan lebih baru', null, 'a@test.local');
+  select count(*), max(body) into n, b from public.release_latest_note where release_id = r;
+  if n <> 1 or b <> 'Catatan lebih baru' then raise exception 'FAIL: catatan terbaru tidak berganti (%, %)', n, b; end if;
+
+  perform public.edit_release_note(nid, 'Catatan lebih baru (diedit)', 'a@test.local');
+  select max(body) into b from public.release_latest_note where release_id = r;
+  if b <> 'Catatan lebih baru (diedit)' then raise exception 'FAIL: view tidak mengikuti edit (%)', b; end if;
+
+  -- entri sistem yang lebih baru tidak menggeser catatan terbaru
+  perform public.resume_release(r, null, null, 'a@test.local'); -- bagian 8 meninggalkan release dalam keadaan hold
+  perform public.hold_release(r, 'tahan untuk uji view', null, 'a@test.local');
+  select max(body) into b from public.release_latest_note where release_id = r;
+  if b <> 'Catatan lebih baru (diedit)' then raise exception 'FAIL: entri hold menggeser catatan terbaru (%)', b; end if;
+
+  -- release tanpa catatan note tidak punya baris
+  select count(*) into n from public.release_latest_note where release_id = gen_random_uuid();
+  if n <> 0 then raise exception 'FAIL: baris view untuk release tidak ada'; end if;
+end $$;
+
 -- 9. Cascade: menghapus release menghapus log-nya.
 do $$
 declare r uuid := (select id from t_ids where k = 'r'); n int;
@@ -266,6 +293,8 @@ begin
   if n <> 1 then raise exception 'FAIL: authenticated tidak bisa membaca release_notes (%)', n; end if;
   select count(*) into n from public.releases where id = r and held_at is null;
   if n <> 1 then raise exception 'FAIL: authenticated tidak bisa membaca releases.held_at (%)', n; end if;
+  select count(*) into n from public.release_latest_note where release_id = r;
+  if n <> 1 then raise exception 'FAIL: authenticated tidak bisa membaca release_latest_note (%)', n; end if;
 
   begin
     insert into public.release_notes (release_id, kind, body, author_email) values (r, 'note', 'x', 'v@test.local');
@@ -312,6 +341,10 @@ begin
   begin
     perform 1 from public.release_notes;
     raise exception 'FAIL: anon bisa SELECT release_notes';
+  exception when insufficient_privilege then null; end;
+  begin
+    perform 1 from public.release_latest_note;
+    raise exception 'FAIL: anon bisa SELECT release_latest_note';
   exception when insufficient_privilege then null; end;
 end $$;
 reset role;

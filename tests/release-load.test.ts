@@ -9,6 +9,9 @@ const SRC2 = "22222222-2222-4222-8222-222222222222";
 
 type Q = { range?: [number, number]; filters: Record<string, unknown> };
 
+/** Tabel yang tidak relevan bagi sebuah tes dijawab kosong (mis. catatan terbaru per release). */
+const DEFAULTS: Record<string, (q: Q) => unknown> = { release_latest_note: () => ({ data: [], error: null }) };
+
 /** Klien palsu: rantai query yang dapat di-await dan mengembalikan hasil per tabel. */
 function fakeDb(handlers: Record<string, (q: Q) => unknown>) {
   const calls: string[] = [];
@@ -22,7 +25,8 @@ function fakeDb(handlers: Record<string, (q: Q) => unknown>) {
       chain.or = (expr: string) => { q.filters.or = expr; return chain; };
       chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
         calls.push(table);
-        return Promise.resolve(handlers[table](q)).then(res, rej);
+        const handler = handlers[table] ?? DEFAULTS[table];
+        return Promise.resolve(handler(q)).then(res, rej);
       };
       return chain;
     },
@@ -115,7 +119,7 @@ describe("loadReleaseOverviews", () => {
     });
     const [o] = await loadReleaseOverviews(db, {}, NOW);
     expect([o.components.length, o.stats.total, o.stats.risk]).toEqual([0, 0, "empty"]);
-    expect(calls).toEqual(["releases", "release_components"]);
+    expect(calls).toEqual(["releases", "release_components", "release_latest_note"]);
   });
 
   it("tag tanpa task: tagFound false dan statistik nol, komponen lain tetap dihitung", async () => {

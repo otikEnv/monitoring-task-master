@@ -107,11 +107,19 @@ describe("pemetaan baris database", () => {
     const c = toComponent({ id: "c1", release_id: "r1", source_id: SRC, tag: "master", range_start: "100" as unknown as number, range_end: 150 });
     expect(c).toEqual({ id: "c1", releaseId: "r1", sourceId: SRC, tag: "master", rangeStart: 100, rangeEnd: 150 });
     const r = toRelease(
-      { id: "r1", name: "2.1", start_date: "2026-11-01", target_date: "2026-11-20", released_on: null, created_at: "t", archived_at: null },
+      { id: "r1", name: "2.1", start_date: "2026-11-01", target_date: "2026-11-20", released_on: null, created_at: "t", archived_at: null, held_at: "2026-11-10T01:00:00Z", hold_reason: "Waiting for API" },
       [c],
     );
-    expect(r).toMatchObject({ id: "r1", name: "2.1", startDate: "2026-11-01", targetDate: "2026-11-20", releasedOn: null });
+    expect(r).toMatchObject({
+      id: "r1", name: "2.1", startDate: "2026-11-01", targetDate: "2026-11-20", releasedOn: null,
+      heldAt: "2026-11-10T01:00:00Z", holdReason: "Waiting for API",
+    });
     expect(r.components).toEqual([c]);
-    expect(toRelease({ id: "r", name: "n", start_date: "a", target_date: "b", released_on: null, created_at: "t", archived_at: null }).components).toEqual([]);
+    const plain = toRelease({ id: "r", name: "n", start_date: "a", target_date: "b", released_on: null, created_at: "t", archived_at: null, held_at: null, hold_reason: null });
+    expect(plain.components).toEqual([]);
+    expect([plain.heldAt, plain.holdReason]).toEqual([null, null]);
+    // baris lama tanpa kolom hold (mis. fixture) tetap dipetakan ke null
+    const legacy = toRelease({ id: "r", name: "n", start_date: "a", target_date: "b", released_on: null, created_at: "t", archived_at: null } as never);
+    expect([legacy.heldAt, legacy.holdReason]).toEqual([null, null]);
   });
 });

@@ -1,8 +1,9 @@
-import { AlarmClock, CircleCheck, CircleDashed, Rocket, TrendingDown, TriangleAlert } from "lucide-react";
+import { AlarmClock, CircleCheck, CircleDashed, CirclePause, Rocket, TrendingDown, TriangleAlert } from "lucide-react";
 import { RISK_LABEL, type RiskLevel } from "@/lib/releases/model";
 
 const ICON = {
   released: Rocket,
+  on_hold: CirclePause,
   empty: CircleDashed,
   overdue: AlarmClock,
   behind: TrendingDown,
@@ -12,6 +13,7 @@ const ICON = {
 
 const TONE: Record<RiskLevel, string> = {
   released: "bg-muted text-foreground",
+  on_hold: "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-200",
   empty: "bg-muted text-muted-foreground",
   overdue: "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
   behind: "bg-orange-100 text-orange-900 dark:bg-orange-950 dark:text-orange-200",

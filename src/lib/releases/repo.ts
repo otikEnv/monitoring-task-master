@@ -23,8 +23,38 @@ export type ReleaseRow = {
   createdAt: string;
   /** Waktu diarsipkan; null = aktif (PRD-Archive.md). */
   archivedAt: string | null;
+  /** Waktu ditahan; null = Active (PRD-Release-Hold-Catatan.md). */
+  heldAt: string | null;
+  holdReason: string | null;
   components: ComponentRow[];
 };
+
+/** Siapa yang melakukan perubahan; dicatat pada log catatan. id null untuk aksi tanpa pengguna. */
+export type Author = { id: string | null; email: string };
+
+export type ReleaseStateCode = "already_released" | "archived" | "already_on_hold" | "not_on_hold";
+const STATE_MESSAGE: Record<ReleaseStateCode, string> = {
+  already_released: "This release has already been released.",
+  archived: "This release is archived. Restore it first.",
+  already_on_hold: "This release is already on hold.",
+  not_on_hold: "This release is not on hold.",
+};
+/** Keadaan release tidak mengizinkan aksi (mis. hold pada release yang sudah rilis). */
+export class ReleaseStateError extends Error {
+  constructor(public code: ReleaseStateCode) {
+    super(STATE_MESSAGE[code]);
+    this.name = "ReleaseStateError";
+  }
+}
+export class NoteNotFoundError extends Error {
+  constructor() {
+    super("Note not found.");
+    this.name = "NoteNotFoundError";
+  }
+}
+
+/** Alasan perubahan target (sudah divalidasi) dan penulisnya; dicatat database bila tanggal target berubah. */
+export type ChangeAudit = { reason: string; author: Author };
 
 export class DuplicateReleaseError extends Error {
   constructor() {
@@ -50,12 +80,13 @@ export class SourceTagError extends Error {
   }
 }
 
-export const RELEASE_COLUMNS = "id, name, start_date, target_date, released_on, created_at, archived_at";
+export const RELEASE_COLUMNS =
+  "id, name, start_date, target_date, released_on, created_at, archived_at, held_at, hold_reason";
 export const COMPONENT_COLUMNS = "id, release_id, source_id, tag, range_start, range_end";
 
 type Row = {
   id: string; name: string; start_date: string; target_date: string; released_on: string | null; created_at: string;
-  archived_at: string | null;
+  archived_at: string | null; held_at: string | null; hold_reason: string | null;
 };
 type ComponentDbRow = {
   id: string; release_id: string; source_id: string; tag: string; range_start: number; range_end: number;
@@ -82,6 +113,8 @@ export function toRelease(r: Row, components: ComponentRow[] = []): ReleaseRow {
     releasedOn: r.released_on,
     createdAt: r.created_at,
     archivedAt: r.archived_at,
+    heldAt: r.held_at ?? null,
+    holdReason: r.hold_reason ?? null,
     components,
   };
 }
@@ -134,6 +167,7 @@ export async function saveRelease(
   id: string | null,
   input: ReleaseInput,
   db: SupabaseClient = createAdminClient(),
+  audit?: ChangeAudit,
 ): Promise<{ id: string }> {
   const { data, error } = await db.rpc("save_release", {
     p_id: id,
@@ -142,6 +176,8 @@ export async function saveRelease(
       // null = bawaan database (hari ini WIB) saat membuat; saat mengubah, null tidak menimpa.
       start_date: input.startDate,
       target_date: input.targetDate,
+      // Alasan dan penulis hanya dipakai database bila target_date berubah pada ubah release.
+      ...(audit?.reason ? { change_reason: audit.reason, author_id: audit.author.id, author_email: audit.author.email } : {}),
     },
     p_components: input.components.map((c) => ({
       source_id: c.sourceId,
@@ -169,19 +205,96 @@ export async function updateRelease(
   id: string,
   input: ReleaseInput,
   db: SupabaseClient = createAdminClient(),
+  audit?: ChangeAudit,
 ): Promise<void> {
-  await saveRelease(id, input, db);
+  await saveRelease(id, input, db, audit);
 }
 
-/** releasedOn null = batalkan tanda rilis. */
+/** Penulis bawaan untuk aksi tanpa pengguna (skrip, tes). */
+export const SYSTEM_AUTHOR: Author = { id: null, email: "system" };
+
+/**
+ * releasedOn null = batalkan tanda rilis. Menandai rilis saat release di-hold mengakhiri hold dan mencatatnya
+ * di log (fungsi database set_release_released, atomik).
+ */
 export async function setReleasedOn(
   id: string,
   releasedOn: string | null,
   db: SupabaseClient = createAdminClient(),
+  author: Author = SYSTEM_AUTHOR,
 ): Promise<void> {
-  const { data, error } = await db.from("releases").update({ released_on: releasedOn }).eq("id", id).select("id");
-  if (error) throw new Error(`Gagal mengubah status rilis: ${error.message}`);
-  if (!data?.length) throw new ReleaseNotFoundError();
+  const { error } = await db.rpc("set_release_released", {
+    p_id: id, p_released_on: releasedOn, p_author: author.id, p_email: author.email,
+  });
+  if (error) {
+    if (error.code === "P0002") throw new ReleaseNotFoundError();
+    throw new Error(`Gagal mengubah status rilis: ${error.message}`);
+  }
+}
+
+type RpcError = { code?: string; message?: string };
+
+/** Memetakan galat fungsi hold/resume: P0002 = tidak ada, 55000 = keadaan tidak mengizinkan. */
+function releaseFunctionError(what: string, e: RpcError): Error {
+  if (e.code === "P0002") return new ReleaseNotFoundError();
+  if (e.code === "55000" && e.message && e.message in STATE_MESSAGE) return new ReleaseStateError(e.message as ReleaseStateCode);
+  return new Error(`Gagal ${what}: ${e.message}`);
+}
+
+/** Menahan release dengan alasan (sudah divalidasi 1..500 karakter). Mengembalikan id entri log. */
+export async function holdRelease(
+  id: string,
+  reason: string,
+  author: Author,
+  db: SupabaseClient = createAdminClient(),
+): Promise<{ noteId: string }> {
+  const { data, error } = await db.rpc("hold_release", {
+    p_id: id, p_reason: reason, p_author: author.id, p_email: author.email,
+  });
+  if (error) throw releaseFunctionError("menahan release", error);
+  return { noteId: data as string };
+}
+
+/** Melanjutkan release yang ditahan; alasan opsional (null atau kosong = tanpa teks). */
+export async function resumeRelease(
+  id: string,
+  reason: string | null,
+  author: Author,
+  db: SupabaseClient = createAdminClient(),
+): Promise<{ noteId: string }> {
+  const { data, error } = await db.rpc("resume_release", {
+    p_id: id, p_reason: reason ?? "", p_author: author.id, p_email: author.email,
+  });
+  if (error) throw releaseFunctionError("melanjutkan release", error);
+  return { noteId: data as string };
+}
+
+/** Catatan bebas pada sebuah release (sudah divalidasi 1..2000 karakter). */
+export async function addReleaseNote(
+  releaseId: string,
+  body: string,
+  author: Author,
+  db: SupabaseClient = createAdminClient(),
+): Promise<{ noteId: string }> {
+  const { data, error } = await db.rpc("add_release_note", {
+    p_id: releaseId, p_body: body, p_author: author.id, p_email: author.email,
+  });
+  if (error) throw releaseFunctionError("menambah catatan", error);
+  return { noteId: data as string };
+}
+
+/** Mengubah teks sebuah catatan; hanya teks yang berubah (fakta terkunci di database). */
+export async function editReleaseNote(
+  noteId: string,
+  body: string,
+  editorEmail: string,
+  db: SupabaseClient = createAdminClient(),
+): Promise<void> {
+  const { error } = await db.rpc("edit_release_note", { p_note_id: noteId, p_body: body, p_email: editorEmail });
+  if (error) {
+    if (error.code === "P0002") throw new NoteNotFoundError();
+    throw new Error(`Gagal mengubah catatan: ${error.message}`);
+  }
 }
 
 /**

@@ -19,6 +19,10 @@ export type ReleaseHeader = {
   targetDate: string;
   /** yyyy-mm-dd; null = belum rilis */
   releasedOn: string | null;
+  /** Waktu release ditahan (ISO); kosong/null = Active. Hanya bermakna bila belum rilis. */
+  heldAt?: string | null;
+  /** Alasan hold; terisi bersama heldAt. */
+  holdReason?: string | null;
 };
 
 /** Satu komponen: rentang task (inklusif) pada satu aplikasi dan tag. */
@@ -51,10 +55,15 @@ export type ReleaseTask = {
   subtasksDone: number;
 };
 
-export type RiskLevel = "released" | "empty" | "overdue" | "behind" | "at_risk" | "on_track";
+/**
+ * Penanda tampilan risiko. "on_hold" hanya muncul pada tingkat release (ReleaseAggregate.risk):
+ * release yang sengaja ditahan menampilkan On hold sebagai ganti peringatan otomatis (PRD-Release-Hold-Catatan.md).
+ */
+export type RiskLevel = "released" | "on_hold" | "empty" | "overdue" | "behind" | "at_risk" | "on_track";
 
 export const RISK_LABEL: Record<RiskLevel, string> = {
   released: "Released",
+  on_hold: "On hold",
   empty: "No tasks",
   overdue: "Overdue",
   behind: "Behind",
@@ -266,7 +275,13 @@ export type ReleaseAggregate = {
   daysLeft: number;
   /** elapsedPercent - persen progres gabungan (tanpa pembulatan); null bila total 0. */
   gap: number | null;
+  /** Yang ditampilkan: "on_hold" bila ditahan, selain itu sama dengan wouldBeRisk. */
   risk: RiskLevel;
+  /** Risiko hasil hitungan otomatis, tanpa memperhitungkan hold (tetap ditampilkan sebagai informasi sekunder). */
+  wouldBeRisk: RiskLevel;
+  /** Waktu hold (ISO) bila release sedang ditahan dan belum rilis; selain itu null. */
+  heldAt: string | null;
+  holdReason: string | null;
   /** Indeks komponen yang sendiri berisiko (At risk, Behind, atau Overdue), urut sesuai masukan. */
   riskComponents: number[];
   /** Jumlah task ditunda, dibatalkan, dan terhambat di seluruh komponen. */
@@ -294,6 +309,9 @@ export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats
   const exactPercent = total > 0 ? (done * 100) / total : null;
   const time = timeProgress(header.startDate, header.targetDate, now);
   const gap = exactPercent === null ? null : time.elapsedPercent - exactPercent;
+  const computed = riskLevel({ releasedOn: header.releasedOn, total, done, daysLeft: time.daysLeft, gap, blocked, waiting });
+  // Release yang sudah rilis tidak pernah dianggap ditahan (hold berakhir saat ditandai rilis).
+  const held = !header.releasedOn && !!header.heldAt;
 
   return {
     total,
@@ -304,8 +322,16 @@ export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats
     elapsedPercent: time.elapsedPercent,
     daysLeft: time.daysLeft,
     gap,
-    risk: riskLevel({ releasedOn: header.releasedOn, total, done, daysLeft: time.daysLeft, gap, blocked, waiting }),
+    risk: held ? "on_hold" : computed,
+    wouldBeRisk: computed,
+    heldAt: held ? header.heldAt! : null,
+    holdReason: held ? (header.holdReason ?? null) : null,
     riskComponents: components.flatMap((c, i) => (RISKY.includes(c.risk) ? [i] : [])),
     attentionCount: counts.blocked + counts.deferred + counts.cancelled,
   };
+}
+
+/** Lama hold dalam hari kalender WIB (0 = ditahan hari ini). */
+export function holdDays(heldAt: string, now: Date): number {
+  return Math.max(0, dayNumber(wibDay(now)) - dayNumber(wibDay(new Date(heldAt))));
 }
