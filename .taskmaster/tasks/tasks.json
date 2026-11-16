@@ -2859,13 +2859,26 @@
         "details": "src/components/layout/app-shell.tsx: bilah atas dengan SidebarTrigger di semua ukuran layar; status awal dibaca dari cookie sidebar_state (ditulis SidebarProvider) supaya tidak kembali terbuka tiap pindah halaman. Mode lipat = ikon (collapsible=icon, 3rem) dengan tooltip; Ctrl/Cmd+B dan rail tetap bekerja. Perbaikan terkait: item Sign out memakai nativeButton.",
         "testStrategy": "Puppeteer: toggle, lebar 16rem/3rem, konten melebar, cookie, bertahan di semua halaman dan setelah muat ulang, Ctrl+B, tooltip, menu akun saat terlipat, viewer, ponsel, tanpa galat konsol; npm run build lolos.",
         "subtasks": []
+      },
+      {
+        "id": "60",
+        "title": "Mode terang dan gelap (Light, Dark, System)",
+        "description": "Tombol tema dengan pilihan tersimpan, tanpa kedip, dan sinkron antar tab.",
+        "status": "done",
+        "priority": "low",
+        "dependencies": [
+          "59"
+        ],
+        "details": "src/lib/theme.ts (parseTheme, applyTheme, THEME_INIT_SCRIPT); src/components/theme/{theme-provider,theme-toggle}.tsx (useSyncExternalStore, localStorage 'theme', event storage); skrip di <head> pada src/app/layout.tsx (suppressHydrationWarning); tombol di AppShell dan halaman login; Toaster mengikuti tema; globals.css color-scheme mengikuti data-theme. CSS data-theme sudah ada sebelumnya.",
+        "testStrategy": "Unit: parseTheme, applyTheme, THEME_INIT_SCRIPT (berbagai nilai, penyimpanan diblokir), render toggle. Browser: Light/Dark/System, OS berlawanan, bertahan antar halaman dan muat ulang, atribut terpasang saat DOMContentLoaded, sinkron antar tab, Trend, toast, ponsel, tanpa galat hidrasi; build lolos.",
+        "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T11:52:17.833Z",
-      "taskCount": 59,
-      "completedCount": 49,
+      "lastModified": "2026-11-16T12:03:12.187Z",
+      "taskCount": 60,
+      "completedCount": 50,
       "tags": [
         "master"
       ]

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { SessionUser } from "@/lib/auth";
@@ -30,6 +31,7 @@ export async function AppShell({
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4 md:hidden" />
           <span className="text-sm font-medium md:hidden">Task Master</span>
+          <ThemeToggle className="ml-auto" />
         </header>
         <div className={cn("mx-auto w-full min-w-0 flex-1 space-y-6 px-4 py-6 md:px-8 md:py-8", WIDTH[width])}>
           {children}

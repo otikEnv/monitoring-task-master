@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ListChecks } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
 import { GoogleButton } from "./google-button";
@@ -18,7 +19,10 @@ async function NoticeFromQuery({ searchParams }: { searchParams: SearchParams })
 
 export default function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="flex flex-1 items-center justify-center bg-muted/40 px-4 py-16">
+    <main className="relative flex flex-1 items-center justify-center bg-muted/40 px-4 py-16">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3 text-center">
           <span className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">

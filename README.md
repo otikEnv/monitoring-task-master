@@ -52,6 +52,13 @@ Halaman login punya tombol **Continue with Google** di samping login email + pas
 - **Mengubah peran bawaan** akun Google menjadi `viewer`: ganti `'admin'` menjadi `'viewer'` pada `handle_new_user()` lewat migrasi baru.
 - **Skrip uji:** user uji lewat admin API harus ber-email `@envisions.app` (hapus di akhir tes); skrip uji SQL yang memasukkan email lain memanggil `select set_config('app.allow_any_domain', 'on', true);` setelah `begin;` (hanya berlaku untuk koneksi `postgres`).
 
+### Tema tampilan dan sidebar
+
+- **Tema:** tombol di bilah atas (ikon matahari atau bulan, juga di halaman login) memilih **Light**, **Dark**, atau **System** (mengikuti pengaturan perangkat, termasuk saat pengaturan itu berubah). Pilihan disimpan di `localStorage` (kunci `theme`) per peramban dan sinkron antar tab. Tanpa pilihan = System.
+- **Tanpa kedip:** skrip kecil di `<head>` (`THEME_INIT_SCRIPT` di `src/lib/theme.ts`) memasang `data-theme` pada `<html>` sebelum halaman tampil. CSS (`src/app/globals.css`) memahami `data-theme="light"` dan `"dark"` (memaksa) dan, tanpa atribut, mengikuti `prefers-color-scheme`. Grafik Trend, notifikasi (toast), dan kontrol bawaan peramban ikut tema.
+- **Kode:** `src/components/theme/{theme-provider,theme-toggle}.tsx`. Komponen baru cukup memakai kelas `dark:` Tailwind; varian `dark` sudah mengikuti `data-theme`.
+- **Sidebar:** tombol di bilah atas (atau Ctrl/Cmd+B) melipat sidebar menjadi deretan ikon di tepi kiri; pilihan terakhir tersimpan di cookie `sidebar_state` dan dibaca `AppShell`.
+
 ### Database dan uji
 
 - Migrasi dan uji SQL: lihat [supabase/README.md](supabase/README.md). Jalankan berkas SQL dengan `npm run db:run -- <berkas.sql>` (memakai `POSTGRES_URL_NON_POOLING` dari `.env.local`).
