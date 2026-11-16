@@ -187,3 +187,8 @@ export const validateHoldReason = (raw: unknown) => validateNoteText(raw, "hold"
 export const validateNoteBody = (raw: unknown) => validateNoteText(raw, "note");
 export const validateTargetReason = (raw: unknown) => validateNoteText(raw, "target_change");
 export const validateResumeReason = (raw: unknown) => validateNoteText(raw, "resume");
+
+/** Mengubah tanggal target pada release yang sudah ada wajib disertai alasan; tanggal kosong belum dianggap perubahan. */
+export function targetDateChanged(editing: boolean, initial: string, current: string): boolean {
+  return editing && current !== "" && current !== initial;
+}

@@ -2706,7 +2706,7 @@
         "id": "56",
         "title": "Hold dan Catatan: form ubah release dengan alasan perubahan target",
         "description": "Kotak Reason for change yang wajib saat tanggal target berubah.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "53"
@@ -2718,7 +2718,7 @@
             "id": 1,
             "title": "Deteksi perubahan target",
             "description": "Form klien.",
-            "status": "pending",
+            "status": "done",
             "details": "Bandingkan tanggal target saat ini dengan nilai awal; bila berbeda tampilkan kotak 'Reason for change' (wajib, 1..500) dan nonaktifkan Save sampai terisi; bila dikembalikan ke nilai awal kotak hilang. Hanya pada mode ubah, bukan baru.",
             "parentId": "56"
           },
@@ -2726,7 +2726,7 @@
             "id": 2,
             "title": "Kirim ke action",
             "description": "Field alasan.",
-            "status": "pending",
+            "status": "done",
             "details": "Alasan dikirim dalam FormData dan divalidasi di server (tidak cukup validasi klien); pesan galat bahasa Inggris dan fokus ke kotak yang salah; perubahan tanggal mulai saja tidak meminta alasan.",
             "parentId": "56"
           },
@@ -2734,7 +2734,7 @@
             "id": 3,
             "title": "Aksesibilitas dan tampilan",
             "description": "Label dan pesan.",
-            "status": "pending",
+            "status": "done",
             "details": "Label terhubung ke input, aria-invalid dan aria-describedby saat galat; tampilan benar di ponsel dan mode gelap.",
             "parentId": "56"
           },
@@ -2742,7 +2742,7 @@
             "id": 4,
             "title": "Tes",
             "description": "release-form.test.tsx dan actions.",
-            "status": "pending",
+            "status": "done",
             "details": "Kotak muncul hanya saat target berubah, Save nonaktif sampai alasan terisi, tanpa perubahan target tidak ada alasan, server menolak alasan kosong.",
             "parentId": "56"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T11:25:03.214Z",
+      "lastModified": "2026-11-16T11:29:38.459Z",
       "taskCount": 57,
-      "completedCount": 45,
+      "completedCount": 46,
       "tags": [
         "master"
       ]

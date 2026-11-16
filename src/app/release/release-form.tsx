@@ -9,8 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
+import { formatYmd } from "@/lib/releases/format";
 import {
-  componentField, MAX_COMPONENTS, parseRangeNumber, type ComponentFieldErrors, type ReleaseFieldErrors,
+  componentField, MAX_COMPONENTS, NOTE_LIMITS, parseRangeNumber, targetDateChanged, type ComponentFieldErrors,
+  type ReleaseFieldErrors,
 } from "@/lib/releases/validate";
 import { previewRange, saveRelease, type PreviewResult } from "./actions";
 
@@ -187,6 +190,14 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
   const [errors, setErrors] = useState<ReleaseFieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
+  // Tanggal target dikendalikan agar perubahannya terdeteksi: mengubahnya pada mode ubah wajib disertai alasan
+  // (dicatat di log Activity). Mengembalikan ke tanggal awal menyembunyikan kotak alasan lagi.
+  const [targetDate, setTargetDate] = useState(initial.targetDate);
+  const [reason, setReason] = useState("");
+  const targetChanged = targetDateChanged(editing, initial.targetDate, targetDate);
+  const reasonMax = NOTE_LIMITS.target_change.max;
+  const reasonLength = reason.trim().length;
+  const reasonMissing = targetChanged && reasonLength === 0;
 
   const patchRow = (key: number, patch: Partial<ComponentInitial>) => {
     setList((l) => ({ ...l, rows: l.rows.map((r) => (r.key === key ? { ...r, ...patch } : r)) }));
@@ -230,9 +241,29 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
               <Input id="startDate" name="startDate" type="date" defaultValue={initial.startDate} />
             </Field>
             <Field label="Target date" htmlFor="targetDate" error={errors.targetDate}>
-              <Input id="targetDate" name="targetDate" type="date" defaultValue={initial.targetDate} required />
+              <Input
+                id="targetDate" name="targetDate" type="date" value={targetDate} required
+                onChange={(e) => { setTargetDate(e.target.value); setErrors((er) => (er.targetDate ? { ...er, targetDate: undefined } : er)); }}
+              />
             </Field>
           </div>
+
+          {targetChanged && (
+            <Field
+              label="Reason for change (required)" htmlFor="changeReason" error={errors.changeReason}
+              hint={`The target date moves from ${formatYmd(initial.targetDate)} to ${formatYmd(targetDate)}. The reason is recorded in the release's Activity log.`}
+            >
+              <Textarea
+                id="changeReason" name="changeReason" rows={3} value={reason} required
+                placeholder="Why is the target date changing?"
+                aria-invalid={errors.changeReason ? true : undefined}
+                onChange={(e) => { setReason(e.target.value); setErrors((er) => (er.changeReason ? { ...er, changeReason: undefined } : er)); }}
+              />
+              <p className={`text-right text-xs tabular-nums ${reasonLength > reasonMax ? "text-destructive" : "text-muted-foreground"}`}>
+                {reasonLength}/{reasonMax}
+              </p>
+            </Field>
+          )}
 
           <div className="space-y-3">
             <div>
@@ -269,7 +300,9 @@ export function ReleaseForm({ initial, sources }: { initial: FormInitial; source
           {formError && <p role="alert" className="text-sm text-destructive">{formError}</p>}
 
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="submit" disabled={saving}>{saving ? "Saving…" : editing ? "Save changes" : "Save release"}</Button>
+            <Button type="submit" disabled={saving || reasonMissing || (targetChanged && reasonLength > reasonMax)}>
+              {saving ? "Saving…" : editing ? "Save changes" : "Save release"}
+            </Button>
             <Link
               href={initial.id ? `/release/${initial.id}` : "/release"}
               className={buttonVariants({ variant: "ghost" })}
