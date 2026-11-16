@@ -263,6 +263,37 @@ begin
   if n <> 0 then raise exception 'FAIL: baris view untuk release tidak ada'; end if;
 end $$;
 
+-- 8c. Mengedit entri Hold terbaru dari release yang masih ditahan memperbarui alasan hold; entri lama dan
+--     release yang sudah dilanjutkan tidak.
+do $$
+declare r uuid; h1 uuid; h2 uuid; reason text;
+begin
+  r := public.save_release(null, '{"name":"T-hold-sync","target_date":"2026-12-01"}'::jsonb,
+    '[{"source_id":"00000000-0000-0000-0000-0000000000c1","tag":"master","range_start":1,"range_end":9}]'::jsonb);
+  h1 := public.hold_release(r, 'alasan pertama', null, 'a@test.local');
+  perform public.resume_release(r, null, null, 'a@test.local');
+  h2 := public.hold_release(r, 'alasan kedua salah ketk', null, 'a@test.local');
+
+  perform public.edit_release_note(h1, 'alasan pertama (diedit)', 'a@test.local');
+  select hold_reason into reason from public.releases where id = r;
+  if reason <> 'alasan kedua salah ketk' then raise exception 'FAIL: edit entri hold lama mengubah alasan berjalan (%)', reason; end if;
+
+  perform public.edit_release_note(h2, 'alasan kedua benar', 'a@test.local');
+  select hold_reason into reason from public.releases where id = r;
+  if reason <> 'alasan kedua benar' then raise exception 'FAIL: alasan hold tidak mengikuti edit (%)', reason; end if;
+
+  perform public.resume_release(r, null, null, 'a@test.local');
+  perform public.edit_release_note(h2, 'alasan kedua final', 'a@test.local');
+  select hold_reason into reason from public.releases where id = r;
+  if reason is not null then raise exception 'FAIL: edit setelah resume mengisi hold_reason (%)', reason; end if;
+  if (select held_at from public.releases where id = r) is not null then raise exception 'FAIL: edit setelah resume menahan release'; end if;
+
+  begin
+    perform public.edit_release_note(h2, repeat('x', 501), 'a@test.local');
+    raise exception 'FAIL: alasan hold 501 karakter diterima lewat edit';
+  exception when check_violation then null; end;
+end $$;
+
 -- 9. Cascade: menghapus release menghapus log-nya.
 do $$
 declare r uuid := (select id from t_ids where k = 'r'); n int;

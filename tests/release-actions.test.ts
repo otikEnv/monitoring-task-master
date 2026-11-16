@@ -14,6 +14,7 @@ const m = vi.hoisted(() => ({
   updateRelease: vi.fn(),
   setReleasedOn: vi.fn(),
   deleteRelease: vi.fn(),
+  getRelease: vi.fn(),
   loadPreview: vi.fn(),
   createClient: vi.fn(),
   revalidatePath: vi.fn(),
@@ -25,6 +26,7 @@ vi.mock("next/cache", () => ({ revalidatePath: m.revalidatePath }));
 vi.mock("next/navigation", () => ({ redirect: m.redirect }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: m.createClient }));
 vi.mock("@/lib/releases/load", () => ({ previewRange: m.loadPreview }));
+vi.mock("@/lib/releases/notes", () => ({ getReleaseNote: vi.fn() }));
 vi.mock("@/lib/releases/repo", () => {
   class DuplicateReleaseError extends Error {
     constructor() { super("A release with this name already exists."); }
@@ -32,11 +34,14 @@ vi.mock("@/lib/releases/repo", () => {
   class ReleaseNotFoundError extends Error {
     constructor() { super("Release not found."); }
   }
+  class ReleaseStateError extends Error {}
+  class NoteNotFoundError extends Error {}
   class SourceTagError extends Error {
     constructor(public field: "sourceId" | "tag", message: string, public index = 0) { super(message); }
   }
   return {
-    DuplicateReleaseError, ReleaseNotFoundError, SourceTagError,
+    DuplicateReleaseError, ReleaseNotFoundError, ReleaseStateError, NoteNotFoundError, SourceTagError,
+    getRelease: m.getRelease, addReleaseNote: vi.fn(), editReleaseNote: vi.fn(), holdRelease: vi.fn(), resumeRelease: vi.fn(),
     assertComponents: m.assertComponents, createRelease: m.createRelease, updateRelease: m.updateRelease,
     setReleasedOn: m.setReleasedOn, deleteRelease: m.deleteRelease,
   };
@@ -62,6 +67,7 @@ beforeEach(() => {
   m.requireAdmin.mockResolvedValue({ id: "u1", email: "a@b.c", role: "admin" });
   m.redirect.mockImplementation(() => { throw new Redirected(); });
   m.createClient.mockResolvedValue({ tag: "sesi" });
+  m.getRelease.mockResolvedValue({ id: ID, targetDate: "2026-11-20" }); // sama dengan target pada form()
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -114,6 +120,44 @@ describe("saveRelease", () => {
     expect(m.updateRelease).toHaveBeenCalledWith(ID, expect.objectContaining({ name: "v2.1" }));
     expect(m.createRelease).not.toHaveBeenCalled();
     expect(m.redirect).toHaveBeenCalledWith(`/release/${ID}`);
+  });
+
+  it("ubah tanpa perubahan target: alasan tidak diminta dan diabaikan bila diisi", async () => {
+    await expect(saveRelease(form({ id: ID, changeReason: "tidak dipakai" }))).rejects.toBeInstanceOf(Redirected);
+    expect(m.updateRelease).toHaveBeenCalledTimes(1);
+    expect(m.updateRelease.mock.calls[0]).toHaveLength(2); // tanpa audit
+  });
+
+  it("ubah dengan perubahan target: alasan wajib, dirapikan, dan dikirim bersama penulis dari sesi", async () => {
+    await expect(saveRelease(form({ id: ID, targetDate: "2026-12-05", changeReason: "  Vendor terlambat \r\n" })))
+      .rejects.toBeInstanceOf(Redirected);
+    expect(m.updateRelease).toHaveBeenCalledWith(
+      ID, expect.objectContaining({ targetDate: "2026-12-05" }), undefined,
+      { reason: "Vendor terlambat", author: { id: "u1", email: "a@b.c" } },
+    );
+  });
+
+  it("ubah dengan perubahan target tanpa alasan: galat pada isian alasan, database tidak diubah", async () => {
+    for (const reason of [undefined, "", "   ", "x".repeat(501)]) {
+      m.updateRelease.mockClear();
+      const over: Record<string, string> = { id: ID, targetDate: "2026-12-05" };
+      if (reason !== undefined) over.changeReason = reason;
+      expect(await saveRelease(form(over))).toEqual({ ok: false, fieldErrors: { changeReason: expect.any(String) } });
+      expect(m.updateRelease).not.toHaveBeenCalled();
+    }
+  });
+
+  it("alasan perubahan target tidak diminta untuk release baru", async () => {
+    m.createRelease.mockResolvedValue({ id: ID });
+    await expect(saveRelease(form({ targetDate: "2026-12-05" }))).rejects.toBeInstanceOf(Redirected);
+    expect(m.getRelease).not.toHaveBeenCalled();
+    expect(m.createRelease).toHaveBeenCalledTimes(1);
+  });
+
+  it("release yang diubah tidak ditemukan saat membaca tanggal target lama", async () => {
+    m.getRelease.mockResolvedValue(null);
+    expect(await saveRelease(form({ id: ID }))).toEqual({ ok: false, error: "Release not found." });
+    expect(m.updateRelease).not.toHaveBeenCalled();
   });
 
   it("isian tidak valid: galat per isian, database tidak disentuh", async () => {
@@ -184,14 +228,17 @@ describe("saveRelease", () => {
 describe("markReleased", () => {
   it("menandai rilis dengan tanggal today (yyyy-mm-dd)", async () => {
     expect(await markReleased(ID, true)).toEqual({ ok: true });
-    expect(m.setReleasedOn).toHaveBeenCalledWith(ID, expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
+    // penulis diambil dari sesi admin (dicatat di log bila rilis mengakhiri hold)
+    expect(m.setReleasedOn).toHaveBeenCalledWith(
+      ID, expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), undefined, { id: "u1", email: "a@b.c" },
+    );
     expect(m.revalidatePath).toHaveBeenCalledWith("/release");
     expect(m.revalidatePath).toHaveBeenCalledWith(`/release/${ID}`);
   });
 
   it("membatalkan tanda rilis dengan null", async () => {
     await markReleased(ID, false);
-    expect(m.setReleasedOn).toHaveBeenCalledWith(ID, null);
+    expect(m.setReleasedOn).toHaveBeenCalledWith(ID, null, undefined, { id: "u1", email: "a@b.c" });
   });
 
   it("id tidak valid dan release hilang", async () => {

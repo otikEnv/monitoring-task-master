@@ -2536,7 +2536,7 @@
         "id": "53",
         "title": "Hold dan Catatan: server action",
         "description": "Hold, Resume, tambah catatan, edit catatan, dan alasan perubahan target, hanya admin.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "52"
@@ -2548,7 +2548,7 @@
             "id": 1,
             "title": "Action hold dan resume",
             "description": "holdRelease, resumeRelease.",
-            "status": "pending",
+            "status": "done",
             "details": "requireAdmin() pertama, validasi UUID, alasan wajib untuk hold, pesan jelas untuk release sudah rilis, sudah hold, atau terarsip; revalidatePath untuk /, /release, dan /release/<id>.",
             "parentId": "53"
           },
@@ -2556,7 +2556,7 @@
             "id": 2,
             "title": "Action catatan",
             "description": "addReleaseNote, editReleaseNote.",
-            "status": "pending",
+            "status": "done",
             "details": "Validasi panjang dan teks kosong; edit hanya teks entri yang ada; id catatan UUID; entri sistem hanya boleh diedit teksnya; email penulis diambil dari sesi admin, bukan dari klien.",
             "parentId": "53"
           },
@@ -2564,7 +2564,7 @@
             "id": 3,
             "title": "Perubahan target dengan alasan",
             "description": "saveRelease.",
-            "status": "pending",
+            "status": "done",
             "details": "Bila target_date berubah pada ubah release, alasan wajib dan dipanggil change_release_target dalam transaksi yang sama; tanpa perubahan target alasan diabaikan. Pembuatan release baru tidak membuat entri.",
             "parentId": "53"
           },
@@ -2572,7 +2572,7 @@
             "id": 4,
             "title": "Mark as released saat hold",
             "description": "Perluas action rilis yang ada.",
-            "status": "pending",
+            "status": "done",
             "details": "Menandai released mengakhiri hold dan menulis entri kind=released lewat fungsi database; konfirmasi tidak berubah.",
             "parentId": "53"
           },
@@ -2580,7 +2580,7 @@
             "id": 5,
             "title": "Tes",
             "description": "tests/release-hold-actions.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Pola vi.mock dengan vi.resetAllMocks di beforeEach: bukan admin ditolak sebelum menyentuh data, validasi, tidak ditemukan, idempoten, revalidatePath dipanggil, galat tak terduga tidak bocor.",
             "parentId": "53"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T10:46:26.879Z",
+      "lastModified": "2026-11-16T11:03:36.547Z",
       "taskCount": 57,
-      "completedCount": 42,
+      "completedCount": 43,
       "tags": [
         "master"
       ]

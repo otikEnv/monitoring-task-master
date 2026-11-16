@@ -21,6 +21,7 @@
    - `20261115010000_task_list_unfiltered.sql` - `task_list` kembali memuat semua aplikasi (sudah diterapkan; penyaringan aplikasi terarsip di Daftar task dilakukan aplikasi agar tautan langsung ke aplikasi terarsip tetap terbaca)
   - `20261116000000_release_hold_notes.sql` - Hold dan Catatan release (sudah diterapkan; kolom `held_at` dan `hold_reason` pada `releases`, tabel `release_notes` dengan fakta terkunci oleh trigger, fungsi `hold_release`, `resume_release`, `add_release_note`, `edit_release_note`, `set_release_released` hanya untuk service_role, dan `save_release` mencatat perubahan target bila header memuat `change_reason`)
   - `20261116010000_release_latest_note.sql` - view `release_latest_note` (catatan bebas terbaru per release, satu baris per release) dan `release_notes.created_at` memakai `clock_timestamp()` agar urutan entri benar dalam satu transaksi (sudah diterapkan)
+  - `20261116020000_edit_hold_note_syncs_reason.sql` - mengedit entri Hold terbaru dari release yang masih ditahan ikut memperbarui `hold_reason` (sudah diterapkan)
 3. Tempel `tests/rls_test.sql` (serta `tests/sync_test.sql`, `tests/counts_view_test.sql`, `tests/task_list_test.sql`, dan `tests/trend_view_test.sql`, `tests/releases_test.sql`, dan `tests/google_sso_test.sql`, dan `tests/archive_test.sql`, dan `tests/release_hold_test.sql` setelah migrasinya), lalu Run. Harapannya muncul notice `SEMUA UJI LOLOS` (tab Results/Messages). Kalau ada baris `FAIL: ...`, jangan lanjut.
 
 **Lewat skrip repo** (memakai `POSTGRES_URL_NON_POOLING` dari `.env.local`)

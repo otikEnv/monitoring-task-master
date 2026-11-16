@@ -24,6 +24,8 @@ export type ReleaseFieldErrors = {
   name?: string;
   startDate?: string;
   targetDate?: string;
+  /** Alasan perubahan target (wajib saat tanggal target berubah pada ubah release). */
+  changeReason?: string;
   /** Galat umum daftar komponen (kosong atau terlalu banyak). */
   components?: string;
   /** Galat per baris komponen; kunci = nomor baris pada form (components[N].…). */

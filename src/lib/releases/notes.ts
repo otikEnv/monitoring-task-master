@@ -97,6 +97,13 @@ export async function loadLatestNotes(db: SupabaseClient, releaseIds: string[]):
   return out;
 }
 
+/** Satu entri log menurut id; null bila tidak ada. Klien HARUS membawa sesi pengguna. */
+export async function getReleaseNote(db: SupabaseClient, noteId: string): Promise<ReleaseNoteRow | null> {
+  const { data, error } = await db.from("release_notes").select(NOTE_COLUMNS).eq("id", noteId).maybeSingle();
+  if (error) throw new Error(`Gagal membaca catatan: ${error.message}`);
+  return data ? toNote(data as unknown as NoteDbRow) : null;
+}
+
 /** Log Activity untuk pengguna yang sedang login (sesi dari cookie). */
 export async function getReleaseActivity(releaseId: string, page = 1): Promise<NotesPage> {
   return loadReleaseActivity(await createClient(), releaseId, page);
