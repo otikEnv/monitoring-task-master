@@ -2590,7 +2590,7 @@
         "id": "54",
         "title": "Hold dan Catatan: antarmuka halaman detail",
         "description": "Bagian Activity, form catatan, dialog Hold, banner On hold, dan edit di tempat.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "53"
@@ -2602,7 +2602,7 @@
             "id": 1,
             "title": "Bagian Activity",
             "description": "Daftar entri berhalaman 20.",
-            "status": "pending",
+            "status": "done",
             "details": "Terbaru di atas; tiap entri: jenis (ikon dan label), teks (di-escape, spasi baris dipertahankan), penulis, waktu relatif plus tanggal, tanda 'edited' dengan tooltip 'Edited by <email> on <tanggal>'; entri Target change menampilkan tanggal lama dan baru. Keadaan kosong. Pager memakai komponen Pagination dengan href.",
             "parentId": "54"
           },
@@ -2610,7 +2610,7 @@
             "id": 2,
             "title": "Form Add note",
             "description": "Hanya admin.",
-            "status": "pending",
+            "status": "done",
             "details": "Textarea dan tombol 'Add note' di atas daftar, penghitung karakter, tombol nonaktif bila kosong, galat tampil sebagai pesan; berhasil mengosongkan form dan menyegarkan.",
             "parentId": "54"
           },
@@ -2618,7 +2618,7 @@
             "id": 3,
             "title": "Dialog Hold dan Resume",
             "description": "Tombol di samping tombol yang ada.",
-            "status": "pending",
+            "status": "done",
             "details": "'Put on hold' membuka dialog dengan kotak alasan wajib dan penjelasan singkat (hold bukan Archive: tetap tampil, tanggal tidak berubah); saat hold tombol menjadi 'Resume' dengan alasan opsional. Tidak tampil untuk release sudah rilis atau terarsip.",
             "parentId": "54"
           },
@@ -2626,7 +2626,7 @@
             "id": 4,
             "title": "Banner On hold dan risiko sekunder",
             "description": "Bagian atas detail.",
-            "status": "pending",
+            "status": "done",
             "details": "Banner berisi alasan, penahan, waktu, dan lama hold (hari); lencana On hold menggantikan lencana risiko; teks sekunder 'Would be <risiko>' tetap tampil.",
             "parentId": "54"
           },
@@ -2634,7 +2634,7 @@
             "id": 5,
             "title": "Edit di tempat",
             "description": "Menu tiga titik per entri.",
-            "status": "pending",
+            "status": "done",
             "details": "Menu berisi Edit (admin): kotak teks di tempat dengan Save dan Cancel, validasi sama dengan tambah; entri sistem hanya teksnya yang bisa diubah; fokus dikelola dan bisa dengan keyboard.",
             "parentId": "54"
           },
@@ -2642,7 +2642,7 @@
             "id": 6,
             "title": "Tes",
             "description": "Render dan puppeteer.",
-            "status": "pending",
+            "status": "done",
             "details": "release-detail (hold, edited, kosong, viewer tanpa tombol), release-actions; puppeteer pada data uji TMP-: hold, tambah catatan, edit, resume. Jangan menyentuh release 2.1.",
             "parentId": "54"
           }
@@ -2798,9 +2798,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T11:03:36.547Z",
+      "lastModified": "2026-11-16T11:20:38.620Z",
       "taskCount": 57,
-      "completedCount": 43,
+      "completedCount": 44,
       "tags": [
         "master"
       ]

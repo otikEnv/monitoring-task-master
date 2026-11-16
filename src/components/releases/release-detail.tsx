@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { CirclePause } from "lucide-react";
 import { RiskBadge } from "@/components/releases/risk-badge";
 import { Badge } from "@/components/ui/badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
 import { PriorityBadge, StatusBadge } from "@/components/tasks/task-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { formatDaysLeft, formatRange, formatYmd } from "@/lib/releases/format";
 import type { ComponentOverview, ReleaseOverview } from "@/lib/releases/load";
-import { AMBANG_BERISIKO, AMBANG_TERTINGGAL, type ReleaseTask } from "@/lib/releases/model";
+import {
+  AMBANG_BERISIKO, AMBANG_TERTINGGAL, holdDays, RISK_LABEL, type ReleaseAggregate, type ReleaseTask,
+} from "@/lib/releases/model";
 import { taskHref } from "@/lib/tasks/list-params";
 
 const section = "space-y-3 rounded-xl border bg-card p-5";
@@ -171,10 +174,48 @@ function TaskTable({ c }: { c: ComponentOverview }) {
   );
 }
 
-/** Tampilan detail satu release. Presentasional; tombol admin dipasang lewat slot `actions`. */
+/**
+ * Banner release yang sedang ditahan: alasan, siapa dan sejak kapan, dan status otomatis yang akan tampil
+ * tanpa hold (informasi sekunder, agar keterlambatan tidak tersembunyi).
+ */
+function HoldBanner({
+  stats, heldBy, now,
+}: { stats: ReleaseAggregate; heldBy: string | null; now: Date }) {
+  const days = holdDays(stats.heldAt!, now);
+  return (
+    <section
+      role="status"
+      aria-label="On hold"
+      className="space-y-1.5 rounded-xl border border-slate-300 bg-slate-100 p-4 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    >
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-medium">
+        <CirclePause aria-hidden="true" className="size-4" />
+        On hold since {formatDate(stats.heldAt)}
+        <span className="text-sm font-normal opacity-80">({days === 0 ? "today" : `${days} ${days === 1 ? "day" : "days"}`})</span>
+      </p>
+      {stats.holdReason && <p className="whitespace-pre-wrap break-words text-sm">{stats.holdReason}</p>}
+      <p className="text-xs opacity-80">
+        {heldBy && <>Put on hold by {heldBy}. </>}
+        Without the hold, the automatic status would be <strong>{RISK_LABEL[stats.wouldBeRisk]}</strong>.
+      </p>
+    </section>
+  );
+}
+
+/**
+ * Tampilan detail satu release. Presentasional; tombol admin dipasang lewat slot `actions` dan bagian Activity
+ * lewat slot `activity` (server component yang memuat log).
+ */
 export function ReleaseDetailView({
-  overview, actions,
-}: { overview: ReleaseOverview; actions?: React.ReactNode }) {
+  overview, actions, activity, heldBy = null, now = new Date(),
+}: {
+  overview: ReleaseOverview;
+  actions?: React.ReactNode;
+  activity?: React.ReactNode;
+  /** Email yang menahan release; null bila tidak diketahui. */
+  heldBy?: string | null;
+  now?: Date;
+}) {
   const { release, stats, components } = overview;
   const released = Boolean(release.releasedOn);
   const multi = components.length > 1;
@@ -217,6 +258,8 @@ export function ReleaseDetailView({
         {components.map((c) => <ComponentWarnings key={c.component.id} c={c} />)}
       </header>
 
+      {stats.heldAt && <HoldBanner stats={stats} heldBy={heldBy} now={now} />}
+
       {released && (
         <p className="text-sm">
           Released on <strong>{formatYmd(release.releasedOn)}</strong>
@@ -228,7 +271,9 @@ export function ReleaseDetailView({
         <p role="status" className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           This release has no components because the applications it covered were removed. Edit it to add components, or delete it.
         </p>
-      ) : (
+      ) : null}
+      {components.length === 0 && activity}
+      {components.length > 0 && (
         <>
           <section aria-labelledby="sec-ringkasan" className="space-y-3">
             <h2 id="sec-ringkasan" className="sr-only">Summary</h2>
@@ -276,6 +321,8 @@ export function ReleaseDetailView({
               unfinished dependencies outside the range also mark the release At risk. This is guidance, not an exact prediction.
             </p>
           </section>
+
+          {activity}
 
           <section aria-labelledby="sec-komponen" className="space-y-3">
             <h2 id="sec-komponen" className={heading}>Components ({components.length})</h2>

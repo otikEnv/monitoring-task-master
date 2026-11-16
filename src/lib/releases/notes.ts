@@ -104,6 +104,19 @@ export async function getReleaseNote(db: SupabaseClient, noteId: string): Promis
   return data ? toNote(data as unknown as NoteDbRow) : null;
 }
 
+/** Siapa dan kapan release ditahan: entri Hold terbaru. Null bila belum pernah ada. */
+export async function loadCurrentHold(
+  db: SupabaseClient, releaseId: string,
+): Promise<{ authorEmail: string; createdAt: string } | null> {
+  const { data, error } = await db
+    .from("release_notes").select("author_email, created_at")
+    .eq("release_id", releaseId).eq("kind", "hold")
+    .order("created_at", { ascending: false }).order("id", { ascending: false }).limit(1);
+  if (error) throw new Error(`Gagal membaca hold: ${error.message}`);
+  const row = (data as { author_email: string; created_at: string }[])[0];
+  return row ? { authorEmail: row.author_email, createdAt: row.created_at } : null;
+}
+
 /** Log Activity untuk pengguna yang sedang login (sesi dari cookie). */
 export async function getReleaseActivity(releaseId: string, page = 1): Promise<NotesPage> {
   return loadReleaseActivity(await createClient(), releaseId, page);

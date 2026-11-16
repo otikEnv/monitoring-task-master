@@ -4,33 +4,45 @@ import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { ReleaseActivity } from "@/components/releases/release-activity";
 import { ReleaseDetailView } from "@/components/releases/release-detail";
 import { requireUser } from "@/lib/auth";
 import { getReleaseOverview, type ReleaseOverview } from "@/lib/releases/load";
+import { loadCurrentHold, loadReleaseActivity, type NotesPage } from "@/lib/releases/notes";
 import { UUID } from "@/lib/releases/validate";
+import { createClient } from "@/lib/supabase/server";
 import { ReleaseActions } from "../release-actions";
 
 export const metadata: Metadata = { title: "Release detail" };
 
 type Params = Promise<{ id: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-// Cache Components aktif: bagian yang membaca sesi dan params harus di dalam Suspense.
-export default function ReleaseDetailPage({ params }: { params: Params }) {
+/** Nomor halaman Activity dari ?page=; tidak valid = 1 (nilai di luar rentang dipotong oleh pemuat). */
+function pageFrom(raw: string | string[] | undefined): number {
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  return v && /^[0-9]{1,6}$/.test(v) ? Math.max(1, Number(v)) : 1;
+}
+
+// Cache Components aktif: bagian yang membaca sesi, params, dan searchParams harus di dalam Suspense.
+export default function ReleaseDetailPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   return (
     <Suspense fallback={<PageSkeleton />}>
-      <ReleaseDetailContent params={params} />
+      <ReleaseDetailContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function ReleaseDetailContent({ params }: { params: Params }) {
+async function ReleaseDetailContent({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const user = await requireUser();
   const { id } = await params;
+  const page = pageFrom((await searchParams).page);
   if (!UUID.test(id)) notFound();
+  const rid = id.toLowerCase();
 
   let overview: ReleaseOverview | null;
   try {
-    overview = await getReleaseOverview(id.toLowerCase());
+    overview = await getReleaseOverview(rid);
   } catch (e) {
     console.error("[release] gagal memuat detail", { error: (e as Error)?.name });
     return (
@@ -41,13 +53,35 @@ async function ReleaseDetailContent({ params }: { params: Params }) {
   }
   if (!overview) notFound();
 
+  // Log dan info hold dibaca terpisah: kegagalannya tidak boleh menjatuhkan seluruh halaman.
+  const db = await createClient();
+  let activity: NotesPage | null = null;
+  let heldBy: string | null = null;
+  try {
+    [activity, heldBy] = await Promise.all([
+      loadReleaseActivity(db, rid, page),
+      overview.stats.heldAt ? loadCurrentHold(db, rid).then((h) => h?.authorEmail ?? null) : Promise.resolve(null),
+    ]);
+  } catch (e) {
+    console.error("[release] gagal memuat log", { error: (e as Error)?.name });
+  }
+
+  const isAdmin = user.role === "admin";
   return (
     <AppShell user={user} width="normal">
       <ReleaseDetailView
         overview={overview}
+        heldBy={heldBy}
+        activity={<ReleaseActivity releaseId={rid} activity={activity} isAdmin={isAdmin} />}
         actions={
-          user.role === "admin" ? (
-            <ReleaseActions id={overview.release.id} name={overview.release.name} released={Boolean(overview.release.releasedOn)} archived={Boolean(overview.release.archivedAt)} />
+          isAdmin ? (
+            <ReleaseActions
+              id={overview.release.id}
+              name={overview.release.name}
+              released={Boolean(overview.release.releasedOn)}
+              archived={Boolean(overview.release.archivedAt)}
+              held={Boolean(overview.release.heldAt)}
+            />
           ) : undefined
         }
       />

@@ -8,17 +8,22 @@ import {
   AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { HoldDialog } from "@/components/releases/hold-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { restoreRelease } from "@/app/archive/actions";
 import { markReleased, removeRelease } from "./actions";
 
-/** Tombol admin pada detail release: Edit, Mark as released (or undo), Delete with confirmation. */
+/**
+ * Tombol admin pada detail release: Edit, Put on hold / Resume (hanya release yang belum rilis dan tidak
+ * terarsip), Mark as released (or undo), Delete with confirmation.
+ */
 export function ReleaseActions({
-  id, name, released, archived = false,
-}: { id: string; name: string; released: boolean; archived?: boolean }) {
+  id, name, released, archived = false, held = false,
+}: { id: string; name: string; released: boolean; archived?: boolean; held?: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [confirming, setConfirming] = useState(false);
+  const [holdOpen, setHoldOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string }>, success: string, after?: () => void) =>
@@ -40,6 +45,12 @@ export function ReleaseActions({
         <Link href={`/release/${id}/ubah`} className={buttonVariants({ variant: "outline", size: "sm" })}>
           Edit
         </Link>
+        {/* Hold berlaku untuk release yang belum rilis; resume tetap tersedia bila release sedang ditahan. */}
+        {((!released && !archived) || held) && (
+          <Button type="button" variant="outline" size="sm" disabled={pending} onClick={() => setHoldOpen(true)}>
+            {held ? "Resume" : "Put on hold"}
+          </Button>
+        )}
         <Button
           type="button" variant="outline" size="sm" disabled={pending}
           onClick={() =>
@@ -65,6 +76,8 @@ export function ReleaseActions({
         </Button>
       </div>
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+
+      <HoldDialog mode={held ? "resume" : "hold"} releaseId={id} releaseName={name} open={holdOpen} onOpenChange={setHoldOpen} />
 
       <AlertDialog open={confirming} onOpenChange={(o) => !pending && setConfirming(o)}>
         <AlertDialogContent>
