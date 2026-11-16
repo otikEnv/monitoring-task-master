@@ -52,6 +52,13 @@ export class NoteNotFoundError extends Error {
     this.name = "NoteNotFoundError";
   }
 }
+/** Hanya catatan bebas (Note) yang bisa dihapus; entri sistem adalah riwayat. */
+export class NoteNotDeletableError extends Error {
+  constructor() {
+    super("Only notes can be deleted. Hold, resume, target change, and release entries are part of the history.");
+    this.name = "NoteNotDeletableError";
+  }
+}
 
 /** Alasan perubahan target (sudah divalidasi) dan penulisnya; dicatat database bila tanggal target berubah. */
 export type ChangeAudit = { reason: string; author: Author };
@@ -281,6 +288,23 @@ export async function addReleaseNote(
   });
   if (error) throw releaseFunctionError("menambah catatan", error);
   return { noteId: data as string };
+}
+
+/**
+ * Menghapus sebuah catatan bebas secara permanen. Entri sistem ditolak (NoteNotDeletableError). Mengembalikan id
+ * release pemilik catatan.
+ */
+export async function deleteReleaseNote(
+  noteId: string,
+  db: SupabaseClient = createAdminClient(),
+): Promise<{ releaseId: string }> {
+  const { data, error } = await db.rpc("delete_release_note", { p_note_id: noteId });
+  if (error) {
+    if (error.code === "P0002") throw new NoteNotFoundError();
+    if (error.code === "55000" && error.message === "not_deletable") throw new NoteNotDeletableError();
+    throw new Error(`Gagal menghapus catatan: ${error.message}`);
+  }
+  return { releaseId: data as string };
 }
 
 /** Mengubah teks sebuah catatan; hanya teks yang berubah (fakta terkunci di database). */

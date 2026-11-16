@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {}, push: () => {} }) }));
 vi.mock("@/app/release/actions", () => ({
-  addNote: vi.fn(), editNote: vi.fn(), putOnHold: vi.fn(), resumeHold: vi.fn(),
+  addNote: vi.fn(), editNote: vi.fn(), deleteNote: vi.fn(), putOnHold: vi.fn(), resumeHold: vi.fn(),
   markReleased: vi.fn(), removeRelease: vi.fn(),
 }));
 vi.mock("@/app/archive/actions", () => ({ restoreRelease: vi.fn() }));

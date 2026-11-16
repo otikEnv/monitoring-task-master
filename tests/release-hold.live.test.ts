@@ -4,8 +4,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { loadReleaseOverviews } from "@/lib/releases/load";
 import { loadCurrentHold, loadLatestNotes, loadReleaseActivity } from "@/lib/releases/notes";
 import {
-  addReleaseNote, createRelease, editReleaseNote, holdRelease, NoteNotFoundError, ReleaseNotFoundError,
-  ReleaseStateError, resumeRelease, setReleaseArchived, setReleasedOn, updateRelease,
+  addReleaseNote, createRelease, deleteReleaseNote, editReleaseNote, holdRelease, NoteNotDeletableError,
+  NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError, resumeRelease, setReleaseArchived, setReleasedOn,
+  updateRelease,
 } from "@/lib/releases/repo";
 
 /**
@@ -299,6 +300,32 @@ describe.skipIf(!ENABLED)("hold dan catatan release (Supabase asli, sesi viewer)
       expect(res.error, fn).toBeTruthy();
     }
     expect((await row(rel.main)).held_at).toBeTruthy(); // masih ditahan: tidak ada panggilan viewer yang berhasil
+  });
+
+  it("hapus catatan: hanya Note; catatan terbaru menyesuaikan; entri sistem ditolak; viewer tidak bisa", async () => {
+    const { noteId } = await addReleaseNote(rel.edit, "Sent by mistake", author(), admin);
+    expect((await loadLatestNotes(viewer, [rel.edit])).get(rel.edit)?.body).toBe("Sent by mistake");
+    const heldBefore = (await row(rel.edit)).held_at;
+
+    // viewer tidak bisa menghapus, lewat fungsi maupun langsung ke tabel
+    expect((await viewer.rpc("delete_release_note", { p_note_id: noteId })).error).toBeTruthy();
+    expect((await viewer.from("release_notes").delete().eq("id", noteId)).error).toBeTruthy();
+    expect((await notes(rel.edit)).some((n) => n.id === noteId)).toBe(true);
+
+    expect(await deleteReleaseNote(noteId, admin)).toEqual({ releaseId: rel.edit });
+    expect((await notes(rel.edit)).some((n) => n.id === noteId)).toBe(false);
+    expect((await loadLatestNotes(viewer, [rel.edit])).get(rel.edit)?.body).toBe("Second note"); // kembali ke yang sebelumnya
+    expect((await row(rel.edit)).held_at).toBe(heldBefore); // menghapus catatan tidak menyentuh hold
+
+    // entri sistem tidak bisa dihapus dan tetap ada
+    const system = (await notes(rel.edit)).filter((n) => n.kind !== "note");
+    expect(system.length).toBeGreaterThan(0);
+    for (const n of system) {
+      await expect(deleteReleaseNote(n.id, admin), n.kind).rejects.toBeInstanceOf(NoteNotDeletableError);
+    }
+    expect((await notes(rel.edit)).filter((n) => n.kind !== "note")).toHaveLength(system.length);
+
+    await expect(deleteReleaseNote(noteId, admin)).rejects.toBeInstanceOf(NoteNotFoundError); // sudah terhapus
   });
 
   it("menghapus release menghapus log-nya", async () => {

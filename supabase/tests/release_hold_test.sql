@@ -294,6 +294,69 @@ begin
   exception when check_violation then null; end;
 end $$;
 
+-- 8d. Hapus catatan: hanya jenis note; entri sistem ditolak dan tetap ada; view catatan terbaru menyesuaikan.
+do $$
+declare r uuid; n1 uuid; n2 uuid; h uuid; rid uuid; b text; n int;
+begin
+  r := public.save_release(null, '{"name":"T-hold-del","target_date":"2026-12-01"}'::jsonb,
+    '[{"source_id":"00000000-0000-0000-0000-0000000000c1","tag":"master","range_start":1,"range_end":9}]'::jsonb);
+  n1 := public.add_release_note(r, 'catatan pertama', null, 'a@test.local');
+  n2 := public.add_release_note(r, 'catatan terkirim salah', null, 'a@test.local');
+  h := public.hold_release(r, 'alasan hold', null, 'a@test.local');
+
+  select max(body) into b from public.release_latest_note where release_id = r;
+  if b <> 'catatan terkirim salah' then raise exception 'FAIL: catatan terbaru awal salah (%)', b; end if;
+
+  rid := public.delete_release_note(n2);
+  if rid <> r then raise exception 'FAIL: delete_release_note tidak mengembalikan id release (%)', rid; end if;
+  select count(*) into n from public.release_notes where id = n2;
+  if n <> 0 then raise exception 'FAIL: catatan tidak terhapus'; end if;
+  select max(body) into b from public.release_latest_note where release_id = r;
+  if b <> 'catatan pertama' then raise exception 'FAIL: catatan terbaru tidak menyesuaikan setelah hapus (%)', b; end if;
+
+  -- hapus catatan tidak menyentuh hold, tanggal, maupun entri lain
+  if (select held_at from public.releases where id = r) is null then raise exception 'FAIL: hapus catatan mengakhiri hold'; end if;
+  select count(*) into n from public.release_notes where release_id = r;
+  if n <> 2 then raise exception 'FAIL: jumlah entri setelah hapus salah (%)', n; end if;
+
+  -- entri sistem tidak bisa dihapus
+  begin
+    perform public.delete_release_note(h);
+    raise exception 'FAIL: entri hold bisa dihapus';
+  exception when sqlstate '55000' then
+    if sqlerrm <> 'not_deletable' then raise exception 'FAIL: pesan hold (%)', sqlerrm; end if;
+  end;
+  perform public.resume_release(r, 'siap', null, 'a@test.local');
+  perform public.set_release_released(r, '2026-11-20', null, 'a@test.local');
+  perform public.save_release(r, '{"name":"T-hold-del","target_date":"2026-12-09","change_reason":"alasan"}'::jsonb,
+    '[{"source_id":"00000000-0000-0000-0000-0000000000c1","tag":"master","range_start":1,"range_end":9}]'::jsonb);
+  for h in select id from public.release_notes where release_id = r and kind <> 'note' loop
+    begin
+      perform public.delete_release_note(h);
+      raise exception 'FAIL: entri sistem bisa dihapus';
+    exception when sqlstate '55000' then null; end;
+  end loop;
+  select count(*) into n from public.release_notes where release_id = r and kind <> 'note';
+  if n <> 4 then raise exception 'FAIL: entri sistem berkurang (%)', n; end if;
+
+  -- tidak ada
+  begin
+    perform public.delete_release_note(gen_random_uuid());
+    raise exception 'FAIL: hapus catatan tidak ada diterima';
+  exception when sqlstate 'P0002' then null; end;
+
+  -- menghapus catatan yang sama dua kali: kedua kalinya tidak ditemukan
+  begin
+    perform public.delete_release_note(n2);
+    raise exception 'FAIL: hapus dua kali diterima';
+  exception when sqlstate 'P0002' then null; end;
+
+  -- semua catatan bebas terhapus: tidak ada baris di view
+  perform public.delete_release_note(n1);
+  select count(*) into n from public.release_latest_note where release_id = r;
+  if n <> 0 then raise exception 'FAIL: view masih memuat catatan setelah semua dihapus (%)', n; end if;
+end $$;
+
 -- 9. Cascade: menghapus release menghapus log-nya.
 do $$
 declare r uuid := (select id from t_ids where k = 'r'); n int;
@@ -362,6 +425,10 @@ begin
   begin
     perform public.resume_release(r, null, null, 'v@test.local');
     raise exception 'FAIL: authenticated bisa memanggil resume_release';
+  exception when insufficient_privilege then null; end;
+  begin
+    perform public.delete_release_note(gen_random_uuid());
+    raise exception 'FAIL: authenticated bisa memanggil delete_release_note';
   exception when insufficient_privilege then null; end;
 end $$;
 reset role;

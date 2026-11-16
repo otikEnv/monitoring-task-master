@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation";
 import { CalendarClock, CirclePause, CirclePlay, MoreVertical, Rocket, StickyNote } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { editNote } from "@/app/release/actions";
+import { deleteNote, editNote } from "@/app/release/actions";
+import {
+  AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +36,8 @@ export function ActivityEntry({
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(note.body);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { label, Icon } = KIND[note.kind];
   const max = NOTE_LIMITS[note.kind].max;
   const inputId = `edit-note-${note.id}`;
@@ -40,6 +46,26 @@ export function ActivityEntry({
     setText(note.body);
     setError(null);
     setEditing(true);
+  }
+
+  function openDelete() {
+    setDeleteError(null);
+    setDeleting(true);
+  }
+
+  // Hanya catatan bebas (Note) yang bisa dihapus; entri sistem adalah riwayat dan hanya teksnya yang bisa diedit.
+  function confirmDelete() {
+    start(async () => {
+      setDeleteError(null);
+      const res = await deleteNote(note.id);
+      if (!res.ok) {
+        setDeleteError(res.error);
+        return;
+      }
+      setDeleting(false);
+      toast.success("Note deleted.");
+      router.refresh();
+    });
   }
 
   function save() {
@@ -90,6 +116,9 @@ export function ActivityEntry({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={open}>Edit</DropdownMenuItem>
+              {note.kind === "note" && (
+                <DropdownMenuItem variant="destructive" onClick={openDelete}>Delete</DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -128,6 +157,28 @@ export function ActivityEntry({
         </div>
       ) : (
         note.body && <p className="whitespace-pre-wrap break-words text-sm">{note.body}</p>
+      )}
+
+      {isAdmin && note.kind === "note" && (
+        <AlertDialog open={deleting} onOpenChange={(o) => !pending && setDeleting(o)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this note?</AlertDialogTitle>
+              <AlertDialogDescription>
+                The note is removed from the Activity log for everyone. This cannot be undone. Hold, resume, and target
+                change entries are never deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <p className="max-h-24 overflow-hidden whitespace-pre-wrap break-words rounded-md bg-muted p-2 text-sm">{note.body}</p>
+            {deleteError && <p role="alert" className="text-sm text-destructive">{deleteError}</p>}
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+              <Button type="button" variant="destructive" disabled={pending} onClick={confirmDelete}>
+                {pending ? "Deleting…" : "Delete note"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </li>
   );

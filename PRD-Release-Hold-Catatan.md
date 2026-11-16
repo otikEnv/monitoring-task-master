@@ -25,7 +25,7 @@ Fitur ini menambahkan dua hal yang saling melengkapi:
 
 - Notifikasi (email atau Slack) saat hold atau jadwal mundur.
 - Catatan oleh pengguna non-admin (viewer).
-- Menghapus catatan.
+- Menghapus entri sistem (Hold, Resume, Target change, Released) dan menghapus dengan jejak (soft delete).
 - Lampiran, mention, atau balasan berutas pada catatan.
 - Hold per komponen (hold selalu untuk seluruh release).
 - Menghitung ulang atau menggeser tanggal target secara otomatis saat hold.
@@ -94,7 +94,13 @@ Entri **Target change** mencatat tanggal target lama dan baru. Perubahan target 
 - Bagian yang tercatat sebagai fakta **terkunci**: jenis entri, tanggal target lama dan baru, penulis awal, dan waktu dibuat. Alasannya: riwayat mundurnya jadwal tidak boleh bisa dipalsukan.
 - Entri yang sudah diedit ditandai **edited**, dengan tooltip "Edited by <email> on <tanggal>".
 - Database menyimpan isi **satu versi sebelumnya** (`previous_body`), siapa yang mengedit, dan kapan. Riwayat penuh semua versi tidak disimpan di versi ini.
-- Tidak ada **hapus** catatan. Catatan yang salah diperbaiki lewat edit.
+
+### Menghapus catatan
+
+- Admin dapat **menghapus** entri bertipe **Note** (catatan bebas), mis. catatan yang terkirim tanpa sengaja. Penghapusan **permanen** dan meminta konfirmasi singkat ("This cannot be undone").
+- Entri **sistem** (Hold, Resume, Target change, Released) **tidak bisa dihapus**: itu riwayat jadwal dan keputusan. Yang salah ketik diperbaiki lewat edit teks. Hold yang keliru diakhiri dengan Resume.
+- Hanya admin; ditolak oleh server action dan fungsi database bagi yang lain. Menghapus tidak mengubah hold, tanggal target, atau angka progres.
+- Setelah dihapus, catatan terbaru di kartu release otomatis menjadi catatan sebelumnya (atau hilang bila tidak ada).
 
 ## Antarmuka
 
@@ -110,7 +116,7 @@ Entri **Target change** mencatat tanggal target lama dan baru. Perubahan target 
 - Form **Add note** (admin) di atas daftar: kotak teks dan tombol Add note.
 - Tombol **Put on hold** di samping tombol yang ada. Membuka dialog dengan kotak alasan wajib. Saat hold, tombol berubah menjadi **Resume**.
 - Banner **On hold** di bagian atas dengan alasan, penahan, dan waktu hold.
-- Menu tiga titik pada tiap entri (admin): **Edit**. Edit membuka kotak teks di tempat dengan Save dan Cancel.
+- Menu tiga titik pada tiap entri (admin): **Edit**, dan **Delete** khusus entri Note. Edit membuka kotak teks di tempat dengan Save dan Cancel. Delete membuka dialog konfirmasi.
 - Daftar Activity berhalaman bila entri banyak (20 per halaman).
 
 ### Form edit release
@@ -139,6 +145,7 @@ Teks antarmuka bahasa Inggris. Dokumen ini dan README bahasa Indonesia.
 | --- | --- |
 | Hold dipakai untuk menyembunyikan keterlambatan | Alasan wajib dan terlihat semua orang. Detail tetap menampilkan risiko sekunder. Log mencatat siapa dan kapan |
 | Catatan diedit untuk mengubah sejarah | Fakta terkunci, penanda "edited", dan satu versi sebelumnya disimpan |
+| Catatan dihapus untuk menyembunyikan sesuatu | Hanya catatan bebas yang bisa dihapus; Hold, Resume, Target change, dan Released tidak. Alasan keterlambatan dan perubahan jadwal tetap utuh. Penghapusan catatan bebas tidak meninggalkan jejak (versi ini) |
 | Perubahan target tanpa alasan | Form Edit mewajibkan alasan; tidak ada jalur lain untuk mengubah target |
 | Release di-hold lalu terlupakan | Lencana On hold dan lama hold (hari) selalu tampil di kartu dan detail |
 | Viewer ingin menulis catatan | Di luar versi ini; dapat ditinjau di Tahap berikutnya |
@@ -154,7 +161,7 @@ Teks antarmuka bahasa Inggris. Dokumen ini dan README bahasa Indonesia.
 6. Mengubah tanggal target lewat form Edit mewajibkan alasan dan membuat entri Target change dengan tanggal lama dan baru.
 7. Admin menambah catatan bebas; entri tampil dengan penulis dan waktu, terbaru di atas.
 8. Admin mengedit teks catatan; muncul tanda "edited" dengan tooltip; versi sebelumnya tersimpan; jenis dan tanggal target pada entri sistem tidak bisa diubah.
-9. Tidak ada cara menghapus catatan.
+9. Admin dapat menghapus entri Note setelah konfirmasi; catatan terbaru di kartu ikut menyesuaikan. Entri Hold, Resume, Target change, dan Released tidak bisa dihapus (ditolak oleh action dan database). Viewer tidak melihat tombol Delete dan tidak bisa memanggilnya.
 10. Menandai release sebagai Released saat hold mengakhiri hold dan mencatatnya.
 11. Viewer melihat status hold dan Activity, tanpa tombol Hold, Resume, Add note, atau Edit; memanggil action sebagai viewer ditolak.
 12. Teks dari catatan di-escape (tanpa XSS).
@@ -176,6 +183,6 @@ Teks antarmuka bahasa Inggris. Dokumen ini dan README bahasa Indonesia.
 - Notifikasi email atau Slack untuk hold dan perubahan jadwal.
 - Catatan oleh viewer, atau peran khusus (misalnya QA).
 - Riwayat penuh semua versi edit catatan.
-- Hapus catatan dengan jejak (soft delete).
+- Hapus catatan dengan jejak (soft delete) dan Undo setelah menghapus.
 - Ringkasan "release yang sedang di-hold" di Dashboard.
 - Hold per komponen.

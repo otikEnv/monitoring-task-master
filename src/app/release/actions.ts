@@ -7,9 +7,9 @@ import { previewRange as loadPreview } from "@/lib/releases/load";
 import { wibDay } from "@/lib/releases/model";
 import { getReleaseNote } from "@/lib/releases/notes";
 import {
-  DuplicateReleaseError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError, SourceTagError, addReleaseNote,
-  assertComponents, createRelease, deleteRelease, editReleaseNote, getRelease, holdRelease, resumeRelease,
-  setReleasedOn, updateRelease, type Author,
+  DuplicateReleaseError, NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
+  SourceTagError, addReleaseNote, assertComponents, createRelease, deleteRelease, deleteReleaseNote, editReleaseNote,
+  getRelease, holdRelease, resumeRelease, setReleasedOn, updateRelease, type Author,
 } from "@/lib/releases/repo";
 import {
   UUID, componentIndexes, parseRangeNumber, parseReleaseForm, validateHoldReason, validateNoteBody,
@@ -103,7 +103,10 @@ export async function markReleased(id: string, released: boolean): Promise<Simpl
 
 /** Galat yang pesannya aman ditampilkan (kelas galat domain); selain itu pesan umum dan tanpa detail internal. */
 function failure(what: string, e: unknown, fallback: string): SimpleResult {
-  if (e instanceof ReleaseNotFoundError || e instanceof ReleaseStateError || e instanceof NoteNotFoundError) {
+  if (
+    e instanceof ReleaseNotFoundError || e instanceof ReleaseStateError || e instanceof NoteNotFoundError ||
+    e instanceof NoteNotDeletableError
+  ) {
     return { ok: false, error: e.message };
   }
   fail(what, e);
@@ -180,6 +183,26 @@ export async function editNote(noteId: string, body: string): Promise<SimpleResu
     refreshRelease(note.releaseId);
   } catch (e) {
     return failure("mengubah catatan", e, "Could not save the note.");
+  }
+  return { ok: true };
+}
+
+/**
+ * Menghapus catatan bebas (Note) secara permanen, mis. yang terkirim tanpa sengaja. Entri sistem (Hold, Resume,
+ * Target change, Released) tidak bisa dihapus: ditolak di sini sebelum menyentuh data, dan lagi oleh database.
+ */
+export async function deleteNote(noteId: string): Promise<SimpleResult> {
+  await requireAdmin();
+  if (!UUID.test(noteId)) return { ok: false, error: "Invalid note ID." };
+  const nid = noteId.toLowerCase();
+  try {
+    const note = await getReleaseNote(await createClient(), nid);
+    if (!note) return { ok: false, error: "Note not found." };
+    if (note.kind !== "note") return failure("menghapus catatan", new NoteNotDeletableError(), "Could not delete the note.");
+    const { releaseId } = await deleteReleaseNote(nid);
+    refreshRelease(releaseId);
+  } catch (e) {
+    return failure("menghapus catatan", e, "Could not delete the note.");
   }
   return { ok: true };
 }

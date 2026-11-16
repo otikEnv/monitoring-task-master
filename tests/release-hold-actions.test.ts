@@ -12,6 +12,7 @@ const m = vi.hoisted(() => ({
   resumeRelease: vi.fn(),
   addReleaseNote: vi.fn(),
   editReleaseNote: vi.fn(),
+  deleteReleaseNote: vi.fn(),
   getReleaseNote: vi.fn(),
   createClient: vi.fn(),
   revalidatePath: vi.fn(),
@@ -33,20 +34,24 @@ vi.mock("@/lib/releases/repo", () => {
   class ReleaseStateError extends Error {
     constructor(public code: string) { super(`state:${code}`); }
   }
+  class NoteNotDeletableError extends Error {
+    constructor() { super("Only notes can be deleted."); }
+  }
   class DuplicateReleaseError extends Error {}
   class SourceTagError extends Error {}
   return {
-    ReleaseNotFoundError, NoteNotFoundError, ReleaseStateError, DuplicateReleaseError, SourceTagError,
+    ReleaseNotFoundError, NoteNotFoundError, NoteNotDeletableError, ReleaseStateError, DuplicateReleaseError, SourceTagError,
+    deleteReleaseNote: m.deleteReleaseNote,
     holdRelease: m.holdRelease, resumeRelease: m.resumeRelease, addReleaseNote: m.addReleaseNote,
     editReleaseNote: m.editReleaseNote, getRelease: vi.fn(), assertComponents: vi.fn(), createRelease: vi.fn(),
     updateRelease: vi.fn(), setReleasedOn: vi.fn(), deleteRelease: vi.fn(),
   };
 });
 
-import { addNote, editNote, putOnHold, resumeHold } from "@/app/release/actions";
-import { NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError } from "@/lib/releases/repo";
+import { addNote, deleteNote, editNote, putOnHold, resumeHold } from "@/app/release/actions";
+import { NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError } from "@/lib/releases/repo";
 
-const touching = () => [m.holdRelease, m.resumeRelease, m.addReleaseNote, m.editReleaseNote, m.getReleaseNote];
+const touching = () => [m.holdRelease, m.resumeRelease, m.addReleaseNote, m.editReleaseNote, m.deleteReleaseNote, m.getReleaseNote];
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -62,6 +67,7 @@ describe("otorisasi: hanya admin", () => {
     ["resumeHold", () => resumeHold(ID, "")],
     ["addNote", () => addNote(ID, "Catatan")],
     ["editNote", () => editNote(NOTE, "Catatan")],
+    ["deleteNote", () => deleteNote(NOTE)],
   ];
 
   it.each(calls)("%s: bukan admin -> ditolak sebelum menyentuh data", async (_name, call) => {
@@ -197,6 +203,48 @@ describe("editNote", () => {
     m.editReleaseNote.mockRejectedValue(new Error("password authentication failed"));
     const r = await editNote(NOTE, "ok");
     expect(r).toEqual({ ok: false, error: "Could not save the note." });
+    expect(JSON.stringify([r, vi.mocked(console.error).mock.calls])).not.toContain("password");
+  });
+});
+
+describe("deleteNote", () => {
+  it("menghapus catatan bebas: membaca jenis lewat sesi, menghapus, dan menyegarkan release-nya", async () => {
+    m.deleteReleaseNote.mockResolvedValue({ releaseId: ID });
+    expect(await deleteNote(NOTE.toUpperCase())).toEqual({ ok: true });
+    expect(m.getReleaseNote).toHaveBeenCalledWith({ tag: "sesi" }, NOTE);
+    expect(m.deleteReleaseNote).toHaveBeenCalledWith(NOTE);
+    for (const p of ["/", "/release", `/release/${ID}`]) expect(m.revalidatePath).toHaveBeenCalledWith(p);
+  });
+
+  it("entri sistem ditolak sebelum menyentuh database (hold, resume, target_change, released)", async () => {
+    for (const kind of ["hold", "resume", "target_change", "released"]) {
+      m.getReleaseNote.mockResolvedValue({ id: NOTE, releaseId: ID, kind });
+      const r = await deleteNote(NOTE);
+      expect(r, kind).toEqual({ ok: false, error: "Only notes can be deleted." });
+    }
+    expect(m.deleteReleaseNote).not.toHaveBeenCalled();
+    expect(m.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("id tidak valid dan catatan tidak ditemukan", async () => {
+    for (const bad of ["", "x", `${NOTE}; drop`]) expect(await deleteNote(bad)).toEqual({ ok: false, error: "Invalid note ID." });
+    expect(m.getReleaseNote).not.toHaveBeenCalled();
+    m.getReleaseNote.mockResolvedValueOnce(null);
+    expect(await deleteNote(NOTE)).toEqual({ ok: false, error: "Note not found." });
+    m.deleteReleaseNote.mockRejectedValueOnce(new NoteNotFoundError()); // terhapus oleh orang lain di sela-sela
+    expect(await deleteNote(NOTE)).toEqual({ ok: false, error: "Note not found." });
+    expect(m.revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("database menolak entri sistem (lapisan kedua): pesan domain dari repo", async () => {
+    m.deleteReleaseNote.mockRejectedValueOnce(new NoteNotDeletableError());
+    expect(await deleteNote(NOTE)).toEqual({ ok: false, error: "Only notes can be deleted." });
+  });
+
+  it("galat tak terduga tidak membocorkan pesan asli", async () => {
+    m.deleteReleaseNote.mockRejectedValue(new Error("password authentication failed"));
+    const r = await deleteNote(NOTE);
+    expect(r).toEqual({ ok: false, error: "Could not delete the note." });
     expect(JSON.stringify([r, vi.mocked(console.error).mock.calls])).not.toContain("password");
   });
 });

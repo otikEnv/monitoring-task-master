@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 
 import {
-  addReleaseNote, editReleaseNote, holdRelease, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
+  addReleaseNote, deleteReleaseNote, editReleaseNote, holdRelease, NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
   resumeRelease, setReleasedOn, SYSTEM_AUTHOR, updateRelease,
 } from "@/lib/releases/repo";
 import type { ReleaseInput } from "@/lib/releases/validate";
@@ -123,5 +123,28 @@ describe("addReleaseNote dan editReleaseNote", () => {
       .rejects.toBeInstanceOf(NoteNotFoundError);
     await expect(editReleaseNote("n1", "x", "e@envisions.app", rpcDb({ error: { message: "boom" } }).db))
       .rejects.toThrow("Gagal mengubah catatan: boom");
+  });
+});
+
+describe("deleteReleaseNote", () => {
+  it("memanggil fungsi dan mengembalikan id release pemilik catatan", async () => {
+    const { db, rpc } = rpcDb({ data: "r1" });
+    expect(await deleteReleaseNote("n1", db)).toEqual({ releaseId: "r1" });
+    expect(rpc).toHaveBeenCalledWith("delete_release_note", { p_note_id: "n1" });
+  });
+
+  it("entri sistem (55000 not_deletable): NoteNotDeletableError dengan pesan jelas", async () => {
+    const { db } = rpcDb({ error: { code: "55000", message: "not_deletable" } });
+    const e = await deleteReleaseNote("n1", db).catch((x) => x);
+    expect(e).toBeInstanceOf(NoteNotDeletableError);
+    expect(e.message).toContain("Only notes can be deleted");
+  });
+
+  it("tidak ada: NoteNotFoundError; 55000 dengan pesan lain dan galat lain: galat umum", async () => {
+    await expect(deleteReleaseNote("n1", rpcDb({ error: { code: "P0002", message: "note not found" } }).db))
+      .rejects.toBeInstanceOf(NoteNotFoundError);
+    const odd = await deleteReleaseNote("n1", rpcDb({ error: { code: "55000", message: "aneh" } }).db).catch((x) => x);
+    expect(odd).not.toBeInstanceOf(NoteNotDeletableError);
+    await expect(deleteReleaseNote("n1", rpcDb({ error: { message: "boom" } }).db)).rejects.toThrow("Gagal menghapus catatan: boom");
   });
 });

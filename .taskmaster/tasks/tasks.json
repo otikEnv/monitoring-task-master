@@ -2794,13 +2794,67 @@
             "parentId": "57"
           }
         ]
+      },
+      {
+        "id": "58",
+        "title": "Hold dan Catatan: hapus catatan bebas (Note)",
+        "description": "Admin dapat menghapus entri Note yang terkirim tanpa sengaja; entri sistem tidak bisa dihapus.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [
+          "57"
+        ],
+        "details": "PRD-Release-Hold-Catatan.md, bagian Menghapus catatan dan Kriteria penerimaan 9. Hanya kind=note, permanen, dengan konfirmasi; hanya admin.",
+        "testStrategy": "Entri Note terhapus dan catatan terbaru menyesuaikan; entri sistem ditolak oleh action dan database; viewer tidak bisa.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Fungsi database delete_release_note",
+            "description": "Migrasi baru, hanya service_role.",
+            "status": "done",
+            "details": "supabase/migrations/20261116030000_delete_release_note.sql: delete_release_note(p_note_id) security definer; P0002 bila tidak ada; 55000 dengan pesan not_deletable bila kind bukan note; menghapus baris. Cabut eksekusi dari public/anon/authenticated. Perbarui supabase/tests/release_hold_test.sql: hapus note berhasil dan view release_latest_note menyesuaikan; hold/resume/target_change/released ditolak dan tidak terhapus; tidak ada = P0002; authenticated dan anon tidak bisa memanggil; cascade hapus release tetap bekerja.",
+            "parentId": "58"
+          },
+          {
+            "id": 2,
+            "title": "Repo dan server action",
+            "description": "deleteReleaseNote dan deleteNote.",
+            "status": "done",
+            "details": "repo.ts: deleteReleaseNote(noteId, db) memetakan P0002 ke NoteNotFoundError dan 55000 not_deletable ke NoteNotDeletableError (pesan Inggris jelas). actions.ts: deleteNote(noteId) dengan requireAdmin() di baris pertama, validasi UUID, baca jenis lewat getReleaseNote (sesi), tolak non-note sebelum menyentuh data, panggil repo, revalidatePath / , /release, /release/<id>; galat tak terduga tidak membocorkan pesan asli.",
+            "parentId": "58"
+          },
+          {
+            "id": 3,
+            "title": "Antarmuka",
+            "description": "Menu Delete pada entri Note dengan dialog konfirmasi.",
+            "status": "done",
+            "details": "activity-entry.tsx: item Delete hanya untuk admin dan kind note; AlertDialog 'Delete this note?' dengan teks 'This cannot be undone.' dan tombol destruktif; berhasil: toast, router.refresh; galat tampil di dialog. Entri sistem hanya punya Edit.",
+            "parentId": "58"
+          },
+          {
+            "id": 4,
+            "title": "Tes unit dan live",
+            "description": "Repo, action, render, live.",
+            "status": "done",
+            "details": "tests/release-hold-repo.test.ts (pemetaan galat), release-hold-actions.test.ts (otorisasi, non-note ditolak sebelum hapus, id tidak valid, galat tak terduga), release-activity.test.tsx; tests/release-hold.live.test.ts: hapus note lewat repo, viewer tidak bisa memanggil dan tidak bisa DELETE langsung, catatan terbaru menyesuaikan.",
+            "parentId": "58"
+          },
+          {
+            "id": 5,
+            "title": "Verifikasi browser dan dokumentasi",
+            "description": "Puppeteer, README, supabase/README.",
+            "status": "done",
+            "details": "Skrip hold-ui: Delete pada note (batal lalu konfirmasi), entri sistem tanpa Delete, viewer tanpa menu; catatan terbaru di kartu menyesuaikan. Perbarui README bagian Hold dan Catatan (hapus catatan bebas) dan daftar migrasi di supabase/README.md. tsc, eslint, vitest, build, tes live, tes SQL bersih.",
+            "parentId": "58"
+          }
+        ]
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-16T11:36:09.420Z",
-      "taskCount": 57,
-      "completedCount": 47,
+      "lastModified": "2026-11-16T11:45:38.232Z",
+      "taskCount": 58,
+      "completedCount": 48,
       "tags": [
         "master"
       ]
