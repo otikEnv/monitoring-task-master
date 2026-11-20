@@ -26,15 +26,18 @@ export async function AppShell({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar user={user} />
-      <SidebarInset className="min-w-0">
+      {/* Tinggi dikunci ke layar: bilah atas tetap di tempat, hanya area konten di bawahnya yang menggulir. */}
+      <SidebarInset className="h-svh min-w-0 overflow-hidden">
         <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4 md:hidden" />
           <span className="text-sm font-medium md:hidden">Task Master</span>
           <ThemeToggle className="ml-auto" />
         </header>
-        <div className={cn("mx-auto w-full min-w-0 flex-1 space-y-6 px-4 py-6 md:px-8 md:py-8", WIDTH[width])}>
-          {children}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className={cn("mx-auto w-full min-w-0 space-y-6 px-4 py-6 md:px-8 md:py-8", WIDTH[width])}>
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
