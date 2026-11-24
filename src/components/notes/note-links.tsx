@@ -20,11 +20,17 @@ function condition(c: { percent: number | null; done: number; total: number; ris
   return [pct, RISK_TEXT(c.risk), left].filter(Boolean).join(", ");
 }
 
-/** Tautan catatan ke aplikasi, release, dan task. Sasaran yang hilang tetap tampil dengan penanda Not found. */
-export function NoteLinks({ links }: { links: LinkView[] }) {
+/**
+ * Tautan catatan ke aplikasi, release, dan task, lengkap dengan kondisi release "At the time" dan "Now". Sasaran yang
+ * hilang tetap tampil dengan penanda Not found. `embedded` = tanpa kotak sendiri (di dalam kotak isi catatan).
+ */
+export function NoteLinks({ links, embedded = false }: { links: LinkView[]; embedded?: boolean }) {
   if (links.length === 0) return null;
   return (
-    <section aria-labelledby="sec-links" className="space-y-3 rounded-xl border bg-card p-5">
+    <section
+      id="links" aria-labelledby="sec-links"
+      className={embedded ? "space-y-3 border-t pt-4" : "space-y-3 rounded-xl border bg-card p-5"}
+    >
       <h2 id="sec-links" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Links</h2>
       <ul className="space-y-3">
         {links.map((l) => (
@@ -93,6 +99,43 @@ export function NoteLinks({ links }: { links: LinkView[] }) {
         ))}
       </ul>
     </section>
+  );
+}
+
+/** Baris ringkas tautan di atas isi catatan: nama dan penanda saja; detailnya ada di bagian Links. */
+export function NoteLinkChips({ links }: { links: LinkView[] }) {
+  if (links.length === 0) return null;
+  const chip = "inline-flex max-w-full items-center gap-1 rounded-full border bg-card px-2.5 py-0.5 text-xs";
+  return (
+    <ul aria-label="Links" className="flex flex-wrap items-center gap-1.5">
+      {links.map((l) => {
+        const missing = l.kind === "task" ? !l.title : !l.name;
+        const label = l.kind === "release"
+          ? l.name ?? "Unknown release"
+          : l.kind === "task"
+            ? `#${l.taskId}${l.title ? ` ${l.title}` : ""}`
+            : l.name ?? "Unknown application";
+        const href = missing ? null : l.kind === "release" ? `/release/${l.releaseId}` : l.kind === "task" ? taskHref(l.sourceId, l.tag, l.taskId) : `/tasks?source=${l.sourceId}`;
+        const Icon = l.kind === "release" ? Rocket : l.kind === "task" ? ListChecks : AppWindow;
+        const body = (
+          <>
+            <Icon aria-hidden="true" className="size-3 shrink-0 text-muted-foreground" />
+            <span className="truncate">{label}</span>
+            {l.kind === "release" && l.now && <span className="shrink-0 text-muted-foreground">· {RISK_TEXT(l.now.risk)}</span>}
+            {missing && <span className="shrink-0 text-muted-foreground">· Not found</span>}
+            {l.archived && <span className="shrink-0 text-muted-foreground">· Archived</span>}
+          </>
+        );
+        return (
+          <li key={l.id} className="min-w-0 max-w-full">
+            {href ? <Link href={href} className={`${chip} hover:bg-muted`}>{body}</Link> : <span className={chip}>{body}</span>}
+          </li>
+        );
+      })}
+      <li>
+        <a href="#links" className="text-xs text-muted-foreground underline">Details</a>
+      </li>
+    </ul>
   );
 }
 

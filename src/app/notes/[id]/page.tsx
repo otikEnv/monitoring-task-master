@@ -7,7 +7,6 @@ import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteDetailView } from "@/components/notes/note-detail";
-import { NoteLinks } from "@/components/notes/note-links";
 import { buttonVariants } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth";
 import { resolveLinkViews, type LinkView } from "@/lib/notes/links";
@@ -63,7 +62,7 @@ async function NoteDetailContent({ params }: { params: Params }) {
       <NoteDetailView
         detail={detail}
         user={user}
-        links={<NoteLinks links={links} />}
+        links={links}
         followUp={
           user.role === "admin" ? (
             <Link href={`/notes/new?followUp=${detail.note.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>

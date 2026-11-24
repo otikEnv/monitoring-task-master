@@ -10,17 +10,20 @@ import { NoteActionItems, type ActionItemView } from "./note-action-items";
 import { CopyNoteButton, DeleteNoteButton } from "./note-buttons";
 import { NoteComments, type CommentView } from "./note-comments";
 import { NoteKindBadge } from "./note-kind-badge";
+import { NoteLinkChips, NoteLinks } from "./note-links";
+import type { LinkView } from "@/lib/notes/links";
 
 /**
  * Detail catatan: judul, jenis, tanggal, penulis, isi Markdown, tautan, action item, dan komentar.
  * Edit dan Delete hanya untuk penulisnya; Follow up untuk admin (slot `followUp`); Copy untuk semua.
  */
 export function NoteDetailView({
-  detail, user, links, followUp, now = new Date(),
+  detail, user, links = [], followUp, now = new Date(),
 }: {
   detail: NoteDetail;
   user: { id: string; role: "admin" | "viewer" };
-  links?: React.ReactNode;
+  /** Tautan beserta nama dan kondisinya. */
+  links?: LinkView[];
   followUp?: React.ReactNode;
   now?: Date;
 }) {
@@ -41,11 +44,14 @@ export function NoteDetailView({
   const commentCount = comments.filter((c) => c.deletedAt === null).length;
 
   return (
-    // Desktop: dua kolom. Kiri = judul, isi, dan tautan (ikut scroll halaman). Kanan = action item dan komentar,
-    // menempel di layar dengan scroll sendiri; kotak komentar baru selalu terlihat di bawah panel.
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)] lg:items-start">
-      <div className="min-w-0 space-y-6">
-        <div className="space-y-3">
+    // Desktop: dua kolom. Kiri = judul, baris tautan, dan kotak isi. Kanan = action item dan komentar; kotak komentar
+    // baru selalu terlihat di bawah panel.
+    //
+    // Desktop: tinggi tetap satu layar (layar dikurangi bilah atas 3rem dan padding halaman 4rem); hanya kotak isi,
+    // daftar komentar, dan action item yang scroll di dalamnya. Ponsel: mengalir biasa (tanpa scroll bersarang).
+    <div className="grid gap-6 lg:h-[calc(100svh-3rem-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)] lg:grid-rows-1">
+      <div className="min-w-0 space-y-6 lg:flex lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
+        <div className="space-y-3 lg:shrink-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
@@ -122,15 +128,20 @@ export function NoteDetailView({
           </a>
         </nav>
 
-        <section aria-label="Content" className="space-y-2 rounded-xl border bg-card p-5 text-sm">
+        {links.length > 0 && <div className="lg:shrink-0"><NoteLinkChips links={links} /></div>}
+
+        <section
+          aria-label="Content" tabIndex={0}
+          className="space-y-2 rounded-xl border bg-card p-5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
+        >
           {note.body.trim() ? <Markdown>{note.body}</Markdown> : <p className="text-muted-foreground">No content.</p>}
+          {links.length > 0 && <div className="pt-4"><NoteLinks links={links} embedded /></div>}
         </section>
-        {links}
       </div>
 
       <aside
         aria-label="Action items and comments"
-        className="min-w-0 space-y-6 lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100svh-3rem-4rem)] lg:flex-col lg:gap-4 lg:space-y-0"
+        className="min-w-0 space-y-6 lg:flex lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0"
       >
         <section
           id="action-items" aria-labelledby="sec-items"
