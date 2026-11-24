@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { AutoSubmitForm } from "@/components/auto-submit-form";
 import { NOTE_KIND_STYLE } from "@/components/notes/note-kind-badge";
 import { RISK_TONE } from "@/components/releases/risk-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -72,7 +73,8 @@ export function CalendarToolbar({
           </div>
         </fieldset>
 
-        <form method="get" action="/calendar" className="flex flex-wrap items-end gap-2">
+        {/* Filter langsung diterapkan saat pilihan diganti; tombol Apply hanya untuk peramban tanpa JavaScript. */}
+        <AutoSubmitForm action="/calendar" className="flex flex-wrap items-end gap-2">
           {params.view === "week" ? <input type="hidden" name="view" value="week" /> : null}
           <input type="hidden" name={params.view === "week" ? "week" : "month"} value={params.view === "week" ? params.week : params.month} />
           {params.show.length !== SHOW_KINDS.length && <input type="hidden" name="show" value={params.show.join(",")} />}
@@ -90,8 +92,10 @@ export function CalendarToolbar({
               {NOTE_KINDS.map((k) => <option key={k} value={k}>{NOTE_KIND_LABEL[k]}</option>)}
             </NativeSelect>
           </div>
-          <Button type="submit" size="sm" variant="outline">Apply</Button>
-        </form>
+          <noscript>
+            <Button type="submit" size="sm" variant="outline">Apply</Button>
+          </noscript>
+        </AutoSubmitForm>
       </div>
     </div>
   );
