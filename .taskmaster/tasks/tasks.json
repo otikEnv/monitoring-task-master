@@ -2995,7 +2995,7 @@
         "id": "63",
         "title": "Notes: form catatan dan halaman detail",
         "description": "New note, edit, detail dengan Markdown, komentar, penanda baca, Copy, dan History.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "62"
@@ -3007,49 +3007,49 @@
             "id": 1,
             "title": "Form catatan",
             "description": "Buat dan edit.",
-            "status": "pending",
+            "status": "done",
             "details": "Judul, tanggal (bawaan hari ini atau ?date=), jenis, isi Markdown dengan tab pratinjau, daftar action item (tambah, hapus, penanggung jawab, tenggat). Tautan ditambahkan di task 65. Kesalahan per kolom.",
             "parentId": "63",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:37:51.446Z"
           },
           {
             "id": 2,
             "title": "Halaman detail",
             "description": "Isi, action item, tombol.",
-            "status": "pending",
+            "status": "done",
             "details": "Judul, jenis, tanggal, penulis, dibuat/diedit, Edited N times. Action item dengan centang (sesuai hak), penanda Overdue dan Carried over. Tombol Copy (semua), Edit dan Delete (penulis, dengan konfirmasi).",
             "parentId": "63",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:37:51.446Z"
           },
           {
             "id": 3,
             "title": "Komentar",
             "description": "Daftar dan kotak komentar.",
-            "status": "pending",
+            "status": "done",
             "details": "Datar urut terlama, penanda edited, edit/hapus komentar sendiri. Membuka detail memanggil penanda baca.",
             "parentId": "63",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:37:51.446Z"
           },
           {
             "id": 4,
             "title": "Copy",
             "description": "Teks rapi ke clipboard.",
-            "status": "pending",
+            "status": "done",
             "details": "Judul, jenis, tanggal, isi teks biasa (daftar dan tebal dipertahankan), action item dengan centang/penanggung jawab/tenggat, tautan absolut ke catatan; tanpa komentar. Toast Copied.",
             "parentId": "63",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:37:51.446Z"
           },
           {
             "id": 5,
             "title": "History",
             "description": "/notes/<id>/history.",
-            "status": "pending",
+            "status": "done",
             "details": "Daftar versi terbaru di atas (waktu, penyunting, kolom berubah) dan perbedaan isi per baris antar versi.",
             "parentId": "63",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:37:51.446Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:37:51.446Z"
       },
       {
         "id": "64",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:27:38.134Z",
+      "lastModified": "2026-11-24T06:37:51.446Z",
       "taskCount": 70,
-      "completedCount": 52,
+      "completedCount": 53,
       "tags": [
         "master"
       ]
