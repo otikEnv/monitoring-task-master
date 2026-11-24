@@ -20,11 +20,11 @@ import type { SessionUser } from "@/lib/auth";
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 
 const NAV: NavItem[] = [
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/tasks", label: "Task list", icon: ListChecks },
   { href: "/release", label: "Release", icon: Rocket },
   { href: "/tren", label: "Trend", icon: TrendingUp },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/notes", label: "Notes", icon: NotebookText },
 ];
 

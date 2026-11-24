@@ -208,7 +208,7 @@ Hari kerja adalah hari Senin sampai Jumat yang bukan National holiday dan bukan 
 
 ### Menu dan alamat
 
-- Dua menu baru di sidebar, kelompok utama setelah **Trend**: **Calendar** (ikon calendar) lalu **Notes** (ikon catatan).
+- Dua menu baru di sidebar, kelompok utama: **Calendar** (ikon calendar) paling atas, di atas Dashboard, dan **Notes** (ikon catatan) setelah Trend.
 - Alamat Calendar: `/calendar`.
 - Alamat Notes: `/notes` (daftar), `/notes/new` (juga `?date=<tanggal>` dan `?followUp=<id>`), `/notes/<id>`, `/notes/<id>/edit`, `/notes/<id>/history`, dan `/notes/holidays` (hanya admin).
 
