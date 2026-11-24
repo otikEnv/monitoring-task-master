@@ -3,8 +3,8 @@ import { CirclePause } from "lucide-react";
 import { RiskBadge } from "@/components/releases/risk-badge";
 import { Badge } from "@/components/ui/badge";
 import { ReleaseProgress } from "@/components/releases/release-progress";
-import { PriorityBadge, StatusBadge } from "@/components/tasks/task-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ReleaseTasks } from "@/components/releases/release-tasks";
+import { StatusBadge } from "@/components/tasks/task-table";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { formatDaysLeft, formatRange, formatYmd } from "@/lib/releases/format";
 import type { ComponentOverview, ReleaseOverview } from "@/lib/releases/load";
@@ -135,41 +135,6 @@ function AttentionGroups({ c }: { c: ComponentOverview }) {
           ))}
         </Group>
       )}
-    </div>
-  );
-}
-
-function TaskTable({ c }: { c: ComponentOverview }) {
-  return (
-    <div className="rounded-xl border bg-card">
-      <Table className="min-w-[40rem]">
-        <TableHeader>
-          <TableRow className="hover:bg-transparent">
-            <TableHead scope="col" className="w-16">ID</TableHead>
-            <TableHead scope="col">Title</TableHead>
-            <TableHead scope="col">Status</TableHead>
-            <TableHead scope="col">Priority</TableHead>
-            <TableHead scope="col" className="text-right">Subtask</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {c.stats.tasks.map((t) => (
-            <TableRow key={t.taskId} className="align-top">
-              <TableCell className="tabular-nums">{t.taskId}</TableCell>
-              <TableCell className="whitespace-normal">
-                <Link href={taskHref(c.component.sourceId, c.component.tag, t.taskId)} className="font-medium hover:underline">
-                  {t.title}
-                </Link>
-              </TableCell>
-              <TableCell><StatusBadge status={t.status === "in_progress" ? "in-progress" : t.status} /></TableCell>
-              <TableCell><PriorityBadge priority={t.priority} /></TableCell>
-              <TableCell className="text-right tabular-nums">
-                {t.subtasksTotal > 0 ? `${t.subtasksDone}/${t.subtasksTotal}` : <span className="text-muted-foreground">-</span>}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
     </div>
   );
 }
@@ -382,21 +347,16 @@ export function ReleaseDetailView({
             )}
           </section>
 
-          <section aria-labelledby="sec-task" className="space-y-5">
-            <h2 id="sec-task" className={heading}>Tasks in range ({stats.total})</h2>
-            {stats.total === 0 ? (
-              <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                No tasks in the ranges yet.
-              </p>
-            ) : (
-              components.filter((c) => c.stats.total > 0).map((c) => (
-                <div key={c.component.id} className="space-y-2">
-                  {multi && <h3 className="text-sm font-semibold">{label(c)} ({c.stats.total})</h3>}
-                  <TaskTable c={c} />
-                </div>
-              ))
-            )}
-          </section>
+          <ReleaseTasks
+            total={stats.total}
+            groups={components.filter((c) => c.stats.total > 0).map((c) => ({
+              id: c.component.id,
+              label: multi ? label(c) : null,
+              sourceId: c.component.sourceId,
+              tag: c.component.tag,
+              tasks: c.stats.tasks,
+            }))}
+          />
         </>
       )}
 
