@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CornerDownRight, MoreVertical, Reply } from "lucide-react";
+import { CornerDownRight, MessageSquare, MoreVertical, Reply } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addCommentAction, editCommentAction, removeCommentAction } from "@/app/notes/actions";
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { LIMITS } from "@/lib/notes/model";
 import { validateComment } from "@/lib/notes/validate";
@@ -56,8 +57,9 @@ function Counter({ length }: { length: number }) {
 
 /** Kotak tulis komentar: dipakai untuk komentar baru dan balasan. */
 function CommentBox({
-  noteId, parentId, label, placeholder, submitLabel, autoFocus, onDone, onCancel,
+  noteId, parentId, label, placeholder, submitLabel, autoFocus, onDone, onCancel, idPrefix = "",
 }: {
+  idPrefix?: string;
   noteId: string;
   parentId: string | null;
   label: string;
@@ -71,7 +73,7 @@ function CommentBox({
   const [pending, start] = useTransition();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const id = `comment-${parentId ?? noteId}`;
+  const id = `${idPrefix}comment-${parentId ?? noteId}`;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -222,7 +224,7 @@ function CommentItem({ c, onReply }: { c: CommentView; onReply?: () => void }) {
 }
 
 /** Satu utas: komentar utama, balasannya (menjorok), dan kotak balasan. */
-function ThreadItem({ noteId, thread }: { noteId: string; thread: Thread }) {
+function ThreadItem({ noteId, thread, idPrefix }: { noteId: string; thread: Thread; idPrefix: string }) {
   const [replying, setReplying] = useState(false);
   const { root, replies } = thread;
   return (
@@ -246,6 +248,7 @@ function ThreadItem({ noteId, thread }: { noteId: string; thread: Thread }) {
           {replying ? (
             <CommentBox
               noteId={noteId} parentId={root.id} label="Reply" placeholder="Write a reply…" submitLabel="Reply" autoFocus
+              idPrefix={idPrefix}
               onDone={() => setReplying(false)} onCancel={() => setReplying(false)}
             />
           ) : (
@@ -267,31 +270,74 @@ function ThreadItem({ noteId, thread }: { noteId: string; thread: Thread }) {
 /**
  * Bagian Comments: utas komentar (komentar utama dengan balasan satu tingkat), urut terlama, dan kotak komentar
  * baru untuk semua pengguna login.
+ *  - "panel": kotak di halaman. Di panel kanan desktop judul tetap, daftar scroll sendiri, kotak tulis di bawah.
+ *  - "sheet": isi sheet komentar di ponsel (tanpa kotak; daftar scroll sendiri, kotak tulis selalu di bawah).
  */
-export function NoteComments({ noteId, comments }: { noteId: string; comments: CommentView[] }) {
+export function NoteComments({
+  noteId, comments, variant = "panel", className,
+}: { noteId: string; comments: CommentView[]; variant?: "panel" | "sheet"; className?: string }) {
   const threads = toThreads(comments);
   const count = comments.filter((c) => !c.deleted).length;
+  const sheet = variant === "sheet";
+  const prefix = sheet ? "sheet-" : "";
   return (
-    // Di panel kanan desktop: judul tetap, daftar komentar scroll sendiri, kotak komentar baru menempel di bawah.
     <section
-      id="comments" aria-labelledby="sec-comments"
-      className="scroll-mt-4 space-y-3 rounded-xl border bg-card p-5 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:space-y-0 lg:gap-3"
+      id={sheet ? undefined : "comments"} aria-labelledby={`${prefix}sec-comments`}
+      className={cn(
+        sheet
+          ? "flex min-h-0 flex-1 flex-col gap-3"
+          : "scroll-mt-4 space-y-3 rounded-xl border bg-card p-5 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:space-y-0 lg:gap-3",
+        className,
+      )}
     >
-      <h2 id="sec-comments" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground lg:shrink-0">
+      <h2 id={`${prefix}sec-comments`} className={cn("text-sm font-semibold uppercase tracking-wide text-muted-foreground", sheet ? "shrink-0" : "lg:shrink-0")}>
         Comments{count > 0 ? ` (${count})` : ""}
       </h2>
-      <div className="lg:-mr-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2">
+      <div className={sheet ? "-mr-2 min-h-0 flex-1 overflow-y-auto pr-2" : "lg:-mr-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2"}>
         {threads.length === 0 ? (
           <p className="text-sm text-muted-foreground">No comments yet.</p>
         ) : (
           <ul className="divide-y">
-            {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} />)}
+            {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} idPrefix={prefix} />)}
           </ul>
         )}
       </div>
-      <div className="border-t pt-3 lg:shrink-0">
-        <CommentBox noteId={noteId} parentId={null} label="Add a comment" placeholder="Write a new comment…" submitLabel="Comment" />
+      <div className={cn("border-t pt-3", sheet ? "shrink-0" : "lg:shrink-0")}>
+        <CommentBox
+          noteId={noteId} parentId={null} label="Add a comment" placeholder="Write a new comment…" submitLabel="Comment"
+          idPrefix={prefix}
+        />
       </div>
     </section>
+  );
+}
+
+/**
+ * Ponsel dan tablet: bilah komentar yang menempel di bawah layar. Mengetuknya membuka sheet dari bawah berisi
+ * komentar dan kotak tulis, sehingga tidak perlu scroll ke bawah catatan yang panjang. Desktop tidak memakainya.
+ */
+export function MobileCommentsBar({ noteId, comments }: { noteId: string; comments: CommentView[] }) {
+  const [open, setOpen] = useState(false);
+  const count = comments.filter((c) => !c.deleted).length;
+  return (
+    <>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 p-3 backdrop-blur lg:hidden">
+        <button
+          type="button" onClick={() => setOpen(true)} aria-haspopup="dialog"
+          className="flex w-full items-center gap-2 rounded-lg border bg-card px-3 py-2 text-left text-sm"
+        >
+          <MessageSquare aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+          <span className="shrink-0 font-medium">Comments ({count})</span>
+          <span aria-hidden="true" className="text-muted-foreground">·</span>
+          <span className="truncate text-muted-foreground">Write a comment…</span>
+        </button>
+      </div>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="flex max-h-[85svh] flex-col gap-0 p-4 lg:hidden">
+          <SheetTitle className="sr-only">Comments</SheetTitle>
+          <NoteComments noteId={noteId} comments={comments} variant="sheet" />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

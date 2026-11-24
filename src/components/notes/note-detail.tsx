@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { History, ListChecks, MessageSquare, Pencil } from "lucide-react";
+import { History, ListChecks, Pencil } from "lucide-react";
 import { Markdown } from "@/components/markdown";
 import { buttonVariants } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format";
@@ -8,7 +8,7 @@ import type { NoteDetail } from "@/lib/notes/load";
 import { formatRelative, formatYmd } from "@/lib/releases/format";
 import { NoteActionItems, type ActionItemView } from "./note-action-items";
 import { CopyNoteButton, DeleteNoteButton } from "./note-buttons";
-import { NoteComments, type CommentView } from "./note-comments";
+import { MobileCommentsBar, NoteComments, type CommentView } from "./note-comments";
 import { NoteKindBadge } from "./note-kind-badge";
 import { NoteLinkChips, NoteLinks } from "./note-links";
 import type { LinkView } from "@/lib/notes/links";
@@ -41,7 +41,6 @@ export function NoteDetailView({
     createdAt: c.createdAt, when: formatRelative(c.createdAt, now), absolute: formatDateTime(c.createdAt),
     edited: c.editedAt !== null, deleted: c.deletedAt !== null,
   }));
-  const commentCount = comments.filter((c) => c.deletedAt === null).length;
 
   return (
     // Desktop: dua kolom. Kiri = judul, baris tautan, dan kotak isi. Kanan = action item dan komentar; kotak komentar
@@ -49,7 +48,7 @@ export function NoteDetailView({
     //
     // Desktop: tinggi tetap satu layar (layar dikurangi bilah atas 3rem dan padding halaman 4rem); hanya kotak isi,
     // daftar komentar, dan action item yang scroll di dalamnya. Ponsel: mengalir biasa (tanpa scroll bersarang).
-    <div className="grid gap-6 lg:h-[calc(100svh-3rem-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)] lg:grid-rows-1">
+    <div className="grid gap-6 pb-20 lg:h-[calc(100svh-3rem-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)] lg:grid-rows-1 lg:pb-0">
       <div className="min-w-0 space-y-6 lg:flex lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0">
         <div className="space-y-3 lg:shrink-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -120,9 +119,6 @@ export function NoteDetailView({
 
         {/* Ponsel dan tablet: tombol lompat ke bagian bawah. Desktop tidak perlu (kolom kanan selalu terlihat). */}
         <nav aria-label="Jump to" className="flex flex-wrap gap-2 lg:hidden">
-          <a href="#comments" className={buttonVariants({ variant: "secondary", size: "sm" })}>
-            <MessageSquare aria-hidden="true" /> Comments ({commentCount})
-          </a>
           <a href="#action-items" className={buttonVariants({ variant: "secondary", size: "sm" })}>
             <ListChecks aria-hidden="true" /> Action items ({items.length})
           </a>
@@ -132,7 +128,7 @@ export function NoteDetailView({
 
         <section
           aria-label="Content" tabIndex={0}
-          className="space-y-2 rounded-xl border bg-card p-5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
+          className="max-h-[60svh] space-y-2 overflow-y-auto rounded-xl border bg-card p-5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring lg:max-h-none lg:min-h-0 lg:flex-1"
         >
           {note.body.trim() ? <Markdown>{note.body}</Markdown> : <p className="text-muted-foreground">No content.</p>}
           {links.length > 0 && <div className="pt-4"><NoteLinks links={links} embedded /></div>}
@@ -157,8 +153,10 @@ export function NoteDetailView({
           )}
         </section>
 
-        <NoteComments noteId={note.id} comments={commentViews} />
+        {/* Ponsel: komentar lewat bilah di bawah layar (MobileCommentsBar), bukan di sini. */}
+        <NoteComments noteId={note.id} comments={commentViews} className="hidden lg:flex" />
       </aside>
+      <MobileCommentsBar noteId={note.id} comments={commentViews} />
     </div>
   );
 }
