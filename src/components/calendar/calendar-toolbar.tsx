@@ -2,28 +2,18 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { NOTE_KIND_STYLE } from "@/components/notes/note-kind-badge";
 import { RISK_TONE } from "@/components/releases/risk-badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { NativeSelect } from "@/components/ui/native-select";
-import {
-  SHOW_KINDS, SHOW_LABEL, calendarHref, navHrefs, periodLabel, type CalendarParams, type ShowKind,
-} from "@/lib/calendar/model";
+import { buttonVariants } from "@/components/ui/button";
+import { calendarHref, navHrefs, periodLabel, type CalendarParams } from "@/lib/calendar/model";
 import { NOTE_KINDS, NOTE_KIND_LABEL } from "@/lib/notes/model";
 import { cn } from "@/lib/utils";
+import { CalendarFilter } from "./calendar-filter";
 import { ITEM_TONE } from "./calendar-item";
 
-/** Navigasi periode, pilihan Month/Week, dan filter. Semuanya tautan atau form GET: state ada di URL. */
+/** Navigasi periode, pilihan Month/Week, dan filter (diterapkan dengan Apply). State ada di URL. */
 export function CalendarToolbar({
   params, apps, now = new Date(),
 }: { params: CalendarParams; apps: { id: string; name: string }[]; now?: Date }) {
   const nav = navHrefs(params, now);
-  const toggle = (k: ShowKind) => {
-    const on = params.show.includes(k);
-    const show = on ? params.show.filter((x) => x !== k) : SHOW_KINDS.filter((x) => x === k || params.show.includes(x));
-    return calendarHref(params, { show }, now);
-  };
-  const appOptions = params.app && !apps.some((a) => a.id === params.app) ? [{ id: params.app, name: "(archived application)" }, ...apps] : apps;
-
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -51,48 +41,7 @@ export function CalendarToolbar({
         </nav>
       </div>
 
-      <div className="flex flex-wrap items-end gap-x-4 gap-y-3 rounded-xl border bg-card p-3">
-        <fieldset className="space-y-1.5">
-          <legend className="text-xs text-muted-foreground">Show</legend>
-          <div className="flex flex-wrap gap-1.5">
-            {SHOW_KINDS.map((k) => {
-              const on = params.show.includes(k);
-              return (
-                <Link
-                  key={k} href={toggle(k)} role="switch" aria-checked={on}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-medium",
-                    on ? "border-primary bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {SHOW_LABEL[k]}
-                </Link>
-              );
-            })}
-          </div>
-        </fieldset>
-
-        <form method="get" action="/calendar" className="flex flex-wrap items-end gap-2">
-          {params.view === "week" ? <input type="hidden" name="view" value="week" /> : null}
-          <input type="hidden" name={params.view === "week" ? "week" : "month"} value={params.view === "week" ? params.week : params.month} />
-          {params.show.length !== SHOW_KINDS.length && <input type="hidden" name="show" value={params.show.join(",")} />}
-          <div className="space-y-1.5">
-            <Label htmlFor="c-app" className="text-xs text-muted-foreground">Application</Label>
-            <NativeSelect id="c-app" name="app" defaultValue={params.app ?? ""}>
-              <option value="">All applications</option>
-              {appOptions.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </NativeSelect>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="c-type" className="text-xs text-muted-foreground">Note type</Label>
-            <NativeSelect id="c-type" name="type" defaultValue={params.type ?? ""}>
-              <option value="">All types</option>
-              {NOTE_KINDS.map((k) => <option key={k} value={k}>{NOTE_KIND_LABEL[k]}</option>)}
-            </NativeSelect>
-          </div>
-          <Button type="submit" size="sm" variant="outline">Apply</Button>
-        </form>
-      </div>
+      <CalendarFilter params={params} apps={apps} />
     </div>
   );
 }
