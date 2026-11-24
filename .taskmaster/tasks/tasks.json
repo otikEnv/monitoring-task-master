@@ -3346,7 +3346,7 @@
         "id": "70",
         "title": "Notes dan Calendar: menu, verifikasi end-to-end, dan dokumentasi",
         "description": "Menu sidebar, uji live, pemeriksaan visual, catatan rilis, README.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "63",
@@ -3364,56 +3364,56 @@
             "id": 1,
             "title": "Menu sidebar",
             "description": "Calendar dan Notes.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambah dua item setelah Trend dengan ikon calendar dan catatan; aktif sesuai rute.",
             "parentId": "70",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:19:47.944Z"
           },
           {
             "id": 2,
             "title": "Tes live",
             "description": "tests/notes.live.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Data uji berawalan TMP-NOTE-: buat/edit/hapus catatan dan riwayat, tautan dan rekaman, Follow up, komentar dan penanda baca, centang action item oleh penanggung jawab viewer, libur; viewer dan admin lain ditolak untuk aksi yang tidak berhak; anon tidak bisa membaca. User uji @envisions.app. vi.setConfig({ testTimeout: 60_000 }). Bersihkan semuanya.",
             "parentId": "70",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:19:47.944Z"
           },
           {
             "id": 3,
             "title": "Pemeriksaan interaksi di browser",
             "description": "Puppeteer pada data uji.",
-            "status": "pending",
+            "status": "done",
             "details": "Alur: New note dari panel hari, +N more, Week, filter Calendar, detail dengan komentar, Copy, History, Follow up, kartu Dashboard, halaman libur, viewer tanpa tombol tulis; tidak ada galat konsol.",
             "parentId": "70",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:19:47.944Z"
           },
           {
             "id": 4,
             "title": "Pemeriksaan visual dan kualitas",
             "description": "Seluruh pemeriksaan.",
-            "status": "pending",
+            "status": "done",
             "details": "Tangkapan layar Calendar, Notes, detail, dan Dashboard (terang, gelap, ponsel) tanpa overflow; tsc, eslint, vitest, npm run build, tes live relevan bersih; semua kriteria PRD dicentang.",
             "parentId": "70",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:19:47.944Z"
           },
           {
             "id": 5,
             "title": "Dokumentasi dan catatan rilis",
             "description": "README dan supabase/README.",
-            "status": "pending",
+            "status": "done",
             "details": "Bagian Notes dan Calendar di README (hak akses, Follow up, libur, hari kerja); catatan rilis bahwa sisa hari dan status risiko release kini memakai hari kerja; tautkan PRD-Note.md dari PRD utama.",
             "parentId": "70",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:19:47.944Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T07:19:47.944Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T07:10:19.996Z",
+      "lastModified": "2026-11-24T07:19:47.944Z",
       "taskCount": 70,
-      "completedCount": 59,
+      "completedCount": 60,
       "tags": [
         "master"
       ]

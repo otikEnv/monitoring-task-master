@@ -1,6 +1,9 @@
 "use client";
 
-import { Archive, ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, Rocket, Settings2, TrendingUp } from "lucide-react";
+import {
+  Archive, CalendarDays, ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, NotebookText, Rocket, Settings2,
+  TrendingUp,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
@@ -21,6 +24,8 @@ const NAV: NavItem[] = [
   { href: "/tasks", label: "Task list", icon: ListChecks },
   { href: "/release", label: "Release", icon: Rocket },
   { href: "/tren", label: "Trend", icon: TrendingUp },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/notes", label: "Notes", icon: NotebookText },
 ];
 
 // Archive dapat dilihat semua pengguna (hanya admin yang bisa Restore); Source settings hanya untuk admin.

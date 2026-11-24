@@ -2,7 +2,7 @@
 
 6 November 2026 · Otik
 
-> Fitur tambahan: [Release Tracking](PRD-Fitur-Release-Tracking.md), [Release Lintas Aplikasi](PRD-Release-Multi-Aplikasi.md), [Login SSO Google](PRD-Login-SSO-Google.md), [Archive dan Restore](PRD-Archive.md), dan [Hold dan Catatan Release](PRD-Release-Hold-Catatan.md).
+> Fitur tambahan: [Release Tracking](PRD-Fitur-Release-Tracking.md), [Release Lintas Aplikasi](PRD-Release-Multi-Aplikasi.md), [Login SSO Google](PRD-Login-SSO-Google.md), [Archive dan Restore](PRD-Archive.md), [Hold dan Catatan Release](PRD-Release-Hold-Catatan.md), dan [Notes dan Calendar](PRD-Note.md).
 
 ## Ringkasan dan latar belakang
 
