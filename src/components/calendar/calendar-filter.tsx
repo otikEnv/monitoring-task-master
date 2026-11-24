@@ -8,6 +8,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { SHOW_KINDS, SHOW_LABEL, calendarHref, type CalendarParams, type ShowKind } from "@/lib/calendar/model";
 import { NOTE_KINDS, NOTE_KIND_LABEL, type NoteKind } from "@/lib/notes/model";
 import { cn } from "@/lib/utils";
+import { CalendarLegend } from "./calendar-legend";
 
 /**
  * Filter Calendar: jenis item (Show), aplikasi, dan jenis catatan. Mengubah pilihan belum menyaring apa pun;
@@ -73,6 +74,7 @@ export function CalendarFilter({ params, apps }: { params: CalendarParams; apps:
           {pending ? "Applying…" : "Apply"}
         </Button>
         {changed && !pending && <span role="status" className="pb-1 text-xs text-muted-foreground">Not applied yet</span>}
+        <CalendarLegend />
       </div>
     </form>
   );

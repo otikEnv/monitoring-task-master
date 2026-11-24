@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CalendarCog } from "lucide-react";
 import { Suspense } from "react";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
-import { CalendarLegend, CalendarToolbar, MissingHolidays } from "@/components/calendar/calendar-toolbar";
+import { CalendarToolbar, MissingHolidays } from "@/components/calendar/calendar-toolbar";
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
@@ -72,7 +72,6 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
             isAdmin={isAdmin}
             initialDate={params.date}
           />
-          <CalendarLegend />
         </>
       )}
     </AppShell>

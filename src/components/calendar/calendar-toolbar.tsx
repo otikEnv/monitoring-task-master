@@ -1,13 +1,9 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";
-import { NOTE_KIND_STYLE } from "@/components/notes/note-kind-badge";
-import { RISK_TONE } from "@/components/releases/risk-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { calendarHref, navHrefs, periodLabel, type CalendarParams } from "@/lib/calendar/model";
-import { NOTE_KINDS, NOTE_KIND_LABEL } from "@/lib/notes/model";
 import { cn } from "@/lib/utils";
 import { CalendarFilter } from "./calendar-filter";
-import { ITEM_TONE } from "./calendar-item";
 
 /** Navigasi periode, pilihan Month/Week, dan filter (diterapkan dengan Apply). State ada di URL. */
 export function CalendarToolbar({
@@ -43,32 +39,6 @@ export function CalendarToolbar({
 
       <CalendarFilter params={params} apps={apps} />
     </div>
-  );
-}
-
-function Swatch({ className, children }: { className: string; children: React.ReactNode }) {
-  return (
-    <li className="flex items-center gap-1.5">
-      <span aria-hidden="true" className={cn("inline-block size-3 rounded-sm", className)} />
-      {children}
-    </li>
-  );
-}
-
-/** Legenda warna di bawah calendar. */
-export function CalendarLegend() {
-  return (
-    <ul aria-label="Legend" className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-      {NOTE_KINDS.map((k) => <Swatch key={k} className={NOTE_KIND_STYLE[k].badge}>{NOTE_KIND_LABEL[k]} note</Swatch>)}
-      <Swatch className={ITEM_TONE.releaseStart}>Release start</Swatch>
-      <Swatch className={RISK_TONE.on_track}>Release target (risk color)</Swatch>
-      <Swatch className={ITEM_TONE.released}>Released</Swatch>
-      <Swatch className={ITEM_TONE.item}>Action item due</Swatch>
-      <Swatch className={ITEM_TONE.itemOverdue}>Action item overdue</Swatch>
-      <Swatch className="bg-rose-100 dark:bg-rose-950">National holiday</Swatch>
-      <Swatch className="bg-rose-50 ring-1 ring-inset ring-rose-200 dark:bg-rose-950/40 dark:ring-rose-900">Collective leave</Swatch>
-      <Swatch className="bg-muted">Weekend (dimmed date)</Swatch>
-    </ul>
   );
 }
 

@@ -62,6 +62,8 @@ function textOf(it: CalendarItem): string {
   return `${RELEASE_EVENT_LABEL[it.event]}: ${it.name}${it.onHold ? " (On hold)" : ""}`;
 }
 
+const ITEM_BASE = "flex min-w-0 items-start gap-1 rounded px-1.5 py-0.5 text-xs font-medium";
+
 /** Satu baris item: ikon + teks berwarna, menuju detailnya. `wrap` = tampilkan teks lengkap (Week, panel). */
 export function CalendarItemLink({ it, wrap = false, className }: { it: CalendarItem; wrap?: boolean; className?: string }) {
   return (
@@ -69,14 +71,23 @@ export function CalendarItemLink({ it, wrap = false, className }: { it: Calendar
       href={itemHref(it)}
       title={itemLabel(it)}
       aria-label={itemLabel(it)}
-      className={cn(
-        "flex min-w-0 items-start gap-1 rounded px-1.5 py-0.5 text-xs font-medium hover:opacity-80 focus-visible:outline-2 focus-visible:outline-ring",
-        toneOf(it),
-        className,
-      )}
+      className={cn(ITEM_BASE, "hover:opacity-80 focus-visible:outline-2 focus-visible:outline-ring", toneOf(it), className)}
     >
       <span className="mt-0.5"><IconOf it={it} /></span>
       <span className={wrap ? "min-w-0 break-words" : "min-w-0 truncate"}>{textOf(it)}</span>
     </Link>
+  );
+}
+
+/**
+ * Contoh item untuk legenda: bentuk, warna, dan ikon sama persis dengan baris di kalender, tanpa tautan.
+ * `label` menggantikan teks item.
+ */
+export function CalendarItemChip({ it, label, className }: { it: CalendarItem; label: string; className?: string }) {
+  return (
+    <span className={cn(ITEM_BASE, "w-fit", toneOf(it), className)}>
+      <span className="mt-0.5"><IconOf it={it} /></span>
+      <span className="min-w-0">{label}</span>
+    </span>
   );
 }
