@@ -61,7 +61,7 @@ export async function commentCounts(
   const out = new Map(noteIds.map((id) => [id, { total: 0, fresh: 0 }]));
   if (noteIds.length === 0) return out;
   const [comments, reads] = await Promise.all([
-    db.from("note_comments").select("note_id, author_id, created_at").in("note_id", noteIds),
+    db.from("note_comments").select("note_id, author_id, created_at").is("deleted_at", null).in("note_id", noteIds),
     db.from("note_reads").select("note_id, last_read_at").eq("user_id", userId).in("note_id", noteIds),
   ]);
   for (const r of [comments, reads]) if (r.error) throw new Error(`Gagal membaca komentar: ${r.error.message}`);

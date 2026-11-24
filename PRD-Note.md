@@ -34,7 +34,6 @@ Karena app kini mengenal hari libur, perhitungan waktu release juga diubah menja
 - Penulisan catatan oleh viewer. Viewer hanya membaca, berkomentar, dan mencentang action item miliknya.
 - Mengedit catatan milik admin lain, termasuk oleh admin.
 - Lampiran file, gambar, dan mention `@`.
-- Balasan berutas pada komentar (komentar datar, urut waktu).
 - Acara berulang, undangan, atau sinkronisasi dengan Google Calendar.
 - Mengambil libur nasional otomatis dari API luar.
 - Hari kerja per orang atau per tim (cuti pribadi). Hari kerja berlaku sama untuk semua release.
@@ -145,7 +144,9 @@ Warna harus terbaca di mode terang dan gelap, dan tidak menjadi satu-satunya pem
 ### Komentar
 
 - Semua pengguna login dapat berkomentar pada catatan mana pun. Maksimal 2.000 karakter, teks biasa.
-- Komentar ditampilkan datar, urut dari yang terlama.
+- Komentar bisa berupa **komentar baru** (utas sendiri) atau **balasan** (tombol Reply) pada komentar lain. Balasan hanya satu tingkat: membalas sebuah balasan tetap masuk ke utas komentar utamanya.
+- Utas ditampilkan urut dari yang terlama; balasan tampil menjorok di bawah komentar utamanya, juga urut terlama.
+- Penulis yang menghapus komentar utama yang sudah dibalas: komentarnya tampil "This comment was deleted" dan balasan orang lain tetap ada. Komentar yang dihapus tidak dihitung.
 - Penulis komentar dapat mengedit dan menghapus komentarnya. Komentar yang diedit diberi penanda "edited".
 - Penulis catatan **tidak** dapat menghapus komentar orang lain.
 
@@ -313,7 +314,7 @@ Release yang diarsipkan tidak tampil. Release yang sedang di-hold tetap tampil d
   - `note_release_snapshots`: tautan release + persen progres, task selesai dan total, status risiko, sisa hari kerja, tanggal target, waktu rekam.
   - `note_action_items`: catatan + isi, penanggung jawab, tenggat, selesai, waktu selesai, `carried_to_id` (action item hasil salinan Follow up, boleh kosong).
   - `note_revisions`: catatan + judul, jenis, tanggal, dan isi versi sebelumnya, penyunting, waktu.
-  - `note_comments`: catatan + isi, penulis, waktu dibuat dan diedit.
+  - `note_comments`: catatan + isi, penulis, waktu dibuat dan diedit, `parent_id` (balasan), `deleted_at` (komentar utama terhapus yang masih dibalas).
   - `note_reads`: pengguna + catatan + waktu terakhir dibuka (kunci gabungan).
   - `holidays`: tanggal (unik), nama, jenis (`national` atau `collective_leave`).
 - Penghapusan catatan berantai ke semua tabel `note_*`. Menghapus catatan asal mengosongkan `follows_up_id` pada catatan lanjutannya.

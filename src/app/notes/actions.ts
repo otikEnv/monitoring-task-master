@@ -129,15 +129,17 @@ export async function toggleActionItemAction(itemId: string, done: boolean): Pro
   return { ok: true };
 }
 
-/** Komentar oleh semua pengguna login. */
-export async function addCommentAction(noteId: string, body: string): Promise<SimpleResult> {
+/** Komentar oleh semua pengguna login; `parentId` = balasan untuk komentar itu. */
+export async function addCommentAction(noteId: string, body: string, parentId: string | null = null): Promise<SimpleResult> {
   const user = await requireUser();
   const id = cleanId(noteId);
   if (!id) return { ok: false, error: "Invalid note ID." };
+  const parent = parentId === null || parentId === undefined || parentId === "" ? null : cleanId(parentId);
+  if (parentId && !parent) return { ok: false, error: "Invalid comment ID." };
   const text = validateComment(body);
   if (!text.ok) return { ok: false, error: text.error };
   try {
-    await addComment(id, text.value, actorOf(user));
+    await addComment(id, text.value, actorOf(user), undefined, parent);
   } catch (e) {
     return failure("menambah komentar", e, "Could not add the comment.");
   }

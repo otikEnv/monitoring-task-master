@@ -266,7 +266,7 @@ begin
     raise exception 'FAIL: authenticated punya hak tulis';
   end if;
   if has_function_privilege('authenticated', 'public.save_note(uuid, uuid, text, jsonb, jsonb, jsonb)', 'execute')
-     or has_function_privilege('authenticated', 'public.add_note_comment(uuid, uuid, text, text)', 'execute')
+     or has_function_privilege('authenticated', 'public.add_note_comment(uuid, uuid, text, text, uuid)', 'execute')
      or has_function_privilege('authenticated', 'public.set_action_item_done(uuid, uuid, boolean)', 'execute')
      or has_function_privilege('anon', 'public.delete_note(uuid, uuid)', 'execute') then
     raise exception 'FAIL: klien bisa menjalankan fungsi penulisan';

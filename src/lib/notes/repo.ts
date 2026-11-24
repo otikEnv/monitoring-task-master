@@ -138,16 +138,18 @@ export async function setActionItemDone(
   return { noteId: data as string };
 }
 
+/** Komentar baru, atau balasan bila `parentId` diisi (balasan dari balasan menempel ke komentar utamanya). */
 export async function addComment(
   noteId: string,
   body: string,
   actor: Actor,
   db: SupabaseClient = createAdminClient(),
+  parentId: string | null = null,
 ): Promise<{ id: string }> {
   const { data, error } = await db.rpc("add_note_comment", {
-    p_note: noteId, p_actor: actor.id, p_actor_email: actor.email, p_body: body,
+    p_note: noteId, p_actor: actor.id, p_actor_email: actor.email, p_body: body, p_parent: parentId,
   });
-  if (error) throw noteError("menambah komentar", error);
+  if (error) throw noteError("menambah komentar", error, parentId ? "Comment" : "Note");
   return { id: data as string };
 }
 
@@ -163,7 +165,10 @@ export async function editComment(
   return { noteId: data as string };
 }
 
-/** Menghapus komentar sendiri. Mengembalikan id catatannya. */
+/**
+ * Menghapus komentar sendiri. Komentar utama yang sudah dibalas ditandai terhapus (balasan orang lain tetap ada).
+ * Mengembalikan id catatannya.
+ */
 export async function deleteComment(
   commentId: string,
   actor: Actor,

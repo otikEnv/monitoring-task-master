@@ -53,6 +53,10 @@ export type ActionItemRow = {
 export type CommentRow = {
   id: string;
   noteId: string;
+  /** Komentar utama yang dibalas; null = komentar utama. */
+  parentId: string | null;
+  /** Komentar utama yang dihapus penulisnya tetapi masih punya balasan; isinya kosong. */
+  deletedAt: string | null;
   body: string;
   authorId: string | null;
   authorEmail: string;
@@ -85,7 +89,7 @@ export type NoteDetail = {
 
 export const NOTE_COLUMNS = "id, title, note_date, kind, body, author_id, author_email, follows_up_id, created_at, edited_at";
 const ITEM_COLUMNS = "id, note_id, position, body, assignee_id, assignee_email, due_date, done, done_at, carried_to_id";
-const COMMENT_COLUMNS = "id, note_id, body, author_id, author_email, created_at, edited_at";
+const COMMENT_COLUMNS = "id, note_id, parent_id, deleted_at, body, author_id, author_email, created_at, edited_at";
 
 type NoteDb = {
   id: string; title: string; note_date: string; kind: NoteKind; body: string; author_id: string | null;
@@ -96,7 +100,7 @@ type ItemDb = {
   due_date: string | null; done: boolean; done_at: string | null; carried_to_id: string | null;
 };
 type CommentDb = {
-  id: string; note_id: string; body: string; author_id: string | null; author_email: string; created_at: string;
+  id: string; note_id: string; parent_id: string | null; deleted_at: string | null; body: string; author_id: string | null; author_email: string; created_at: string;
   edited_at: string | null;
 };
 type SnapshotDb = {
@@ -123,7 +127,7 @@ export function toItem(r: ItemDb): ActionItemRow {
 }
 
 const toComment = (r: CommentDb): CommentRow => ({
-  id: r.id, noteId: r.note_id, body: r.body, authorId: r.author_id, authorEmail: r.author_email,
+  id: r.id, noteId: r.note_id, parentId: r.parent_id, deletedAt: r.deleted_at, body: r.body, authorId: r.author_id, authorEmail: r.author_email,
   createdAt: r.created_at, editedAt: r.edited_at,
 });
 

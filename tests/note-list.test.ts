@@ -52,7 +52,7 @@ describe("likePattern", () => {
 describe("commentCounts", () => {
   function db(comments: unknown[], reads: unknown[]) {
     const make = (data: unknown[]) => {
-      const q = { eq: vi.fn(() => q), in: vi.fn(() => Promise.resolve({ data, error: null })) };
+      const q = { eq: vi.fn(() => q), is: vi.fn(() => q), in: vi.fn(() => Promise.resolve({ data, error: null })) };
       return q;
     };
     return {

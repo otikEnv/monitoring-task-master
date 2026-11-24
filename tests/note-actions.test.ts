@@ -98,7 +98,10 @@ describe("hak akses", () => {
 
   it("komentar dan centang action item cukup login; pelaku diambil dari sesi", async () => {
     expect(await addCommentAction(NOTE, " Setuju ")).toEqual({ ok: true });
-    expect(m.addComment).toHaveBeenCalledWith(NOTE, "Setuju", { id: "u9", email: "viewer@envisions.app" });
+    expect(m.addComment).toHaveBeenCalledWith(NOTE, "Setuju", { id: "u9", email: "viewer@envisions.app" }, undefined, null);
+    expect(await addCommentAction(NOTE, "Balas", ITEM.toUpperCase())).toEqual({ ok: true });
+    expect(m.addComment).toHaveBeenLastCalledWith(NOTE, "Balas", { id: "u9", email: "viewer@envisions.app" }, undefined, ITEM);
+    expect(await addCommentAction(NOTE, "Balas", "bukan-id")).toEqual({ ok: false, error: "Invalid comment ID." });
     expect(await toggleActionItemAction(ITEM, true)).toEqual({ ok: true });
     expect(m.setActionItemDone).toHaveBeenCalledWith(ITEM, true, { id: "u9", email: "viewer@envisions.app" });
     expect(m.requireAdmin).not.toHaveBeenCalled();

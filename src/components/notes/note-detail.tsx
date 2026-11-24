@@ -33,9 +33,10 @@ export function NoteDetailView({
     done: it.done, carried: it.carriedToId !== null, overdue: isOverdueItem(it, today),
   }));
   const commentViews: CommentView[] = comments.map((c) => ({
-    id: c.id, body: c.body, authorEmail: c.authorEmail, mine: c.authorId !== null && c.authorId === user.id,
+    id: c.id, parentId: c.parentId, body: c.body, authorEmail: c.authorEmail,
+    mine: c.authorId !== null && c.authorId === user.id && c.deletedAt === null,
     createdAt: c.createdAt, when: formatRelative(c.createdAt, now), absolute: formatDateTime(c.createdAt),
-    edited: c.editedAt !== null,
+    edited: c.editedAt !== null, deleted: c.deletedAt !== null,
   }));
 
   return (

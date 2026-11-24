@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MoreVertical } from "lucide-react";
+import { CornerDownRight, MoreVertical, Reply } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addCommentAction, editCommentAction, removeCommentAction } from "@/app/notes/actions";
@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 /** Komentar siap tampil. Teks waktu dihitung di server agar sama antara render server dan hidrasi. */
 export type CommentView = {
   id: string;
+  /** Komentar utama yang dibalas; null = komentar utama. */
+  parentId: string | null;
   body: string;
   authorEmail: string;
   mine: boolean;
@@ -27,7 +29,22 @@ export type CommentView = {
   when: string;
   absolute: string;
   edited: boolean;
+  /** Komentar utama yang dihapus penulisnya tetapi masih punya balasan. */
+  deleted: boolean;
 };
+
+type Thread = { root: CommentView; replies: CommentView[] };
+
+/** Komentar utama urut terlama, masing-masing dengan balasannya (urut terlama). */
+export function toThreads(comments: CommentView[]): Thread[] {
+  const roots = comments.filter((c) => c.parentId === null);
+  const byParent = new Map<string, CommentView[]>();
+  for (const c of comments) {
+    if (c.parentId === null) continue;
+    byParent.set(c.parentId, [...(byParent.get(c.parentId) ?? []), c]);
+  }
+  return roots.map((root) => ({ root, replies: byParent.get(root.id) ?? [] }));
+}
 
 function Counter({ length }: { length: number }) {
   return (
@@ -37,7 +54,62 @@ function Counter({ length }: { length: number }) {
   );
 }
 
-function CommentItem({ c }: { c: CommentView }) {
+/** Kotak tulis komentar: dipakai untuk komentar baru dan balasan. */
+function CommentBox({
+  noteId, parentId, label, placeholder, submitLabel, autoFocus, onDone, onCancel,
+}: {
+  noteId: string;
+  parentId: string | null;
+  label: string;
+  placeholder: string;
+  submitLabel: string;
+  autoFocus?: boolean;
+  onDone?: () => void;
+  onCancel?: () => void;
+}) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const id = `comment-${parentId ?? noteId}`;
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const check = validateComment(text);
+    if (!check.ok) return setError(check.error);
+    start(async () => {
+      const res = await addCommentAction(noteId, check.value, parentId);
+      if (!res.ok) return setError(res.error);
+      setText("");
+      onDone?.();
+      router.refresh();
+    });
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-1.5">
+      <Label htmlFor={id} className={parentId ? "sr-only" : undefined}>{label}</Label>
+      <Textarea
+        id={id} value={text} rows={parentId ? 2 : 3} disabled={pending} placeholder={placeholder} autoFocus={autoFocus}
+        onChange={(e) => { setText(e.target.value); setError(null); }}
+        onKeyDown={(e) => { if (e.key === "Escape" && onCancel) onCancel(); }}
+        aria-invalid={error ? true : undefined}
+      />
+      <div className="flex items-center justify-between gap-2">
+        <Counter length={text.trim().length} />
+        <div className="flex gap-1.5">
+          {onCancel && <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={onCancel}>Cancel</Button>}
+          <Button type="submit" size="sm" disabled={pending || text.trim().length === 0}>
+            {pending ? "Posting…" : submitLabel}
+          </Button>
+        </div>
+      </div>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    </form>
+  );
+}
+
+function CommentItem({ c, onReply }: { c: CommentView; onReply?: () => void }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState(false);
@@ -69,8 +141,17 @@ function CommentItem({ c }: { c: CommentView }) {
     });
   }
 
+  if (c.deleted) {
+    return (
+      <div className="py-1">
+        <p className="text-sm italic text-muted-foreground">This comment was deleted.</p>
+      </div>
+    );
+  }
+
+  const kind = c.parentId ? "reply" : "comment";
   return (
-    <li className="space-y-1.5 py-3 first:pt-0 last:pb-0">
+    <div className="space-y-1.5">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
           <span className="break-all font-medium text-foreground">{c.authorEmail}</span>
@@ -81,7 +162,7 @@ function CommentItem({ c }: { c: CommentView }) {
         {c.mine && !editing && (
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button type="button" variant="ghost" size="icon-sm" className="-mr-1 -mt-1 shrink-0" aria-label={`Actions for your comment from ${c.absolute}`} />}
+              render={<Button type="button" variant="ghost" size="icon-sm" className="-mr-1 -mt-1 shrink-0" aria-label={`Actions for your ${kind} from ${c.absolute}`} />}
             >
               <MoreVertical aria-hidden="true" />
             </DropdownMenuTrigger>
@@ -95,7 +176,7 @@ function CommentItem({ c }: { c: CommentView }) {
       {editing ? (
         <div className="space-y-1.5">
           <Textarea
-            aria-label="Edit your comment" value={text} rows={3} autoFocus disabled={pending}
+            aria-label={`Edit your ${kind}`} value={text} rows={3} autoFocus disabled={pending}
             onChange={(e) => { setText(e.target.value); setError(null); }}
             onKeyDown={(e) => { if (e.key === "Escape") setEditing(false); }}
           />
@@ -111,70 +192,100 @@ function CommentItem({ c }: { c: CommentView }) {
       ) : (
         <p className="whitespace-pre-wrap break-words text-sm">{c.body}</p>
       )}
+      {onReply && !editing && (
+        <button
+          type="button" onClick={onReply}
+          className="inline-flex items-center gap-1 rounded text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          <Reply aria-hidden="true" className="size-3.5" /> Reply
+        </button>
+      )}
       <AlertDialog open={deleting} onOpenChange={(o) => !pending && setDeleting(o)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete your comment?</AlertDialogTitle>
-            <AlertDialogDescription>The comment is removed for everyone. This cannot be undone.</AlertDialogDescription>
+            <AlertDialogTitle>Delete your {kind}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The {kind} is removed for everyone. This cannot be undone.
+              {!c.parentId && " If it has replies, the replies stay and the comment shows as deleted."}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <Button type="button" variant="destructive" disabled={pending} onClick={remove}>
-              {pending ? "Deleting…" : "Delete comment"}
+              {pending ? "Deleting…" : `Delete ${kind}`}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+/** Satu utas: komentar utama, balasannya (menjorok), dan kotak balasan. */
+function ThreadItem({ noteId, thread }: { noteId: string; thread: Thread }) {
+  const [replying, setReplying] = useState(false);
+  const { root, replies } = thread;
+  return (
+    <li className="space-y-3 py-3 first:pt-0 last:pb-0">
+      <CommentItem c={root} onReply={root.deleted ? undefined : () => setReplying(true)} />
+      {(replies.length > 0 || replying) && (
+        <div className="ml-3 space-y-3 border-l-2 pl-4 sm:ml-4">
+          {replies.length > 0 && (
+            <ul aria-label={`${replies.length} ${replies.length === 1 ? "reply" : "replies"}`} className="space-y-3">
+              {replies.map((r) => (
+                <li key={r.id} className="flex gap-2">
+                  <CornerDownRight aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    {/* Membalas balasan tetap masuk utas ini (satu tingkat). */}
+                    <CommentItem c={r} onReply={() => setReplying(true)} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          {replying ? (
+            <CommentBox
+              noteId={noteId} parentId={root.id} label="Reply" placeholder="Write a reply…" submitLabel="Reply" autoFocus
+              onDone={() => setReplying(false)} onCancel={() => setReplying(false)}
+            />
+          ) : (
+            !root.deleted && replies.length > 0 && (
+              <button
+                type="button" onClick={() => setReplying(true)}
+                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                <Reply aria-hidden="true" className="size-3.5" /> Reply to this thread
+              </button>
+            )
+          )}
+        </div>
+      )}
     </li>
   );
 }
 
-/** Bagian Comments: daftar datar urut terlama, dan kotak komentar untuk semua pengguna login. */
+/**
+ * Bagian Comments: utas komentar (komentar utama dengan balasan satu tingkat), urut terlama, dan kotak komentar
+ * baru untuk semua pengguna login.
+ */
 export function NoteComments({ noteId, comments }: { noteId: string; comments: CommentView[] }) {
-  const router = useRouter();
-  const [pending, start] = useTransition();
-  const [text, setText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const check = validateComment(text);
-    if (!check.ok) return setError(check.error);
-    start(async () => {
-      const res = await addCommentAction(noteId, check.value);
-      if (!res.ok) return setError(res.error);
-      setText("");
-      router.refresh();
-    });
-  }
-
+  const threads = toThreads(comments);
+  const count = comments.filter((c) => !c.deleted).length;
   return (
     <section id="comments" aria-labelledby="sec-comments" className="space-y-3 rounded-xl border bg-card p-5">
       <h2 id="sec-comments" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Comments{comments.length > 0 ? ` (${comments.length})` : ""}
+        Comments{count > 0 ? ` (${count})` : ""}
       </h2>
-      {comments.length === 0 ? (
+      {threads.length === 0 ? (
         <p className="text-sm text-muted-foreground">No comments yet.</p>
       ) : (
         <ul className="divide-y">
-          {comments.map((c) => <CommentItem key={c.id} c={c} />)}
+          {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} />)}
         </ul>
       )}
-      <form onSubmit={submit} className="space-y-1.5 border-t pt-3">
-        <Label htmlFor={`comment-${noteId}`}>Add a comment</Label>
-        <Textarea
-          id={`comment-${noteId}`} value={text} rows={3} disabled={pending} placeholder="Write a comment…"
-          onChange={(e) => { setText(e.target.value); setError(null); }}
-          aria-invalid={error ? true : undefined}
-        />
-        <div className="flex items-center justify-between gap-2">
-          <Counter length={text.trim().length} />
-          <Button type="submit" size="sm" disabled={pending || text.trim().length === 0}>
-            {pending ? "Posting…" : "Comment"}
-          </Button>
-        </div>
-        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-      </form>
+      <div className="border-t pt-3">
+        <CommentBox noteId={noteId} parentId={null} label="Add a comment" placeholder="Write a new comment…" submitLabel="Comment" />
+      </div>
     </section>
   );
 }

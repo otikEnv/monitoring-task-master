@@ -31,7 +31,7 @@ function detail(extra: Partial<NoteDetail> = {}): NoteDetail {
         dueDate: "2026-11-01", done: false, doneAt: null, carriedToId: "x" },
     ],
     comments: [
-      { id: "c1", noteId: "n1", body: "Komentar saya", authorId: OTHER, authorEmail: "dev@envisions.app",
+      { id: "c1", noteId: "n1", parentId: null, deletedAt: null, body: "Komentar saya", authorId: OTHER, authorEmail: "dev@envisions.app",
         createdAt: "2026-11-24T04:00:00Z", editedAt: "2026-11-24T04:30:00Z" },
     ],
     revisionCount: 2,
@@ -85,6 +85,34 @@ describe("NoteDetailView", () => {
     expect(own).toContain("Actions for your comment");
     expect(own).toContain("Add a comment");
     expect(render(detail(), { id: AUTHOR, role: "admin" })).not.toContain("Actions for your comment");
+  });
+});
+
+describe("utas komentar", () => {
+  const c = (id: string, parentId: string | null, body: string, extra: Partial<NoteDetail["comments"][number]> = {}) => ({
+    id, noteId: "n1", parentId, deletedAt: null, body, authorId: OTHER, authorEmail: "dev@envisions.app",
+    createdAt: "2026-11-24T04:00:00Z", editedAt: null, ...extra,
+  });
+
+  it("balasan tampil menjorok di bawah komentar utamanya; komentar baru terpisah", () => {
+    const out = render(detail({ comments: [c("c1", null, "Utama satu"), c("c2", null, "Utama dua"), c("r1", "c1", "Balasan untuk satu")] }),
+      { id: AUTHOR, role: "admin" });
+    expect(out).toContain("Comments (3)");
+    expect(out).toMatch(/Utama satu[\s\S]*aria-label="1 reply"[\s\S]*Balasan untuk satu[\s\S]*Utama dua/);
+    expect(out).toContain("Reply to this thread");
+    expect(out).toContain("Write a new comment");
+  });
+
+  it("komentar utama terhapus yang masih punya balasan: placeholder, balasan tetap, tanpa menu", () => {
+    const out = render(detail({ comments: [
+      c("c1", null, "", { deletedAt: "2026-11-24T05:00:00Z", authorId: AUTHOR }),
+      c("r1", "c1", "Balasan tetap ada"),
+    ] }), { id: AUTHOR, role: "admin" });
+    expect(out).toContain("This comment was deleted.");
+    expect(out).toContain("Balasan tetap ada");
+    expect(out).toContain("Comments (1)");
+    expect(out).not.toContain("Reply to this thread");
+    expect(out).not.toContain("Actions for your comment");
   });
 });
 

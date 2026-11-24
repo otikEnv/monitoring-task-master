@@ -87,8 +87,11 @@ describe("fungsi lain", () => {
     const c = rpcDb({ data: "c1" });
     await addComment("n1", "Setuju", ACTOR, c.db);
     expect(c.rpc).toHaveBeenCalledWith("add_note_comment", {
-      p_note: "n1", p_actor: "u1", p_actor_email: "admin@envisions.app", p_body: "Setuju",
+      p_note: "n1", p_actor: "u1", p_actor_email: "admin@envisions.app", p_body: "Setuju", p_parent: null,
     });
+    const r = rpcDb({ data: "c2" });
+    await addComment("n1", "Balas", ACTOR, r.db, "c1");
+    expect(r.rpc.mock.calls[0][1]).toMatchObject({ p_parent: "c1" });
   });
 
   it("not_allowed pada action item memberi pesan penanggung jawab", async () => {
