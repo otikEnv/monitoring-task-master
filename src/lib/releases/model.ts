@@ -1,4 +1,5 @@
 import { parseDependencyIds } from "@/lib/tasks/detail-model";
+import { workTimeProgress, type WorkCalendar } from "./workdays";
 import { displayStatus, STATUS_ORDER, type DisplayStatus } from "@/lib/status";
 
 /**
@@ -101,8 +102,10 @@ export type ReleaseStats = {
   };
   /** Persen waktu yang sudah lewat (0..100). */
   elapsedPercent: number;
-  /** Sisa hari kalender WIB menuju target; negatif bila sudah lewat. */
+  /** Sisa hari kalender WIB menuju target; negatif bila sudah lewat (dasar Overdue). */
   daysLeft: number;
+  /** Sisa hari kerja (besok sampai target); null bila dihitung tanpa kalender kerja. */
+  workingDaysLeft: number | null;
   /** elapsedPercent - persen progres (tanpa pembulatan); null bila tidak ada task. */
   gap: number | null;
   risk: RiskLevel;
@@ -166,6 +169,17 @@ export function timeProgress(startDate: string, targetDate: string, now: Date): 
   return { elapsedPercent, daysLeft: target - today };
 }
 
+/**
+ * Waktu release: dengan kalender kerja (PRD-Note.md) persen waktu dan sisa hari memakai hari kerja; tanpa kalender
+ * memakai hari kalender seperti semula. daysLeft selalu hari kalender (Overdue tidak berubah).
+ */
+export function releaseTime(
+  startDate: string, targetDate: string, now: Date, cal?: WorkCalendar,
+): { elapsedPercent: number; daysLeft: number; workingDaysLeft: number | null } {
+  if (!cal) return { ...timeProgress(startDate, targetDate, now), workingDaysLeft: null };
+  return workTimeProgress(startDate, targetDate, wibDay(now), cal);
+}
+
 export type RiskInput = {
   releasedOn: string | null;
   total: number;
@@ -194,7 +208,7 @@ export function riskLevel(i: RiskInput): RiskLevel {
  * Total mencakup semua status (termasuk ditunda dan dibatalkan) agar penyebab progres tertahan
  * bisa dievaluasi; keduanya dilaporkan terpisah di attention.
  */
-export function computeRelease(def: ReleaseDef, tagTasks: TaskInput[], now: Date): ReleaseStats {
+export function computeRelease(def: ReleaseDef, tagTasks: TaskInput[], now: Date, cal?: WorkCalendar): ReleaseStats {
   const inRange = tasksInRange(tagTasks, def.rangeStart, def.rangeEnd);
   const tasks = inRange.map(toReleaseTask);
 
@@ -226,7 +240,7 @@ export function computeRelease(def: ReleaseDef, tagTasks: TaskInput[], now: Date
     if (missing.length > 0) missingDeps.push({ task, ids: missing });
   });
 
-  const time = timeProgress(def.startDate, def.targetDate, now);
+  const time = releaseTime(def.startDate, def.targetDate, now, cal);
   const gap = exactPercent === null ? null : time.elapsedPercent - exactPercent;
   const blocked = tasks.filter((t) => t.status === "blocked");
 
@@ -252,6 +266,7 @@ export function computeRelease(def: ReleaseDef, tagTasks: TaskInput[], now: Date
     },
     elapsedPercent: time.elapsedPercent,
     daysLeft: time.daysLeft,
+    workingDaysLeft: time.workingDaysLeft,
     gap,
     risk,
   };
@@ -273,6 +288,8 @@ export type ReleaseAggregate = {
   percentDone: number | null;
   elapsedPercent: number;
   daysLeft: number;
+  /** Sisa hari kerja (besok sampai target); null bila dihitung tanpa kalender kerja. */
+  workingDaysLeft: number | null;
   /** elapsedPercent - persen progres gabungan (tanpa pembulatan); null bila total 0. */
   gap: number | null;
   /** Yang ditampilkan: "on_hold" bila ditahan, selain itu sama dengan wouldBeRisk. */
@@ -295,7 +312,7 @@ const RISKY: RiskLevel[] = ["at_risk", "behind", "overdue"];
  * risiko memakai aturan yang sama dengan satu komponen, dengan selisih dari progres gabungan.
  * `components` adalah hasil computeRelease tiap komponen (tanggal dari header yang sama).
  */
-export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats[], now: Date): ReleaseAggregate {
+export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats[], now: Date, cal?: WorkCalendar): ReleaseAggregate {
   const counts = zeroCounts();
   let blocked = 0;
   let waiting = 0;
@@ -307,7 +324,7 @@ export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats
   const total = STATUS_ORDER.reduce((n, s) => n + counts[s], 0);
   const done = counts.done;
   const exactPercent = total > 0 ? (done * 100) / total : null;
-  const time = timeProgress(header.startDate, header.targetDate, now);
+  const time = releaseTime(header.startDate, header.targetDate, now, cal);
   const gap = exactPercent === null ? null : time.elapsedPercent - exactPercent;
   const computed = riskLevel({ releasedOn: header.releasedOn, total, done, daysLeft: time.daysLeft, gap, blocked, waiting });
   // Release yang sudah rilis tidak pernah dianggap ditahan (hold berakhir saat ditandai rilis).
@@ -321,6 +338,7 @@ export function aggregateRelease(header: ReleaseHeader, components: ReleaseStats
     percentDone: exactPercent === null ? null : Math.round(exactPercent),
     elapsedPercent: time.elapsedPercent,
     daysLeft: time.daysLeft,
+    workingDaysLeft: time.workingDaysLeft,
     gap,
     risk: held ? "on_hold" : computed,
     wouldBeRisk: computed,

@@ -10,6 +10,8 @@ export type ReleaseSummary = {
   /** Jumlah task komponen aplikasi ini. */
   total: number;
   daysLeft: number;
+  /** Sisa hari kerja; null bila dihitung tanpa kalender kerja. */
+  workingDaysLeft: number | null;
   /** Risiko release secara keseluruhan (bukan hanya komponen aplikasi ini). */
   risk: RiskLevel;
   /** Jumlah komponen (aplikasi) pada release ini; > 1 berarti release lintas aplikasi. */
@@ -48,6 +50,7 @@ export function summarizeReleases(overviews: ReleaseOverview[]): Map<string, Rel
         percent: total > 0 ? Math.round((done * 100) / total) : null,
         total,
         daysLeft: o.stats.daysLeft,
+        workingDaysLeft: o.stats.workingDaysLeft,
         risk: o.stats.risk,
         componentCount: o.components.length,
         extra: 0,

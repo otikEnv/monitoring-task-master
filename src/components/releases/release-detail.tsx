@@ -250,7 +250,7 @@ export function ReleaseDetailView({
             <dt className="inline">Target: </dt>
             <dd className="inline text-foreground">
               {formatYmd(release.targetDate)}
-              {!released && ` (${formatDaysLeft(stats.daysLeft)})`}
+              {!released && ` (${formatDaysLeft(stats.daysLeft, stats.workingDaysLeft)})`}
             </dd>
           </div>
           {released && (
@@ -318,7 +318,8 @@ export function ReleaseDetailView({
             )}
             <p className="text-xs text-muted-foreground">
               {multi && "Progress is the total of done tasks divided by all tasks across the components. "}
-              The indicator compares the share of time that has elapsed with the share of tasks done: more than{" "}
+              The indicator compares the share of working time that has elapsed with the share of tasks done (working
+              days skip weekends, national holidays, and collective leave): more than{" "}
               {AMBANG_BERISIKO} points behind = At risk, more than {AMBANG_TERTINGGAL} points behind = Behind. Blocked tasks or
               unfinished dependencies outside the range also mark the release At risk. This is guidance, not an exact prediction.
             </p>

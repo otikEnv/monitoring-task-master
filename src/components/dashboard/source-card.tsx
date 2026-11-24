@@ -133,7 +133,7 @@ export function SourceCard({
           <Link href={`/release/${card.release.releaseId}`} className="flex flex-wrap items-center gap-x-2 gap-y-1 hover:underline">
             <span className="font-medium">Release {card.release.name}</span>
             <span className="text-muted-foreground">
-              {card.release.percent === null ? "no tasks" : `${card.release.percent}%`} · {formatDaysLeft(card.release.daysLeft)}
+              {card.release.percent === null ? "no tasks" : `${card.release.percent}%`} · {formatDaysLeft(card.release.daysLeft, card.release.workingDaysLeft)}
               {/* Release lintas aplikasi: persen di atas hanya bagian aplikasi ini. */}
               {card.release.componentCount > 1 && <> · this app, {card.release.componentCount} components</>}
             </span>

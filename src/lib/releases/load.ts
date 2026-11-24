@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import type { WorkCalendar } from "./workdays";
 import {
   aggregateRelease, computeRelease, tasksInRange,
   type ReleaseAggregate, type ReleaseStats, type TaskInput,
@@ -129,7 +130,7 @@ export async function loadReleaseOverviews(
     }
   }
 
-  const latestNotes = await loadLatestNotes(db, headers.map((h) => h.id));
+  const [latestNotes, cal] = await Promise.all([loadLatestNotes(db, headers.map((h) => h.id)), loadWorkCalendar(db, headers)]);
 
   const pairs = new Map<string, { sourceId: string; tag: string }>();
   for (const c of components) pairs.set(`${c.sourceId}\u0000${c.tag}`, { sourceId: c.sourceId, tag: c.tag });
@@ -154,7 +155,7 @@ export async function loadReleaseOverviews(
             syncStatus: s?.last_sync_status ?? "never",
             lastSyncedAt: s?.last_synced_at ?? null,
             tagFound: tasks.length > 0,
-            stats: computeRelease({ ...release, ...component }, tasks, now),
+            stats: computeRelease({ ...release, ...component }, tasks, now, cal),
           };
         })
         .sort((a, b) => a.sourceName.localeCompare(b.sourceName, "en") || a.component.tag.localeCompare(b.component.tag, "en"));
@@ -162,11 +163,27 @@ export async function loadReleaseOverviews(
       return {
         release,
         components: overviews,
-        stats: aggregateRelease(release, overviews.map((o) => o.stats), now),
+        stats: aggregateRelease(release, overviews.map((o) => o.stats), now, cal),
         latestNote: latestNotes.get(h.id) ?? null,
       };
     }),
   );
+}
+
+/**
+ * Kalender kerja untuk sekumpulan release: libur nasional dan cuti bersama dari tanggal mulai paling awal sampai
+ * target paling akhir, dibaca sekali per pemanggilan (PRD-Note.md, Hari kerja pada release).
+ */
+export async function loadWorkCalendar(
+  db: SupabaseClient,
+  headers: { start_date: string; target_date: string }[],
+): Promise<WorkCalendar> {
+  if (headers.length === 0) return { holidays: new Set() };
+  const from = headers.reduce((m, h) => (h.start_date < m ? h.start_date : m), headers[0].start_date);
+  const to = headers.reduce((m, h) => (h.target_date > m ? h.target_date : m), headers[0].target_date);
+  const { data, error } = await db.from("holidays").select("holiday_date").gte("holiday_date", from).lte("holiday_date", to);
+  if (error) throw new Error(`Gagal membaca libur: ${error.message}`);
+  return { holidays: new Set((data as { holiday_date: string }[]).map((r) => r.holiday_date)) };
 }
 
 /** Daftar release untuk pengguna yang sedang login (sesi dari cookie). */

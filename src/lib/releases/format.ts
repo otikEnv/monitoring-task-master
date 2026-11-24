@@ -1,11 +1,21 @@
 import { formatDate } from "@/lib/format";
 
-/** Teks sisa hari menuju target (daysLeft negatif = sudah lewat). */
-export function formatDaysLeft(daysLeft: number): string {
-  if (daysLeft > 1) return `${daysLeft} days left`;
-  if (daysLeft === 1) return "tomorrow";
+/**
+ * Teks sisa waktu menuju target. daysLeft = hari kalender (negatif = sudah lewat; Overdue tetap memakai kalender).
+ * workingDaysLeft = hari kerja dari besok sampai target (PRD-Note.md); null = teks lama dalam hari kalender.
+ */
+export function formatDaysLeft(daysLeft: number, workingDaysLeft: number | null = null): string {
+  if (daysLeft < 0) return `${-daysLeft} ${-daysLeft === 1 ? "day" : "days"} overdue`;
   if (daysLeft === 0) return "today";
-  return `${-daysLeft} ${-daysLeft === 1 ? "day" : "days"} overdue`;
+  if (daysLeft === 1) return "tomorrow";
+  if (workingDaysLeft === null) return `${daysLeft} days left`;
+  return `${workingDaysLeft} working ${workingDaysLeft === 1 ? "day" : "days"} left`;
+}
+
+/** Sisa waktu yang tersimpan pada rekaman kondisi release: negatif = hari kalender lewat, selain itu hari kerja. */
+export function formatSnapshotDaysLeft(daysLeft: number): string {
+  if (daysLeft < 0) return `${-daysLeft} ${-daysLeft === 1 ? "day" : "days"} overdue`;
+  return `${daysLeft} working ${daysLeft === 1 ? "day" : "days"} left`;
 }
 
 /**

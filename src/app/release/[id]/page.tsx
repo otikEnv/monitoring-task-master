@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
-import { LoadError } from "@/components/layout/notices";
+import { LoadError, Notice } from "@/components/layout/notices";
 import { RelatedNotes } from "@/components/notes/note-links";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { ReleaseActivity } from "@/components/releases/release-activity";
 import { ReleaseDetailView } from "@/components/releases/release-detail";
 import { requireUser } from "@/lib/auth";
+import { yearsWithHolidays } from "@/lib/notes/holidays";
 import { loadRelatedNotes } from "@/lib/notes/links";
+import { yearsInRange } from "@/lib/releases/workdays";
 import type { NoteRow } from "@/lib/notes/load";
 import { getReleaseOverview, type ReleaseOverview } from "@/lib/releases/load";
 import { loadCurrentHold, loadReleaseActivity, type NotesPage } from "@/lib/releases/notes";
@@ -74,10 +77,27 @@ async function ReleaseDetailContent({ params, searchParams }: { params: Params; 
   } catch (e) {
     console.error("[release] gagal memuat catatan terkait", { error: (e as Error)?.name });
   }
+  // Hari kerja tanpa data libur hanya melewati akhir pekan: beri tahu bila tahun yang dicakup belum diisi.
+  let missingYears: number[] = [];
+  if (!overview.release.releasedOn) {
+    try {
+      const years = yearsInRange(overview.release.startDate, overview.release.targetDate);
+      const have = await yearsWithHolidays(db, years);
+      missingYears = years.filter((y) => !have.has(y));
+    } catch (e) {
+      console.error("[release] gagal memeriksa data libur", { error: (e as Error)?.name });
+    }
+  }
 
   const isAdmin = user.role === "admin";
   return (
     <AppShell user={user} width="normal">
+      {missingYears.length > 0 && (
+        <Notice>
+          Holidays for {missingYears.join(" and ")} have not been added yet, so working days for this release only skip
+          weekends.{isAdmin && <> <Link href={`/notes/holidays?year=${missingYears[0]}`} className="underline">Add them</Link>.</>}
+        </Notice>
+      )}
       <ReleaseDetailView
         overview={overview}
         heldBy={heldBy}

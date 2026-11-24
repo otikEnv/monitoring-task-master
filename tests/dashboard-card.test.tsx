@@ -185,7 +185,7 @@ describe("tombol Refresh dan hasilnya", () => {
 });
 
 describe("baris release pada kartu", () => {
-  const release = { releaseId: "22222222-2222-4222-8222-222222222222", name: "v2.1", percent: 62, total: 87, daysLeft: 13, risk: "at_risk" as const, componentCount: 1, extra: 0 };
+  const release = { releaseId: "22222222-2222-4222-8222-222222222222", name: "v2.1", percent: 62, total: 87, daysLeft: 13, workingDaysLeft: null, risk: "at_risk" as const, componentCount: 1, extra: 0 };
 
   it("tanpa release aktif: tidak ada baris tambahan", () => {
     for (const r of [undefined, null]) {
@@ -203,6 +203,10 @@ describe("baris release pada kartu", () => {
     expect(html).toContain("At risk");
     expect(html).toContain(`href="/release/${release.releaseId}"`);
     expect(html).not.toContain("more releases");
+  });
+
+  it("dengan kalender kerja: sisa hari kerja", () => {
+    expect(render(card({ release: { ...release, workingDaysLeft: 9 } }))).toContain("9 working days left");
   });
 
   it("satu komponen: tanpa keterangan lintas aplikasi", () => {

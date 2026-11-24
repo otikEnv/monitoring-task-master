@@ -10,7 +10,10 @@ const SRC2 = "22222222-2222-4222-8222-222222222222";
 type Q = { range?: [number, number]; filters: Record<string, unknown> };
 
 /** Tabel yang tidak relevan bagi sebuah tes dijawab kosong (mis. catatan terbaru per release). */
-const DEFAULTS: Record<string, (q: Q) => unknown> = { release_latest_note: () => ({ data: [], error: null }) };
+const DEFAULTS: Record<string, (q: Q) => unknown> = {
+  release_latest_note: () => ({ data: [], error: null }),
+  holidays: () => ({ data: [], error: null }),
+};
 
 /** Klien palsu: rantai query yang dapat di-await dan mengembalikan hasil per tabel. */
 function fakeDb(handlers: Record<string, (q: Q) => unknown>) {
@@ -20,7 +23,7 @@ function fakeDb(handlers: Record<string, (q: Q) => unknown>) {
       const q: Q = { filters: {} };
       const chain: Record<string, unknown> = {};
       for (const m of ["select", "order"]) chain[m] = () => chain;
-      for (const m of ["eq", "in", "is"]) chain[m] = (col: string, v: unknown) => { q.filters[`${m}:${col}`] = v; return chain; };
+      for (const m of ["eq", "in", "is", "gte", "lte"]) chain[m] = (col: string, v: unknown) => { q.filters[`${m}:${col}`] = v; return chain; };
       chain.range = (a: number, b: number) => { q.range = [a, b]; return chain; };
       chain.or = (expr: string) => { q.filters.or = expr; return chain; };
       chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
@@ -119,7 +122,7 @@ describe("loadReleaseOverviews", () => {
     });
     const [o] = await loadReleaseOverviews(db, {}, NOW);
     expect([o.components.length, o.stats.total, o.stats.risk]).toEqual([0, 0, "empty"]);
-    expect(calls).toEqual(["releases", "release_components", "release_latest_note"]);
+    expect(calls).toEqual(["releases", "release_components", "release_latest_note", "holidays"]);
   });
 
   it("tag tanpa task: tagFound false dan statistik nol, komponen lain tetap dihitung", async () => {

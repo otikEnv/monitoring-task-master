@@ -107,7 +107,8 @@ export async function releaseSnapshots(db: Db, releaseIds: string[], now: Date =
       done: o.stats.done,
       total: o.stats.total,
       risk: o.stats.risk,
-      daysLeft: o.stats.daysLeft,
+      // Sisa hari kerja; bila target sudah lewat, hari kalender negatif (seperti Overdue).
+      daysLeft: o.stats.daysLeft < 0 ? o.stats.daysLeft : (o.stats.workingDaysLeft ?? o.stats.daysLeft),
       targetDate: o.release.targetDate,
     });
   }
@@ -118,7 +119,9 @@ export async function releaseSnapshots(db: Db, releaseIds: string[], now: Date =
 // Tampilan tautan pada detail catatan
 // ---------------------------------------------------------------------------
 
-export type ReleaseNow = { percent: number | null; done: number; total: number; risk: RiskLevel; daysLeft: number; targetDate: string };
+export type ReleaseNow = {
+  percent: number | null; done: number; total: number; risk: RiskLevel; daysLeft: number; workingDaysLeft: number | null; targetDate: string;
+};
 
 export type LinkView =
   | { id: string; kind: "source"; sourceId: string; name: string | null; archived: boolean }
@@ -157,7 +160,7 @@ export async function resolveLinkViews(db: Db, links: NoteLinkRow[], now: Date =
       return {
         id: l.id, kind: "release", releaseId: l.releaseId!, name: o?.release.name ?? null, archived: Boolean(o?.release.archivedAt),
         snapshot: l.snapshot,
-        now: o ? { percent: o.stats.percentDone, done: o.stats.done, total: o.stats.total, risk: o.stats.risk, daysLeft: o.stats.daysLeft, targetDate: o.release.targetDate } : null,
+        now: o ? { percent: o.stats.percentDone, done: o.stats.done, total: o.stats.total, risk: o.stats.risk, daysLeft: o.stats.daysLeft, workingDaysLeft: o.stats.workingDaysLeft, targetDate: o.release.targetDate } : null,
       };
     }
     const s = sources.get(l.sourceId!);

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AppWindow, ListChecks, Rocket } from "lucide-react";
 import { RISK_LABEL, type RiskLevel } from "@/lib/releases/model";
-import { formatDaysLeft } from "@/lib/releases/format";
+import { formatDaysLeft, formatSnapshotDaysLeft } from "@/lib/releases/format";
 import type { LinkView } from "@/lib/notes/links";
 import type { NoteRow } from "@/lib/notes/load";
 import { taskHref } from "@/lib/tasks/list-params";
@@ -14,10 +14,10 @@ function Flag({ children }: { children: React.ReactNode }) {
   return <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">{children}</span>;
 }
 
-/** Ringkasan kondisi release: "45% done (4/9), At risk, 12 days left". */
-function condition(c: { percent: number | null; done: number; total: number; risk: string; daysLeft: number }, released: boolean) {
-  const pct = c.percent === null ? "no tasks" : `${Math.round(c.percent)}% done (${c.done}/${c.total})`;
-  return [pct, RISK_TEXT(c.risk), released ? null : formatDaysLeft(c.daysLeft)].filter(Boolean).join(", ");
+/** Ringkasan kondisi release: "45% done (4/9), At risk, 12 working days left". */
+function condition(c: { percent: number | null; done: number; total: number; risk: string }, left: string | null) {
+  const pct = c.percent === null || c.total === 0 ? "no tasks" : `${Math.round(c.percent)}% done (${c.done}/${c.total})`;
+  return [pct, RISK_TEXT(c.risk), left].filter(Boolean).join(", ");
 }
 
 /** Tautan catatan ke aplikasi, release, dan task. Sasaran yang hilang tetap tampil dengan penanda Not found. */
@@ -42,14 +42,17 @@ export function NoteLinks({ links }: { links: LinkView[] }) {
                   {l.snapshot && (
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium text-foreground">At the time:</span>{" "}
-                      {condition({ percent: l.snapshot.progressPercent, done: l.snapshot.done, total: l.snapshot.total, risk: l.snapshot.risk, daysLeft: l.snapshot.daysLeft }, l.snapshot.risk === "released")}
+                      {condition(
+                        { percent: l.snapshot.progressPercent, done: l.snapshot.done, total: l.snapshot.total, risk: l.snapshot.risk },
+                        l.snapshot.risk === "released" ? null : formatSnapshotDaysLeft(l.snapshot.daysLeft),
+                      )}
                       {" "}· target {formatYmd(l.snapshot.targetDate)}
                     </p>
                   )}
                   {l.now && (
                     <p className="text-xs text-muted-foreground">
                       <span className="font-medium text-foreground">Now:</span>{" "}
-                      {condition(l.now, l.now.risk === "released")} · target {formatYmd(l.now.targetDate)}
+                      {condition(l.now, l.now.risk === "released" ? null : formatDaysLeft(l.now.daysLeft, l.now.workingDaysLeft))} · target {formatYmd(l.now.targetDate)}
                     </p>
                   )}
                 </div>

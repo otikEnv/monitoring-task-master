@@ -68,7 +68,7 @@ export function ReleaseCard({ overview, canArchive = false }: { overview: Releas
               Target {formatYmd(release.targetDate)} ·{" "}
               {/* Release yang ditahan sengaja terlambat: teksnya tetap ada, tetapi tidak berwarna peringatan. */}
               <span className={stats.daysLeft < 0 && !stats.heldAt ? "font-medium text-red-700 dark:text-red-400" : undefined}>
-                {formatDaysLeft(stats.daysLeft)}
+                {formatDaysLeft(stats.daysLeft, stats.workingDaysLeft)}
               </span>
             </>
           )}

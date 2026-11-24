@@ -19,11 +19,13 @@ function fakeDb(handlers: Record<string, (q: Q) => unknown>) {
       const chain: Record<string, unknown> = {};
       chain.select = (_cols: string, opts?: { head?: boolean }) => { q.head = !!opts?.head; return chain; };
       chain.order = (col: string, o: unknown) => { q.ops.push(["order", [col, o]]); return chain; };
-      for (const m of ["eq", "in", "is"]) chain[m] = (col: string, v: unknown) => { q.filters[`${m}:${col}`] = v; return chain; };
+      for (const m of ["eq", "in", "is", "gte", "lte"]) chain[m] = (col: string, v: unknown) => { q.filters[`${m}:${col}`] = v; return chain; };
       chain.range = (a: number, b: number) => { q.range = [a, b]; return chain; };
       chain.then = (res: (v: unknown) => unknown, rej: (e: unknown) => unknown) => {
         calls.push(table);
-        return Promise.resolve(handlers[table](q)).then(res, rej);
+        // Libur (kalender kerja release) kosong bila tes tidak mengaturnya.
+        const handler = handlers[table] ?? (table === "holidays" ? () => ({ data: [], error: null }) : undefined);
+        return Promise.resolve(handler!(q)).then(res, rej);
       };
       return chain;
     },

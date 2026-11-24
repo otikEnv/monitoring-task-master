@@ -3294,7 +3294,7 @@
         "id": "69",
         "title": "Release: hari kerja pada sisa hari dan persen waktu",
         "description": "Sisa hari dan persen waktu release tidak menghitung akhir pekan, libur nasional, dan cuti bersama.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "61",
@@ -3307,40 +3307,40 @@
             "id": 1,
             "title": "Catat angka pembanding",
             "description": "Sebelum perubahan.",
-            "status": "pending",
+            "status": "done",
             "details": "Simpan sisa hari, persen waktu, dan status risiko semua release aktif (termasuk 2.1) untuk dibandingkan dengan hitungan manual setelahnya.",
             "parentId": "69",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:10:19.996Z"
           },
           {
             "id": 2,
             "title": "Fungsi hari kerja",
             "description": "src/lib/releases/workdays.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Hitung hari kerja antara dua tanggal (Asia/Jakarta) dengan set tanggal libur; tes unit lengkap.",
             "parentId": "69",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:10:19.996Z"
           },
           {
             "id": 3,
             "title": "Terapkan di model dan pemuat",
             "description": "timeProgress dan pemanggilnya.",
-            "status": "pending",
+            "status": "done",
             "details": "Teruskan libur ke model dari pemuat release dan Dashboard; teks 'N working days left'; rekaman kondisi release (task 65) memakai angka yang sama.",
             "parentId": "69",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:10:19.996Z"
           },
           {
             "id": 4,
             "title": "Pemberitahuan libur belum diisi",
             "description": "Detail release.",
-            "status": "pending",
+            "status": "done",
             "details": "Tampilkan pemberitahuan kecil bila tahun yang dicakup release belum punya data libur.",
             "parentId": "69",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:10:19.996Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T07:10:19.996Z"
       },
       {
         "id": "70",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T07:04:04.601Z",
+      "lastModified": "2026-11-24T07:10:19.996Z",
       "taskCount": 70,
-      "completedCount": 58,
+      "completedCount": 59,
       "tags": [
         "master"
       ]
