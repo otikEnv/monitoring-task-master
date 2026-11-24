@@ -3251,7 +3251,7 @@
         "id": "68",
         "title": "Notes: halaman pengelolaan libur dan kartu Notes di Dashboard",
         "description": "/notes/holidays untuk admin dan ringkasan di Dashboard.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "62",
@@ -3264,31 +3264,31 @@
             "id": 1,
             "title": "Halaman libur",
             "description": "/notes/holidays.",
-            "status": "pending",
+            "status": "done",
             "details": "Pilihan tahun, daftar, tambah/ubah/hapus (tanggal, nama, jenis) dengan konfirmasi hapus; requireAdmin.",
             "parentId": "68",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:04:04.601Z"
           },
           {
             "id": 2,
             "title": "Data kartu Dashboard",
             "description": "src/lib/dashboard/.",
-            "status": "pending",
+            "status": "done",
             "details": "Catatan hari ini, action item lewat tenggat (belum selesai, bukan Carried over; milik pengguna dulu, maks 5), libur 14 hari ke depan.",
             "parentId": "68",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:04:04.601Z"
           },
           {
             "id": 3,
             "title": "Kartu Notes",
             "description": "Di atas Dashboard.",
-            "status": "pending",
+            "status": "done",
             "details": "Tiga bagian ringkas dengan tautan View all ke Calendar atau Notes; bisa dilipat, status di cookie; tidak menggeser tata letak kartu aplikasi.",
             "parentId": "68",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T07:04:04.601Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T07:04:04.601Z"
       },
       {
         "id": "69",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:58:59.250Z",
+      "lastModified": "2026-11-24T07:04:04.601Z",
       "taskCount": 70,
-      "completedCount": 57,
+      "completedCount": 58,
       "tags": [
         "master"
       ]
