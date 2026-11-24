@@ -11,7 +11,7 @@ const ICON = {
   on_track: CircleCheck,
 } as const;
 
-const TONE: Record<RiskLevel, string> = {
+export const RISK_TONE: Record<RiskLevel, string> = {
   released: "bg-muted text-foreground",
   on_hold: "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-200",
   empty: "bg-muted text-muted-foreground",
@@ -25,7 +25,7 @@ const TONE: Record<RiskLevel, string> = {
 export function RiskBadge({ risk }: { risk: RiskLevel }) {
   const Icon = ICON[risk];
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${TONE[risk]}`}>
+    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${RISK_TONE[risk]}`}>
       <Icon aria-hidden="true" className="size-3.5" />
       {RISK_LABEL[risk]}
     </span>

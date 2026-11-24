@@ -3190,7 +3190,7 @@
         "id": "67",
         "title": "Calendar: halaman calendar gabungan",
         "description": "Menu Calendar dengan Month, Week, +N more, panel hari, filter, dan legenda.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "64",
@@ -3203,49 +3203,49 @@
             "id": 1,
             "title": "Pemuat data per rentang",
             "description": "src/lib/calendar/data.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Muat catatan, release, action item, dan libur hanya untuk bulan atau minggu yang dilihat; filter jenis item, aplikasi, dan jenis catatan; hasilkan item per tanggal dengan urutan release, action item, catatan.",
             "parentId": "67",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:58:59.250Z"
           },
           {
             "id": 2,
             "title": "Tampilan Month",
             "description": "Batas 3 item dan +N more.",
-            "status": "pending",
+            "status": "done",
             "details": "Baris pendek berwarna dengan ikon; libur sebagai latar dan nama kecil (tidak dihitung batas); akhir pekan redup; di ponsel hanya titik per jenis dan jumlah.",
             "parentId": "67",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:58:59.250Z"
           },
           {
             "id": 3,
             "title": "Panel hari",
             "description": "Popover dan sheet.",
-            "status": "pending",
+            "status": "done",
             "details": "Klik +N more atau sel tanggal: semua item dikelompokkan Holidays, Releases, Action items, Notes; tiap item menuju detail; New note (admin) dengan tanggal terisi; aksesibel keyboard.",
             "parentId": "67",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:58:59.250Z"
           },
           {
             "id": 4,
             "title": "Tampilan Week",
             "description": "Tujuh kolom tanpa batas.",
-            "status": "pending",
+            "status": "done",
             "details": "Semua item tertulis lengkap; di ponsel bertumpuk ke bawah.",
             "parentId": "67",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:58:59.250Z"
           },
           {
             "id": 5,
             "title": "Navigasi, filter, legenda",
             "description": "Semuanya di URL.",
-            "status": "pending",
+            "status": "done",
             "details": "Month/Week, sebelumnya, berikutnya, Today; toggle jenis item, aplikasi, jenis catatan; legenda warna; pemberitahuan libur tahun yang belum diisi.",
             "parentId": "67",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:58:59.250Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:58:59.250Z"
       },
       {
         "id": "68",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:52:15.949Z",
+      "lastModified": "2026-11-24T06:58:59.250Z",
       "taskCount": 70,
-      "completedCount": 56,
+      "completedCount": 57,
       "tags": [
         "master"
       ]
