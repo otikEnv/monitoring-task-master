@@ -2935,7 +2935,7 @@
         "id": "62",
         "title": "Notes: lapisan data dan server action",
         "description": "Catatan, tautan, action item, riwayat, komentar, penanda baca, dan libur dengan pemeriksaan hak akses.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "61"
@@ -2947,49 +2947,49 @@
             "id": 1,
             "title": "Validasi form",
             "description": "src/lib/notes/validate.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Judul wajib maks 200, tanggal wajib (bawaan hari ini Asia/Jakarta), jenis valid, isi maks 20.000, action item maks 500, komentar maks 2.000, tautan task wajib aplikasi + tag + nomor. Kesalahan per kolom mengikuti pola src/lib/releases/validate.ts.",
             "parentId": "62",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:27:38.134Z"
           },
           {
             "id": 2,
             "title": "Repo dan action catatan",
             "description": "Buat, edit, hapus.",
-            "status": "pending",
+            "status": "done",
             "details": "Buat catatan beserta tautan dan action item dalam satu alur; edit hanya oleh author_id = user; setiap edit judul/jenis/tanggal/isi menyimpan versi lama ke note_revisions; hapus hanya oleh penulis. Catatan dengan follows_up_id menandai action item asal yang disalin (carried_to_id).",
             "parentId": "62",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:27:38.134Z"
           },
           {
             "id": 3,
             "title": "Action item",
             "description": "Centang selesai.",
-            "status": "pending",
+            "status": "done",
             "details": "Centang dan batal centang diizinkan untuk penulis catatan atau assignee_id = user (termasuk viewer); ubah isi, penanggung jawab, dan tenggat hanya penulis. Pilihan penanggung jawab dari pengguna terdaftar (email).",
             "parentId": "62",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:27:38.134Z"
           },
           {
             "id": 4,
             "title": "Komentar dan penanda baca",
             "description": "Semua pengguna login.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambah komentar oleh siapa pun yang login; edit dan hapus hanya author_id = user. Upsert note_reads saat detail catatan dibuka. Hitungan komentar baru: komentar orang lain dengan created_at > last_read_at.",
             "parentId": "62",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:27:38.134Z"
           },
           {
             "id": 5,
             "title": "Libur",
             "description": "Hanya admin.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambah, ubah, hapus holidays; tanggal unik dengan pesan galat yang jelas. Fungsi baca libur per rentang tanggal untuk Calendar, Dashboard, dan hari kerja.",
             "parentId": "62",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:27:38.134Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:27:38.134Z"
       },
       {
         "id": "63",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:18:50.204Z",
+      "lastModified": "2026-11-24T06:27:38.134Z",
       "taskCount": 70,
-      "completedCount": 51,
+      "completedCount": 52,
       "tags": [
         "master"
       ]
