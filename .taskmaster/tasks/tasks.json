@@ -3148,7 +3148,7 @@
         "id": "66",
         "title": "Notes: Follow up dan action item Carried over",
         "description": "Catatan lanjutan dengan tautan dan action item yang belum selesai.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "65"
@@ -3160,31 +3160,31 @@
             "id": 1,
             "title": "Isi awal form dari catatan asal",
             "description": "?followUp=<id>.",
-            "status": "pending",
+            "status": "done",
             "details": "Judul Follow up: <judul>, jenis sama, tanggal hari ini, tautan sama, salinan action item belum selesai dengan penanggung jawab dan tenggat.",
             "parentId": "66",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:52:15.949Z"
           },
           {
             "id": 2,
             "title": "Simpan dan tandai Carried over",
             "description": "follows_up_id dan carried_to_id.",
-            "status": "pending",
+            "status": "done",
             "details": "Saat simpan, isi follows_up_id dan tandai action item asal yang disalin. Action item asal tetap bisa dicentang.",
             "parentId": "66",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:52:15.949Z"
           },
           {
             "id": 3,
             "title": "Rujukan di detail",
             "description": "Follows up dan Followed up in.",
-            "status": "pending",
+            "status": "done",
             "details": "Tampilkan rujukan dua arah dengan tautan; catatan asal yang dihapus membuat rujukan hilang tanpa galat.",
             "parentId": "66",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:52:15.949Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:52:15.949Z"
       },
       {
         "id": "67",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:49:38.240Z",
+      "lastModified": "2026-11-24T06:52:15.949Z",
       "taskCount": 70,
-      "completedCount": 55,
+      "completedCount": 56,
       "tags": [
         "master"
       ]

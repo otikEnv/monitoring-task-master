@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { CornerDownRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
@@ -6,6 +8,7 @@ import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteDetailView } from "@/components/notes/note-detail";
 import { NoteLinks } from "@/components/notes/note-links";
+import { buttonVariants } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth";
 import { resolveLinkViews, type LinkView } from "@/lib/notes/links";
 import { getNoteDetail, type NoteDetail } from "@/lib/notes/load";
@@ -57,7 +60,18 @@ async function NoteDetailContent({ params }: { params: Params }) {
 
   return (
     <AppShell user={user} width="normal">
-      <NoteDetailView detail={detail} user={user} links={<NoteLinks links={links} />} />
+      <NoteDetailView
+        detail={detail}
+        user={user}
+        links={<NoteLinks links={links} />}
+        followUp={
+          user.role === "admin" ? (
+            <Link href={`/notes/new?followUp=${detail.note.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+              <CornerDownRight aria-hidden="true" /> Follow up
+            </Link>
+          ) : undefined
+        }
+      />
     </AppShell>
   );
 }
