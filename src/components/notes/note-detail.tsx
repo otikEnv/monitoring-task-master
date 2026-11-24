@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { History, Pencil } from "lucide-react";
+import { History, ListChecks, MessageSquare, Pencil } from "lucide-react";
 import { Markdown } from "@/components/markdown";
 import { buttonVariants } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format";
@@ -38,94 +38,116 @@ export function NoteDetailView({
     createdAt: c.createdAt, when: formatRelative(c.createdAt, now), absolute: formatDateTime(c.createdAt),
     edited: c.editedAt !== null, deleted: c.deletedAt !== null,
   }));
+  const commentCount = comments.filter((c) => c.deletedAt === null).length;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <NoteKindBadge kind={note.kind} />
-              <time dateTime={note.noteDate}>{formatYmd(note.noteDate)}</time>
+    // Desktop: dua kolom. Kiri = judul, isi, dan tautan (ikut scroll halaman). Kanan = action item dan komentar,
+    // menempel di layar dengan scroll sendiri; kotak komentar baru selalu terlihat di bawah panel.
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)] lg:items-start">
+      <div className="min-w-0 space-y-6">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <NoteKindBadge kind={note.kind} />
+                <time dateTime={note.noteDate}>{formatYmd(note.noteDate)}</time>
+              </div>
+              <h1 className="break-words text-2xl font-semibold tracking-tight">{note.title}</h1>
             </div>
-            <h1 className="break-words text-2xl font-semibold tracking-tight">{note.title}</h1>
+            <div className="flex flex-wrap gap-2">
+              <CopyNoteButton
+                noteId={note.id} title={note.title} kind={note.kind} noteDate={note.noteDate} body={note.body}
+                items={items.map((it) => ({ body: it.body, done: it.done, assigneeEmail: it.assigneeEmail, dueDate: it.dueDate }))}
+              />
+              {followUp}
+              {isAuthor && (
+                <>
+                  <Link href={`/notes/${note.id}/edit`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                    <Pencil aria-hidden="true" /> Edit
+                  </Link>
+                  <DeleteNoteButton noteId={note.id} title={note.title} />
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <CopyNoteButton
-              noteId={note.id} title={note.title} kind={note.kind} noteDate={note.noteDate} body={note.body}
-              items={items.map((it) => ({ body: it.body, done: it.done, assigneeEmail: it.assigneeEmail, dueDate: it.dueDate }))}
-            />
-            {followUp}
-            {isAuthor && (
+
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+            <span>By <span className="break-all font-medium text-foreground">{note.authorEmail}</span></span>
+            <span aria-hidden="true">·</span>
+            <span>Created {formatDateTime(note.createdAt)}</span>
+            {note.editedAt && (
               <>
-                <Link href={`/notes/${note.id}/edit`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                  <Pencil aria-hidden="true" /> Edit
-                </Link>
-                <DeleteNoteButton noteId={note.id} title={note.title} />
+                <span aria-hidden="true">·</span>
+                <span>Edited {formatDateTime(note.editedAt)}</span>
               </>
             )}
-          </div>
+            {detail.revisionCount > 0 && (
+              <>
+                <span aria-hidden="true">·</span>
+                <Link href={`/notes/${note.id}/history`} className="inline-flex items-center gap-1 underline">
+                  <History aria-hidden="true" className="size-3" />
+                  Edited {detail.revisionCount} {detail.revisionCount === 1 ? "time" : "times"}
+                </Link>
+              </>
+            )}
+          </p>
+
+          {(detail.followsUp || detail.followedUpIn.length > 0) && (
+            <div className="space-y-1 text-sm">
+              {detail.followsUp && (
+                <p>
+                  Follows up{" "}
+                  <Link href={`/notes/${detail.followsUp.id}`} className="font-medium underline">{detail.followsUp.title}</Link>{" "}
+                  <span className="text-muted-foreground">({formatYmd(detail.followsUp.noteDate)})</span>
+                </p>
+              )}
+              {detail.followedUpIn.map((f) => (
+                <p key={f.id}>
+                  Followed up in{" "}
+                  <Link href={`/notes/${f.id}`} className="font-medium underline">{f.title}</Link>{" "}
+                  <span className="text-muted-foreground">({formatYmd(f.noteDate)})</span>
+                </p>
+              ))}
+            </div>
+          )}
         </div>
 
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-          <span>By <span className="break-all font-medium text-foreground">{note.authorEmail}</span></span>
-          <span aria-hidden="true">·</span>
-          <span>Created {formatDateTime(note.createdAt)}</span>
-          {note.editedAt && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>Edited {formatDateTime(note.editedAt)}</span>
-            </>
-          )}
-          {detail.revisionCount > 0 && (
-            <>
-              <span aria-hidden="true">·</span>
-              <Link href={`/notes/${note.id}/history`} className="inline-flex items-center gap-1 underline">
-                <History aria-hidden="true" className="size-3" />
-                Edited {detail.revisionCount} {detail.revisionCount === 1 ? "time" : "times"}
-              </Link>
-            </>
-          )}
-        </p>
+        {/* Ponsel dan tablet: tombol lompat ke bagian bawah. Desktop tidak perlu (kolom kanan selalu terlihat). */}
+        <nav aria-label="Jump to" className="flex flex-wrap gap-2 lg:hidden">
+          <a href="#comments" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+            <MessageSquare aria-hidden="true" /> Comments ({commentCount})
+          </a>
+          <a href="#action-items" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+            <ListChecks aria-hidden="true" /> Action items ({items.length})
+          </a>
+        </nav>
 
-        {(detail.followsUp || detail.followedUpIn.length > 0) && (
-          <div className="space-y-1 text-sm">
-            {detail.followsUp && (
-              <p>
-                Follows up{" "}
-                <Link href={`/notes/${detail.followsUp.id}`} className="font-medium underline">{detail.followsUp.title}</Link>{" "}
-                <span className="text-muted-foreground">({formatYmd(detail.followsUp.noteDate)})</span>
-              </p>
-            )}
-            {detail.followedUpIn.map((f) => (
-              <p key={f.id}>
-                Followed up in{" "}
-                <Link href={`/notes/${f.id}`} className="font-medium underline">{f.title}</Link>{" "}
-                <span className="text-muted-foreground">({formatYmd(f.noteDate)})</span>
-              </p>
-            ))}
-          </div>
-        )}
+        <section aria-label="Content" className="space-y-2 rounded-xl border bg-card p-5 text-sm">
+          {note.body.trim() ? <Markdown>{note.body}</Markdown> : <p className="text-muted-foreground">No content.</p>}
+        </section>
+        {links}
       </div>
 
-      <section aria-label="Content" className="space-y-2 rounded-xl border bg-card p-5 text-sm">
-        {note.body.trim() ? <Markdown>{note.body}</Markdown> : <p className="text-muted-foreground">No content.</p>}
-      </section>
+      <aside
+        aria-label="Action items and comments"
+        className="min-w-0 space-y-6 lg:sticky lg:top-8 lg:flex lg:max-h-[calc(100svh-3rem-4rem)] lg:flex-col lg:gap-4 lg:space-y-0"
+      >
+        <section
+          id="action-items" aria-labelledby="sec-items"
+          className="scroll-mt-4 space-y-3 rounded-xl border bg-card p-5 lg:max-h-[40%] lg:shrink-0 lg:overflow-y-auto"
+        >
+          <h2 id="sec-items" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Action items{items.length > 0 ? ` (${items.filter((i) => i.done).length}/${items.length} done)` : ""}
+          </h2>
+          {items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No action items.</p>
+          ) : (
+            <NoteActionItems items={itemViews} userId={user.id} isAuthor={isAuthor} />
+          )}
+        </section>
 
-      {links}
-
-      <section aria-labelledby="sec-items" className="space-y-3 rounded-xl border bg-card p-5">
-        <h2 id="sec-items" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Action items{items.length > 0 ? ` (${items.filter((i) => i.done).length}/${items.length} done)` : ""}
-        </h2>
-        {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No action items.</p>
-        ) : (
-          <NoteActionItems items={itemViews} userId={user.id} isAuthor={isAuthor} />
-        )}
-      </section>
-
-      <NoteComments noteId={note.id} comments={commentViews} />
+        <NoteComments noteId={note.id} comments={commentViews} />
+      </aside>
     </div>
   );
 }

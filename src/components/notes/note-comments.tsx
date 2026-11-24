@@ -272,18 +272,24 @@ export function NoteComments({ noteId, comments }: { noteId: string; comments: C
   const threads = toThreads(comments);
   const count = comments.filter((c) => !c.deleted).length;
   return (
-    <section id="comments" aria-labelledby="sec-comments" className="space-y-3 rounded-xl border bg-card p-5">
-      <h2 id="sec-comments" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+    // Di panel kanan desktop: judul tetap, daftar komentar scroll sendiri, kotak komentar baru menempel di bawah.
+    <section
+      id="comments" aria-labelledby="sec-comments"
+      className="scroll-mt-4 space-y-3 rounded-xl border bg-card p-5 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:space-y-0 lg:gap-3"
+    >
+      <h2 id="sec-comments" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground lg:shrink-0">
         Comments{count > 0 ? ` (${count})` : ""}
       </h2>
-      {threads.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No comments yet.</p>
-      ) : (
-        <ul className="divide-y">
-          {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} />)}
-        </ul>
-      )}
-      <div className="border-t pt-3">
+      <div className="lg:-mr-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2">
+        {threads.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No comments yet.</p>
+        ) : (
+          <ul className="divide-y">
+            {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} />)}
+          </ul>
+        )}
+      </div>
+      <div className="border-t pt-3 lg:shrink-0">
         <CommentBox noteId={noteId} parentId={null} label="Add a comment" placeholder="Write a new comment…" submitLabel="Comment" />
       </div>
     </section>

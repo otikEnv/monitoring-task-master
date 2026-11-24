@@ -59,7 +59,7 @@ async function NoteDetailContent({ params }: { params: Params }) {
   }
 
   return (
-    <AppShell user={user} width="normal">
+    <AppShell user={user} width="wide">
       <NoteDetailView
         detail={detail}
         user={user}
