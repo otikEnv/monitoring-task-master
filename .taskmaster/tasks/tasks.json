@@ -3055,7 +3055,7 @@
         "id": "64",
         "title": "Notes: halaman daftar, pencarian, dan filter",
         "description": "Halaman /notes berhalaman dengan penanda komentar baru.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "63"
@@ -3067,31 +3067,31 @@
             "id": 1,
             "title": "Parameter dan kueri",
             "description": "src/lib/notes/list.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Parsing parameter seperti src/lib/releases/params.ts; kueri dengan ilike yang aman, filter aplikasi lewat note_links, urut note_date desc lalu created_at desc.",
             "parentId": "64",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:42:05.091Z"
           },
           {
             "id": 2,
             "title": "Halaman daftar",
             "description": "/notes.",
-            "status": "pending",
+            "status": "done",
             "details": "Baris: judul, jenis (warna + label), tanggal, penulis, jumlah komentar, penanda N new. Tombol New note hanya admin. Keadaan kosong No notes yet.",
             "parentId": "64",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:42:05.091Z"
           },
           {
             "id": 3,
             "title": "Kontrol filter",
             "description": "Form filter di URL.",
-            "status": "pending",
+            "status": "done",
             "details": "Kata kunci, jenis, aplikasi, rentang tanggal, reset; View in calendar membuka /calendar pada bulan rentang filter.",
             "parentId": "64",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:42:05.091Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:42:05.091Z"
       },
       {
         "id": "65",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:37:51.446Z",
+      "lastModified": "2026-11-24T06:42:05.091Z",
       "taskCount": 70,
-      "completedCount": 53,
+      "completedCount": 54,
       "tags": [
         "master"
       ]
