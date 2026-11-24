@@ -24,12 +24,22 @@ const m = vi.hoisted(() => ({
   deleteHoliday: vi.fn(),
   revalidatePath: vi.fn(),
   redirect: vi.fn(),
+  loadNoteLinks: vi.fn(),
+  checkLinks: vi.fn(),
+  releaseSnapshots: vi.fn(),
+  createClient: vi.fn(),
 }));
 
 vi.mock("@/lib/auth", () => ({ requireAdmin: m.requireAdmin, requireUser: m.requireUser }));
 vi.mock("next/cache", () => ({ revalidatePath: m.revalidatePath }));
 vi.mock("next/navigation", () => ({ redirect: m.redirect }));
 vi.mock("@/lib/notes/users", () => ({ resolveAssignees: m.resolveAssignees }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: m.createClient }));
+vi.mock("@/lib/notes/load", () => ({ loadNoteLinks: m.loadNoteLinks }));
+vi.mock("@/lib/notes/links", async () => {
+  const real = await vi.importActual<typeof import("@/lib/notes/links")>("@/lib/notes/links");
+  return { newLinks: real.newLinks, checkLinks: m.checkLinks, releaseSnapshots: m.releaseSnapshots };
+});
 vi.mock("@/lib/notes/repo", () => {
   class NoteNotFoundError extends Error {}
   class NotAllowedError extends Error {
@@ -70,6 +80,10 @@ beforeEach(() => {
   m.setActionItemDone.mockResolvedValue({ noteId: NOTE });
   m.editComment.mockResolvedValue({ noteId: NOTE });
   m.deleteComment.mockResolvedValue({ noteId: NOTE });
+  m.createClient.mockResolvedValue({ tag: "sesi" });
+  m.loadNoteLinks.mockResolvedValue([]);
+  m.checkLinks.mockResolvedValue(new Map());
+  m.releaseSnapshots.mockResolvedValue(new Map());
 });
 
 describe("hak akses", () => {
@@ -136,6 +150,39 @@ describe("saveNoteAction", () => {
     m.saveNote.mockRejectedValue(new Error("db down"));
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await saveNoteAction(form({ title: "a" }))).toEqual({ ok: false, error: "Could not save the note. Try again." });
+  });
+});
+
+describe("tautan pada saveNoteAction", () => {
+  const REL = "55555555-5555-4555-8555-555555555555";
+  const SRC = "66666666-6666-4666-8666-666666666666";
+
+  it("tautan baru diperiksa; galat dipetakan ke nomor baris form", async () => {
+    m.checkLinks.mockResolvedValue(new Map([[1, "This release is archived. Restore it first."]]));
+    const r = await saveNoteAction(form({
+      title: "a",
+      "links[2].kind": "source", "links[2].sourceId": SRC,
+      "links[5].kind": "release", "links[5].releaseId": REL,
+    }));
+    expect(r).toEqual({ ok: false, fieldErrors: { linkItems: { 5: "This release is archived. Restore it first." } } });
+    expect(m.checkLinks.mock.calls[0][2]).toEqual([0, 1]);
+    expect(m.saveNote).not.toHaveBeenCalled();
+  });
+
+  it("ubah: tautan lama tidak diperiksa ulang dan tidak direkam ulang; release baru direkam", async () => {
+    const REL2 = "77777777-7777-4777-8777-777777777777";
+    m.loadNoteLinks.mockResolvedValue([{ id: "l1", kind: "release", sourceId: null, releaseId: REL, tag: null, taskId: null, snapshot: null }]);
+    const snap = new Map([[REL2, { progressPercent: 10, done: 1, total: 10, risk: "on_track", daysLeft: 5, targetDate: "2026-12-01" }]]);
+    m.releaseSnapshots.mockResolvedValue(snap);
+    await expect(saveNoteAction(form({
+      id: NOTE, title: "a",
+      "links[0].kind": "release", "links[0].releaseId": REL,
+      "links[1].kind": "release", "links[1].releaseId": REL2,
+    }))).rejects.toThrow("redirect:");
+    expect(m.loadNoteLinks).toHaveBeenCalledWith({ tag: "sesi" }, NOTE);
+    expect(m.checkLinks.mock.calls[0][2]).toEqual([1]);
+    expect(m.releaseSnapshots.mock.calls[0][1]).toEqual([REL2]);
+    expect(m.saveNote.mock.calls[0][3].snapshots).toBe(snap);
   });
 });
 

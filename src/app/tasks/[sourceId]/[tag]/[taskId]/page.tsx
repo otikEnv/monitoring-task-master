@@ -4,8 +4,12 @@ import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { RelatedNotes } from "@/components/notes/note-links";
 import { TaskDetailView } from "@/components/tasks/task-detail";
 import { requireUser } from "@/lib/auth";
+import { loadRelatedNotes } from "@/lib/notes/links";
+import type { NoteRow } from "@/lib/notes/load";
+import { createClient } from "@/lib/supabase/server";
 import { getTaskDetail } from "@/lib/tasks/detail";
 import { parseDetailKey, type TaskDetail } from "@/lib/tasks/detail-model";
 
@@ -42,9 +46,17 @@ async function TaskDetailContent({ params }: { params: Params }) {
 
   if (!detail) notFound();
 
+  // Catatan terkait dibaca terpisah: kegagalannya tidak boleh menjatuhkan halaman.
+  let related: NoteRow[] | null = null;
+  try {
+    related = await loadRelatedNotes(await createClient(), { sourceId: key.sourceId, tag: key.tag, taskId: key.taskId });
+  } catch (e) {
+    console.error("[detail-task] gagal memuat catatan terkait", { error: (e as Error)?.name });
+  }
+
   return (
     <AppShell user={user} width="narrow">
-      <TaskDetailView detail={detail} />
+      <TaskDetailView detail={detail} related={<RelatedNotes notes={related} />} />
     </AppShell>
   );
 }

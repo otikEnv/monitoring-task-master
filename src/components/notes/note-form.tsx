@@ -13,6 +13,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { LIMITS, NOTE_KINDS, NOTE_KIND_LABEL, type NoteKind } from "@/lib/notes/model";
 import { itemField, type NoteFieldErrors } from "@/lib/notes/validate";
+import { LinkPicker, type LinkInitial, type LinkReleaseChoice, type LinkSourceChoice } from "./link-picker";
 import { cn } from "@/lib/utils";
 
 export type ItemInitial = {
@@ -33,6 +34,7 @@ export type NoteFormInitial = {
   kind: NoteKind;
   body: string;
   followsUpId?: string;
+  links: LinkInitial[];
   items: ItemInitial[];
 };
 
@@ -57,15 +59,15 @@ function Field({
 
 /**
  * Form catatan (buat, ubah, Follow up). Nomor baris action item naik terus dan tidak dipakai ulang; itu yang dikirim
- * sebagai items[N].… dan dipakai untuk memetakan galat server ke barisnya. `links` adalah bagian tautan
- * (pemilih tautan) yang dirender di dalam form yang sama.
+ * sebagai items[N].… dan dipakai untuk memetakan galat server ke barisnya. Hal yang sama berlaku untuk tautan.
  */
 export function NoteForm({
-  initial, users, links, followUpOf,
+  initial, users, sources, releases, followUpOf,
 }: {
   initial: NoteFormInitial;
   users: UserChoice[];
-  links?: React.ReactNode;
+  sources: LinkSourceChoice[];
+  releases: LinkReleaseChoice[];
   followUpOf?: { id: string; title: string } | null;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -175,7 +177,7 @@ export function NoteForm({
             {errors.body && <p role="alert" className="text-xs text-destructive">{errors.body}</p>}
           </div>
 
-          {links}
+          <LinkPicker initial={initial.links} sources={sources} releases={releases} errors={errors.linkItems} />
 
           <div className="space-y-3">
             <div>

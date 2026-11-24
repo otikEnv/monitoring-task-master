@@ -6,9 +6,9 @@ import { AppShell } from "@/components/layout/app-shell";
 import { LoadError, Notice } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
-import { KeepLinks } from "@/components/notes/keep-links";
 import { NoteForm, type NoteFormInitial } from "@/components/notes/note-form";
 import { requireAdmin } from "@/lib/auth";
+import { loadLinkOptions, type LinkOptions } from "@/lib/notes/links";
 import { getNote, loadActionItems, loadNoteLinks, type ActionItemRow, type NoteLinkRow, type NoteRow } from "@/lib/notes/load";
 import { listUserOptions, type UserOption } from "@/lib/notes/users";
 import { UUID } from "@/lib/releases/validate";
@@ -36,10 +36,18 @@ async function EditNoteContent({ params }: { params: Params }) {
   let items: ActionItemRow[] = [];
   let links: NoteLinkRow[] = [];
   let users: UserOption[] = [];
+  let options: LinkOptions = { sources: [], releases: [] };
   try {
     const db = await createClient();
     note = await getNote(db, nid);
-    if (note) [items, links, users] = await Promise.all([loadActionItems(db, nid), loadNoteLinks(db, nid), listUserOptions()]);
+    if (note) {
+      [items, links, users] = await Promise.all([loadActionItems(db, nid), loadNoteLinks(db, nid), listUserOptions()]);
+      // Aplikasi dan release pada tautan lama tetap bisa dipilih walau sudah terarsip.
+      options = await loadLinkOptions(db, {
+        sourceIds: links.flatMap((l) => (l.sourceId ? [l.sourceId] : [])),
+        releaseIds: links.flatMap((l) => (l.releaseId ? [l.releaseId] : [])),
+      });
+    }
   } catch (e) {
     console.error("[notes] gagal memuat form ubah", { error: (e as Error)?.name });
     return (
@@ -69,6 +77,7 @@ async function EditNoteContent({ params }: { params: Params }) {
     noteDate: note.noteDate,
     kind: note.kind,
     body: note.body,
+    links: links.map((l) => ({ kind: l.kind, sourceId: l.sourceId ?? "", releaseId: l.releaseId ?? "", tag: l.tag ?? "", taskId: l.taskId ?? "" })),
     items: items.map((it) => ({
       id: it.id, body: it.body, assigneeId: it.assigneeId ?? "", dueDate: it.dueDate ?? "", done: it.done, carriedFromId: "",
     })),
@@ -84,7 +93,7 @@ async function EditNoteContent({ params }: { params: Params }) {
   return (
     <AppShell user={user} width="narrow">
       <PageHeader title="Edit note" />
-      <NoteForm initial={initial} users={users} links={<KeepLinks links={links} />} />
+      <NoteForm initial={initial} users={users} sources={options.sources} releases={options.releases} />
     </AppShell>
   );
 }

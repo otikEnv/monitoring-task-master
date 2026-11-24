@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteForm, type NoteFormInitial } from "@/components/notes/note-form";
 import { requireAdmin } from "@/lib/auth";
+import { loadLinkOptions, type LinkOptions } from "@/lib/notes/links";
 import { todayWib } from "@/lib/notes/model";
 import { listUserOptions, type UserOption } from "@/lib/notes/users";
 import { isValidDate } from "@/lib/releases/validate";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "New note" };
 
@@ -32,18 +34,23 @@ async function NewNoteContent({ searchParams }: { searchParams: SearchParams }) 
   const noteDate = date && isValidDate(date) ? date : todayWib();
 
   let users: UserOption[] | null = null;
+  let options: LinkOptions | null = null;
   try {
-    users = await listUserOptions();
+    [users, options] = await Promise.all([listUserOptions(), loadLinkOptions(await createClient())]);
   } catch (e) {
     console.error("[notes] gagal memuat pengguna", { error: (e as Error)?.name });
   }
 
-  const initial: NoteFormInitial = { title: "", noteDate, kind: "meeting", body: "", items: [] };
+  const initial: NoteFormInitial = { title: "", noteDate, kind: "meeting", body: "", links: [], items: [] };
 
   return (
     <AppShell user={user} width="narrow">
       <PageHeader title="New note" description="Meeting results, decisions, or any note, with optional action items." />
-      {users === null ? <LoadError title="The form could not be loaded." /> : <NoteForm initial={initial} users={users} />}
+      {users === null || options === null ? (
+        <LoadError title="The form could not be loaded." />
+      ) : (
+        <NoteForm initial={initial} users={users} sources={options.sources} releases={options.releases} />
+      )}
     </AppShell>
   );
 }

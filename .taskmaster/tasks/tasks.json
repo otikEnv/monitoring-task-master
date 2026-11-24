@@ -3097,7 +3097,7 @@
         "id": "65",
         "title": "Notes: tautan ke aplikasi, release, task, rekaman kondisi, dan Related notes",
         "description": "Pemilih tautan di form, rekaman kondisi release, dan Related notes di halaman detail.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "63"
@@ -3109,40 +3109,40 @@
             "id": 1,
             "title": "Pemilih tautan di form",
             "description": "Aplikasi, release, task.",
-            "status": "pending",
+            "status": "done",
             "details": "Tambah dan hapus banyak tautan; aplikasi terarsip tidak ditawarkan untuk tautan baru; validasi server bahwa aplikasi, release, dan tag/task ada.",
             "parentId": "65",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:49:38.240Z"
           },
           {
             "id": 2,
             "title": "Rekaman kondisi release",
             "description": "note_release_snapshots.",
-            "status": "pending",
+            "status": "done",
             "details": "Saat simpan, untuk tautan release yang baru: rekam persen progres, selesai/total, status risiko, sisa hari, tanggal target. Hapus tautan ikut menghapus rekamannya.",
             "parentId": "65",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:49:38.240Z"
           },
           {
             "id": 3,
             "title": "Tampilan tautan di detail catatan",
             "description": "Dengan kondisi At the time.",
-            "status": "pending",
+            "status": "done",
             "details": "Tautan berlabel dengan penanda Archived atau Not found; untuk release tampilkan At the time berdampingan dengan kondisi sekarang.",
             "parentId": "65",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:49:38.240Z"
           },
           {
             "id": 4,
             "title": "Related notes",
             "description": "Detail release dan task.",
-            "status": "pending",
+            "status": "done",
             "details": "Bagian Related notes di src/app/release/[id]/page.tsx dan src/app/tasks/[sourceId]/[tag]/[taskId]/page.tsx: judul, jenis, tanggal, penulis, terbaru di atas.",
             "parentId": "65",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:49:38.240Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:49:38.240Z"
       },
       {
         "id": "66",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:42:05.091Z",
+      "lastModified": "2026-11-24T06:49:38.240Z",
       "taskCount": 70,
-      "completedCount": 54,
+      "completedCount": 55,
       "tags": [
         "master"
       ]

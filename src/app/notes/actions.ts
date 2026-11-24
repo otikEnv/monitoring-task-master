@@ -7,9 +7,12 @@ import {
   InvalidNoteError, NotAllowedError, NoteNotFoundError, addComment, deleteComment, deleteNote, editComment, saveNote,
   setActionItemDone, type Actor,
 } from "@/lib/notes/repo";
+import { checkLinks, newLinks, releaseSnapshots } from "@/lib/notes/links";
+import { loadNoteLinks } from "@/lib/notes/load";
 import { resolveAssignees } from "@/lib/notes/users";
-import { itemIndexes, parseNoteForm, validateComment, type NoteFieldErrors } from "@/lib/notes/validate";
+import { itemIndexes, linkIndexes, parseNoteForm, validateComment, type NoteFieldErrors } from "@/lib/notes/validate";
 import { UUID } from "@/lib/releases/validate";
+import { createClient } from "@/lib/supabase/server";
 
 // Semua action di sini dipanggil dari klien lewat HTTP: requireAdmin()/requireUser() WAJIB di baris pertama
 // (server action adalah endpoint publik; pengecekan di UI saja tidak cukup). Pemeriksaan penulis dan penanggung
@@ -72,7 +75,24 @@ export async function saveNoteAction(formData: FormData): Promise<SaveNoteResult
     });
     if (Object.keys(unknown).length > 0) return { ok: false, fieldErrors: { itemRows: unknown } };
 
-    savedId = (await saveNote(id, input, actorOf(user), { assigneeEmails })).id;
+    // Tautan baru diperiksa (aplikasi, release, task ada dan tidak terarsip); tautan lama dibiarkan walau
+    // sasarannya sudah hilang. Release yang baru ditautkan direkam kondisinya saat ini.
+    const db = await createClient();
+    const existing = id ? await loadNoteLinks(db, id) : [];
+    const fresh = newLinks(input.links, existing);
+    const linkErrors = await checkLinks(db, input.links, fresh);
+    if (linkErrors.size > 0) {
+      const formRows = linkIndexes(formData);
+      const rows: Record<number, string> = {};
+      for (const [k, msg] of linkErrors) rows[formRows[k] ?? k] = msg;
+      return { ok: false, fieldErrors: { linkItems: rows } };
+    }
+    const snapshots = await releaseSnapshots(
+      db,
+      fresh.flatMap((k) => { const l = input.links[k]; return l.kind === "release" ? [l.releaseId] : []; }),
+    );
+
+    savedId = (await saveNote(id, input, actorOf(user), { assigneeEmails, snapshots })).id;
   } catch (e) {
     return failure("menyimpan catatan", e, "Could not save the note. Try again.");
   }

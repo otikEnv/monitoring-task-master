@@ -3,10 +3,13 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
+import { RelatedNotes } from "@/components/notes/note-links";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { ReleaseActivity } from "@/components/releases/release-activity";
 import { ReleaseDetailView } from "@/components/releases/release-detail";
 import { requireUser } from "@/lib/auth";
+import { loadRelatedNotes } from "@/lib/notes/links";
+import type { NoteRow } from "@/lib/notes/load";
 import { getReleaseOverview, type ReleaseOverview } from "@/lib/releases/load";
 import { loadCurrentHold, loadReleaseActivity, type NotesPage } from "@/lib/releases/notes";
 import { UUID } from "@/lib/releases/validate";
@@ -57,6 +60,7 @@ async function ReleaseDetailContent({ params, searchParams }: { params: Params; 
   const db = await createClient();
   let activity: NotesPage | null = null;
   let heldBy: string | null = null;
+  let related: NoteRow[] | null = null;
   try {
     [activity, heldBy] = await Promise.all([
       loadReleaseActivity(db, rid, page),
@@ -64,6 +68,11 @@ async function ReleaseDetailContent({ params, searchParams }: { params: Params; 
     ]);
   } catch (e) {
     console.error("[release] gagal memuat log", { error: (e as Error)?.name });
+  }
+  try {
+    related = await loadRelatedNotes(db, { releaseId: rid });
+  } catch (e) {
+    console.error("[release] gagal memuat catatan terkait", { error: (e as Error)?.name });
   }
 
   const isAdmin = user.role === "admin";
@@ -73,6 +82,7 @@ async function ReleaseDetailContent({ params, searchParams }: { params: Params; 
         overview={overview}
         heldBy={heldBy}
         activity={<ReleaseActivity releaseId={rid} activity={activity} isAdmin={isAdmin} />}
+        related={<RelatedNotes notes={related} />}
         actions={
           isAdmin ? (
             <ReleaseActions

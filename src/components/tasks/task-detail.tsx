@@ -14,7 +14,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 }
 
 /** Tampilan detail satu task. Presentasional dan hanya-baca: tidak ada aksi yang mengubah task. */
-export function TaskDetailView({ detail }: { detail: TaskDetail }) {
+export function TaskDetailView({ detail, related }: { detail: TaskDetail; related?: React.ReactNode }) {
   const { done, total } = subtaskProgress(detail.subtasks);
   const backToList = hrefFor(DEFAULT_PARAMS, { source: detail.sourceId, tag: detail.tag });
 
@@ -126,6 +126,8 @@ export function TaskDetailView({ detail }: { detail: TaskDetail }) {
           </ol>
         )}
       </section>
+
+      {related}
 
       <p>
         <Link href={backToList} className="text-sm text-muted-foreground hover:underline">

@@ -207,11 +207,13 @@ function HoldBanner({
  * lewat slot `activity` (server component yang memuat log).
  */
 export function ReleaseDetailView({
-  overview, actions, activity, heldBy = null, now = new Date(),
+  overview, actions, activity, related, heldBy = null, now = new Date(),
 }: {
   overview: ReleaseOverview;
   actions?: React.ReactNode;
   activity?: React.ReactNode;
+  /** Bagian Related notes (PRD-Note.md). */
+  related?: React.ReactNode;
   /** Email yang menahan release; null bila tidak diketahui. */
   heldBy?: string | null;
   now?: Date;
@@ -323,6 +325,8 @@ export function ReleaseDetailView({
           </section>
 
           {activity}
+
+          {related}
 
           <section aria-labelledby="sec-komponen" className="space-y-3">
             <h2 id="sec-komponen" className={heading}>Components ({components.length})</h2>

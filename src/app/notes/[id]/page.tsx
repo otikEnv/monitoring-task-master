@@ -5,7 +5,9 @@ import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteDetailView } from "@/components/notes/note-detail";
+import { NoteLinks } from "@/components/notes/note-links";
 import { requireUser } from "@/lib/auth";
+import { resolveLinkViews, type LinkView } from "@/lib/notes/links";
 import { getNoteDetail, type NoteDetail } from "@/lib/notes/load";
 import { markNoteRead } from "@/lib/notes/repo";
 import { UUID } from "@/lib/releases/validate";
@@ -31,8 +33,11 @@ async function NoteDetailContent({ params }: { params: Params }) {
   const nid = id.toLowerCase();
 
   let detail: NoteDetail | null;
+  let links: LinkView[] = [];
   try {
-    detail = await getNoteDetail(await createClient(), nid);
+    const db = await createClient();
+    detail = await getNoteDetail(db, nid);
+    if (detail) links = await resolveLinkViews(db, detail.links);
   } catch (e) {
     console.error("[notes] gagal memuat detail", { error: (e as Error)?.name });
     return (
@@ -52,7 +57,7 @@ async function NoteDetailContent({ params }: { params: Params }) {
 
   return (
     <AppShell user={user} width="normal">
-      <NoteDetailView detail={detail} user={user} />
+      <NoteDetailView detail={detail} user={user} links={<NoteLinks links={links} />} />
     </AppShell>
   );
 }
