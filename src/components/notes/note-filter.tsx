@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { AutoSubmitForm } from "@/components/auto-submit-form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,14 +8,14 @@ import { NOTE_KINDS, NOTE_KIND_LABEL } from "@/lib/notes/model";
 import { hasNoteFilters, MAX_QUERY, type NoteListParams } from "@/lib/notes/list-params";
 
 /**
- * Filter lewat form GET: pilihan jenis, aplikasi, dan tanggal langsung diterapkan saat diganti; kata kunci lewat Enter
- * atau tombol Search. Mengubah filter selalu kembali ke halaman 1 (halaman tidak ikut dikirim).
+ * Filter lewat <form method="get">: diterapkan saat Search ditekan (atau Enter). Mengubah filter selalu kembali ke
+ * halaman 1 (halaman tidak ikut dikirim). Tanpa JavaScript klien.
  */
 export function NoteFilter({ params, apps }: { params: NoteListParams; apps: { id: string; name: string }[] }) {
   // Aplikasi yang dipilih tetap tampil walau sudah terarsip (mis. dari tautan lama).
   const options = params.app && !apps.some((a) => a.id === params.app) ? [{ id: params.app, name: "(archived application)" }, ...apps] : apps;
   return (
-    <AutoSubmitForm action="/notes" role="search" className="space-y-3 rounded-xl border bg-card p-4">
+    <form method="get" action="/notes" role="search" className="space-y-3 rounded-xl border bg-card p-4">
       <div className="space-y-1.5">
         <Label htmlFor="f-q" className="text-xs text-muted-foreground">Search</Label>
         <div className="relative">
@@ -52,6 +51,6 @@ export function NoteFilter({ params, apps }: { params: NoteListParams; apps: { i
         <Button type="submit" size="sm">Search</Button>
         {hasNoteFilters(params) && <Link href="/notes" className={buttonVariants({ variant: "ghost", size: "sm" })}>Reset</Link>}
       </div>
-    </AutoSubmitForm>
+    </form>
   );
 }
