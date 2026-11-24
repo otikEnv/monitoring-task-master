@@ -37,7 +37,7 @@ const GROUPS: { kind: CalendarItem["kind"]; label: string }[] = [
 ];
 
 /** Isi panel hari: semua item tanggal itu, dikelompokkan Holidays, Releases, Action items, Notes. */
-function DayPanelBody({ cell, isAdmin }: { cell: DayCell; isAdmin: boolean }) {
+function DayPanelBody({ cell, isAdmin, showNewNote }: { cell: DayCell; isAdmin: boolean; showNewNote: boolean }) {
   const empty = cell.items.length === 0 && !cell.holiday;
   return (
     <div className="space-y-4">
@@ -71,7 +71,7 @@ function DayPanelBody({ cell, isAdmin }: { cell: DayCell; isAdmin: boolean }) {
         );
       })}
       {empty && <p className="text-sm text-muted-foreground">Nothing on this day.</p>}
-      {isAdmin && (
+      {isAdmin && showNewNote && (
         <Link href={`/notes/new?date=${cell.date}`} className={buttonVariants({ size: "sm", className: "w-full" })}>
           <Plus aria-hidden="true" /> New note
         </Link>
@@ -93,9 +93,12 @@ export function CalendarGrid({
     initialDate && cells.some((c) => c.date === initialDate) ? initialDate : null,
   );
   const cell = cells.find((c) => c.date === selected) ?? null;
+  // Panel yang dibuka lewat "+N more" hanya untuk melihat item; tombol New note hanya saat tanggalnya diklik.
+  const [fromMore, setFromMore] = useState(false);
 
-  const open = useCallback((date: string | null) => {
+  const open = useCallback((date: string | null, viaMore = false) => {
     setSelected(date);
+    setFromMore(viaMore);
     const url = new URL(window.location.href);
     if (date) url.searchParams.set("date", date);
     else url.searchParams.delete("date");
@@ -118,7 +121,7 @@ export function CalendarGrid({
           {Array.from({ length: cells.length / 7 }, (_, w) => (
             <div key={w} role="row" className="grid grid-cols-7 divide-x border-b last:border-b-0">
               {cells.slice(w * 7, w * 7 + 7).map((c) => (
-                <MonthCell key={c.date} cell={c} active={c.date === selected} onOpen={() => open(c.date)} />
+                <MonthCell key={c.date} cell={c} active={c.date === selected} onOpen={() => open(c.date)} onMore={() => open(c.date, true)} />
               ))}
             </div>
           ))}
@@ -140,7 +143,7 @@ export function CalendarGrid({
                   <SheetTitle>{longDate(cell.date)}</SheetTitle>
                   <SheetDescription>{cell.items.length} {cell.items.length === 1 ? "item" : "items"}</SheetDescription>
                 </SheetHeader>
-                <DayPanelBody cell={cell} isAdmin={isAdmin} />
+                <DayPanelBody cell={cell} isAdmin={isAdmin} showNewNote={!fromMore} />
               </>
             )}
           </SheetContent>
@@ -163,7 +166,7 @@ export function CalendarGrid({
                         <X aria-hidden="true" />
                       </Popover.Close>
                     </div>
-                    <DayPanelBody cell={cell} isAdmin={isAdmin} />
+                    <DayPanelBody cell={cell} isAdmin={isAdmin} showNewNote={!fromMore} />
                   </div>
                 )}
               </Popover.Popup>
@@ -207,7 +210,9 @@ function DateButton({ cell, onOpen, className }: { cell: DayCell; onOpen: () => 
   );
 }
 
-function MonthCell({ cell, active, onOpen }: { cell: DayCell; active: boolean; onOpen: () => void }) {
+function MonthCell({
+  cell, active, onOpen, onMore,
+}: { cell: DayCell; active: boolean; onOpen: () => void; onMore: () => void }) {
   const { shown, more } = cellSlice(cell.items);
   const counts = countByKind(cell.items);
   return (
@@ -234,7 +239,7 @@ function MonthCell({ cell, active, onOpen }: { cell: DayCell; active: boolean; o
       </ul>
       {more > 0 && (
         <button
-          type="button" onClick={onOpen}
+          type="button" onClick={onMore}
           className="hidden self-start rounded px-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground sm:inline"
         >
           +{more} more
