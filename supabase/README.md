@@ -23,7 +23,8 @@
   - `20261116010000_release_latest_note.sql` - view `release_latest_note` (catatan bebas terbaru per release, satu baris per release) dan `release_notes.created_at` memakai `clock_timestamp()` agar urutan entri benar dalam satu transaksi (sudah diterapkan)
   - `20261116020000_edit_hold_note_syncs_reason.sql` - mengedit entri Hold terbaru dari release yang masih ditahan ikut memperbarui `hold_reason` (sudah diterapkan)
   - `20261116030000_delete_release_note.sql` - fungsi `delete_release_note` (hanya service_role): menghapus catatan bebas (`kind = 'note'`); entri sistem ditolak dengan `55000 not_deletable` (sudah diterapkan)
-3. Tempel `tests/rls_test.sql` (serta `tests/sync_test.sql`, `tests/counts_view_test.sql`, `tests/task_list_test.sql`, dan `tests/trend_view_test.sql`, `tests/releases_test.sql`, dan `tests/google_sso_test.sql`, dan `tests/archive_test.sql`, dan `tests/release_hold_test.sql` setelah migrasinya), lalu Run. Harapannya muncul notice `SEMUA UJI LOLOS` (tab Results/Messages). Kalau ada baris `FAIL: ...`, jangan lanjut.
+  - `20261124000000_notes_calendar.sql` - Notes dan Calendar (sudah diterapkan; tabel `notes`, `note_links`, `note_release_snapshots`, `note_action_items`, `note_revisions`, `note_comments`, `note_reads`, `holidays` dengan data awal libur nasional dan cuti bersama 2026 dan 2027 dari SKB tiga menteri; fungsi `save_note`, `delete_note`, `set_action_item_done`, `add_note_comment`, `edit_note_comment`, `delete_note_comment`, `mark_note_read` hanya untuk service_role dan memeriksa penulis atau penanggung jawab; `note_reads` hanya terbaca pemiliknya)
+3. Tempel `tests/rls_test.sql` (serta `tests/sync_test.sql`, `tests/counts_view_test.sql`, `tests/task_list_test.sql`, dan `tests/trend_view_test.sql`, `tests/releases_test.sql`, dan `tests/google_sso_test.sql`, dan `tests/archive_test.sql`, dan `tests/release_hold_test.sql`, dan `tests/notes_test.sql` setelah migrasinya), lalu Run. Harapannya muncul notice `SEMUA UJI LOLOS` (tab Results/Messages). Kalau ada baris `FAIL: ...`, jangan lanjut.
 
 **Lewat skrip repo** (memakai `POSTGRES_URL_NON_POOLING` dari `.env.local`)
 `npm run db:run -- supabase/migrations/<berkas>.sql`, lalu `npm run db:run -- supabase/tests/<uji>.sql` (NOTICE `... LOLOS` = sukses). Migrasi tidak idempoten dan tidak dicatat; jalankan sekali saja.
@@ -33,7 +34,7 @@
 
 ## Aturan akses
 
-- Peran klien (`anon`, `authenticated`) hanya bisa `SELECT`. Penulisan hanya lewat service role di kode server.
+- Peran klien (`anon`, `authenticated`) hanya bisa `SELECT`. Penulisan hanya lewat service role di kode server. Notes: viewer juga boleh berkomentar, mencentang action item miliknya, dan menandai catatan sudah dibaca, tetapi tetap lewat server action (fungsi service_role yang memeriksa pemiliknya), bukan tulis langsung dari klien.
 - `sources.token_encrypted` tidak bisa dibaca peran klien. Karena itu klien harus menyebut kolom secara eksplisit (`select id, name, ...`); `select *` pada `sources` ditolak.
 - Akun baru di `auth.users` otomatis mendapat profil `viewer`. Seeder menaikkan admin awal ke `admin`.
 - ID task hanya unik per `(source_id, tag, task_id)`.

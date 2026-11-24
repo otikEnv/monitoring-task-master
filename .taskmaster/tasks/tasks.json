@@ -2877,7 +2877,7 @@
         "id": "61",
         "title": "Notes dan Calendar: migrasi database (tabel catatan, komentar, libur)",
         "description": "Delapan tabel baru beserta RLS, indeks, dan data awal libur 2026 dan 2027.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-Note.md, bagian Data dan migrasi dan Hak akses. Dijalankan langsung dengan npm run db:run. Pola penulis (author_id + author_email) dan grant mengikuti supabase/migrations/20261116000000_release_hold_notes.sql.",
@@ -2887,49 +2887,49 @@
             "id": 1,
             "title": "Kumpulkan data libur resmi",
             "description": "SKB 3 Menteri 2026 dan 2027.",
-            "status": "pending",
+            "status": "done",
             "details": "Daftar libur nasional dan cuti bersama 2026 dan 2027 dari SKB 3 Menteri yang berlaku (termasuk revisi). Catat sumber dan tanggal SKB di komentar migrasi. Minta konfirmasi pengguna bila ada tanggal yang belum pasti.",
             "parentId": "61",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:18:50.204Z"
           },
           {
             "id": 2,
             "title": "Tulis migrasi tabel",
             "description": "supabase/migrations/<ts>_notes.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "notes (title, note_date, kind meeting|decision|general, body, author_id, author_email, follows_up_id on delete set null, created_at, edited_at), note_links (kind source|release|task; source_id, release_id, tag, task_id; check per jenis), note_release_snapshots, note_action_items (body, assignee_id, assignee_email, due_date, done, done_at, carried_to_id), note_revisions, note_comments, note_reads (pk user_id + note_id), holidays (holiday_date unik, name, kind national|collective_leave). Batas panjang sesuai PRD lewat check constraint. Cascade dari notes ke semua note_*.",
             "parentId": "61",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:18:50.204Z"
           },
           {
             "id": 3,
             "title": "RLS, grant, dan indeks",
             "description": "Hanya baca untuk klien.",
-            "status": "pending",
+            "status": "done",
             "details": "Enable RLS semua tabel; SELECT untuk authenticated, note_reads hanya user_id = auth.uid(); revoke semua dari anon; tidak ada hak tulis klien (penulisan lewat service role). Indeks: notes(note_date), note_links per sasaran, note_action_items(due_date), note_comments(note_id, created_at).",
             "parentId": "61",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:18:50.204Z"
           },
           {
             "id": 4,
             "title": "Data awal libur",
             "description": "Insert 2026 dan 2027.",
-            "status": "pending",
+            "status": "done",
             "details": "Insert ke holidays di migrasi yang sama atau migrasi seed terpisah, idempoten terhadap tanggal unik.",
             "parentId": "61",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:18:50.204Z"
           },
           {
             "id": 5,
             "title": "Tes SQL dan terapkan",
             "description": "supabase/tests/notes_test.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Awali dengan set_config('app.allow_any_domain','on',true). Kasus: constraint panjang dan jenis, check tautan per jenis, cascade hapus catatan, follows_up_id dikosongkan saat catatan asal dihapus, hak akses viewer dan anon, note_reads tidak terbaca pengguna lain. Jalankan npm run db:run, bandingkan angka release 2.1, perbarui supabase/README.md.",
             "parentId": "61",
-            "updatedAt": "2026-11-24T06:01:31.960Z"
+            "updatedAt": "2026-11-24T06:18:50.204Z"
           }
         ],
-        "updatedAt": "2026-11-24T06:01:31.960Z"
+        "updatedAt": "2026-11-24T06:18:50.204Z"
       },
       {
         "id": "62",
@@ -3411,9 +3411,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T06:01:31.960Z",
+      "lastModified": "2026-11-24T06:18:50.204Z",
       "taskCount": 70,
-      "completedCount": 50,
+      "completedCount": 51,
       "tags": [
         "master"
       ]
