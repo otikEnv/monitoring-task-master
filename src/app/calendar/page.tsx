@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { CalendarCog } from "lucide-react";
 import { Suspense } from "react";
 import { CalendarGrid } from "@/components/calendar/calendar-grid";
 import { CalendarLegend, CalendarToolbar, MissingHolidays } from "@/components/calendar/calendar-toolbar";
@@ -6,6 +8,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { buttonVariants } from "@/components/ui/button";
 import { requireUser } from "@/lib/auth";
 import { loadCalendar } from "@/lib/calendar/data";
 import { buildDays, parseCalendarParams, visibleDays, type CalendarData } from "@/lib/calendar/model";
@@ -40,9 +43,21 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
   }
 
   const isAdmin = user.role === "admin";
+  // Revisi SKB libur dilakukan admin di halaman Holidays; tautan membawa tahun yang sedang dilihat.
+  const year = (params.view === "week" ? params.week : params.month).slice(0, 4);
   return (
     <AppShell user={user} width="wide">
-      <PageHeader title="Calendar" description="Notes, releases, action item due dates, and Indonesian holidays." />
+      <PageHeader
+        title="Calendar"
+        description="Notes, releases, action item due dates, and Indonesian holidays."
+        actions={
+          isAdmin ? (
+            <Link href={`/notes/holidays?year=${year}`} className={buttonVariants({ variant: "outline" })}>
+              <CalendarCog aria-hidden="true" /> Manage holidays
+            </Link>
+          ) : undefined
+        }
+      />
       <CalendarToolbar params={params} apps={apps} now={now} />
       {data === null ? (
         <LoadError title="The calendar could not be loaded." />

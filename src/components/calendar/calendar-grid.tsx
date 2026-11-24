@@ -47,6 +47,11 @@ function DayPanelBody({ cell, isAdmin }: { cell: DayCell; isAdmin: boolean }) {
           <p className="rounded-md bg-rose-100 px-2 py-1 text-sm text-rose-950 dark:bg-rose-950 dark:text-rose-100">
             {cell.holiday.name} <span className="text-xs opacity-80">· {HOLIDAY_KIND_LABEL[cell.holiday.kind]}</span>
           </p>
+          {isAdmin && (
+            <Link href={`/notes/holidays?year=${cell.date.slice(0, 4)}`} className="text-xs text-muted-foreground underline">
+              Edit holidays
+            </Link>
+          )}
         </section>
       )}
       {GROUPS.map(({ kind, label }) => {
