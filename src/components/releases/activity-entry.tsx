@@ -26,11 +26,12 @@ const KIND = {
 
 /**
  * Satu entri log. Teks waktu dihitung di server dan dikirim sebagai props (tidak dihitung ulang di klien) agar
- * tidak berbeda antara render server dan hidrasi. Admin dapat mengedit teksnya di tempat; fakta entri terkunci.
+ * tidak berbeda antara render server dan hidrasi. Yang berhak (`canChange`) dapat mengedit teksnya di tempat; fakta
+ * entri terkunci.
  */
 export function ActivityEntry({
-  note, isAdmin, when, absolute, editedAbsolute,
-}: { note: ReleaseNoteRow; isAdmin: boolean; when: string; absolute: string; editedAbsolute: string | null }) {
+  note, canChange, when, absolute, editedAbsolute,
+}: { note: ReleaseNoteRow; canChange: boolean; when: string; absolute: string; editedAbsolute: string | null }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [editing, setEditing] = useState(false);
@@ -102,7 +103,7 @@ export function ActivityEntry({
             <span title={`Edited by ${note.editedByEmail ?? "unknown"} on ${editedAbsolute}`}>(edited)</span>
           )}
         </div>
-        {isAdmin && !editing && (
+        {canChange && !editing && (
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -159,7 +160,7 @@ export function ActivityEntry({
         note.body && <p className="whitespace-pre-wrap break-words text-sm">{note.body}</p>
       )}
 
-      {isAdmin && note.kind === "note" && (
+      {canChange && note.kind === "note" && (
         <AlertDialog open={deleting} onOpenChange={(o) => !pending && setDeleting(o)}>
           <AlertDialogContent>
             <AlertDialogHeader>

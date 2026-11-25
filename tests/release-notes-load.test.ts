@@ -58,7 +58,7 @@ describe("toNote", () => {
     const n = toNote(noteRow(1, { previous_body: "rahasia lama" }) as never);
     expect(n).toEqual({
       id: "n1", releaseId: REL, kind: "note", body: "Catatan 1", oldTargetDate: null, newTargetDate: null,
-      authorEmail: "admin@envisions.app", createdAt: "2026-11-11T03:00:00Z", editedAt: null, editedByEmail: null,
+      authorId: null, authorEmail: "admin@envisions.app", createdAt: "2026-11-11T03:00:00Z", editedAt: null, editedByEmail: null,
     });
     expect(JSON.stringify(n)).not.toContain("rahasia lama");
   });

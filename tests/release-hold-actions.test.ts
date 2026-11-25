@@ -18,7 +18,8 @@ const m = vi.hoisted(() => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock("@/lib/auth", () => ({ requireAdmin: m.requireAdmin }));
+// requireAbility (activity) dan requireAdmin (lainnya) memakai tiruan yang sama: dipanggil tepat sekali per action.
+vi.mock("@/lib/auth", () => ({ requireAdmin: m.requireAdmin, requireAbility: m.requireAdmin }));
 vi.mock("next/cache", () => ({ revalidatePath: m.revalidatePath }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: m.createClient }));
@@ -84,6 +85,36 @@ describe("otorisasi: hanya admin", () => {
   it.each(calls)("%s: requireAdmin dipanggil tepat sekali dan sebelum apa pun", async (_name, call) => {
     await call();
     expect(m.requireAdmin).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("developer pada activity", () => {
+  const DEV = { id: "d1", email: "dev@envisions.app", role: "developer" };
+
+  it("mengubah dan menghapus Note miliknya; Note orang lain dan entri sistem ditolak tanpa menyentuh data", async () => {
+    m.requireAdmin.mockResolvedValue(DEV);
+    m.getReleaseNote.mockResolvedValue({ id: NOTE, releaseId: ID, kind: "note", authorId: "d1" });
+    m.deleteReleaseNote.mockResolvedValue({ releaseId: ID });
+    expect(await editNote(NOTE, "Milik saya")).toEqual({ ok: true });
+    expect(m.editReleaseNote).toHaveBeenCalledWith(NOTE, "Milik saya", { id: "d1", email: "dev@envisions.app" });
+    expect(await deleteNote(NOTE)).toEqual({ ok: true });
+
+    vi.clearAllMocks();
+    m.requireAdmin.mockResolvedValue(DEV);
+    m.createClient.mockResolvedValue({ tag: "sesi" });
+    for (const other of [{ kind: "note", authorId: "u1" }, { kind: "note", authorId: null }, { kind: "hold", authorId: "d1" }]) {
+      m.getReleaseNote.mockResolvedValue({ id: NOTE, releaseId: ID, ...other });
+      expect(await editNote(NOTE, "x")).toEqual({ ok: false, error: "You can only change your own notes." });
+    }
+    m.getReleaseNote.mockResolvedValue({ id: NOTE, releaseId: ID, kind: "note", authorId: "u1" });
+    expect(await deleteNote(NOTE)).toEqual({ ok: false, error: "You can only change your own notes." });
+    expect(m.editReleaseNote).not.toHaveBeenCalled();
+    expect(m.deleteReleaseNote).not.toHaveBeenCalled();
+  });
+
+  it("admin tetap mengubah entri siapa pun", async () => {
+    m.getReleaseNote.mockResolvedValue({ id: NOTE, releaseId: ID, kind: "hold", authorId: "lain" });
+    expect(await editNote(NOTE, "Alasan baru")).toEqual({ ok: true });
   });
 });
 

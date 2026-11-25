@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/lib/auth";
+import { canChangeAnyActivity } from "@/lib/access";
+import { requireAbility, requireAdmin } from "@/lib/auth";
 import { previewRange as loadPreview } from "@/lib/releases/load";
 import { wibDay } from "@/lib/releases/model";
 import { getReleaseNote } from "@/lib/releases/notes";
@@ -17,7 +18,7 @@ import {
 } from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
 
-// Semua action di sini dipanggil dari klien lewat HTTP: requireAdmin() WAJIB di baris pertama
+// Semua action di sini dipanggil dari klien lewat HTTP: requireAdmin()/requireAbility() WAJIB di baris pertama
 // (server action adalah endpoint publik; pengecekan di UI saja tidak cukup).
 
 export type SaveReleaseResult = { ok: false; error?: string; fieldErrors?: ReleaseFieldErrors };
@@ -30,6 +31,10 @@ const fail = (what: string, e: unknown) => console.error(`[release] gagal ${what
 
 /** Penulis entri log: selalu diambil dari sesi admin di server, tidak pernah dari masukan klien. */
 const authorOf = (u: { id: string; email: string }): Author => ({ id: u.id, email: u.email });
+
+/** Admin dan superadmin: semua entri; developer: hanya Note miliknya. Database memeriksanya lagi. */
+const mayChange = (user: { id: string; role: Parameters<typeof canChangeAnyActivity>[0] }, note: { kind: string; authorId: string | null }) =>
+  canChangeAnyActivity(user.role) || (note.kind === "note" && note.authorId === user.id);
 
 const idFrom = (fd: FormData): string | null => {
   const v = fd.get("id");
@@ -150,9 +155,9 @@ export async function resumeHold(id: string, reason = ""): Promise<SimpleResult>
   return { ok: true };
 }
 
-/** Menambah catatan bebas (1-2000 karakter) pada log release. */
+/** Menambah catatan bebas (1-2000 karakter) pada log release. Superadmin, admin, dan developer. */
 export async function addNote(id: string, body: string): Promise<SimpleResult> {
-  const user = await requireAdmin("release");
+  const user = await requireAbility("release.activity", "release");
   if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   const text = validateNoteBody(body);
   if (!text.ok) return { ok: false, error: text.error };
@@ -171,12 +176,13 @@ export async function addNote(id: string, body: string): Promise<SimpleResult> {
  * database. Batas panjang mengikuti jenis entri (catatan 2000; hold dan alasan target 500; resume boleh kosong).
  */
 export async function editNote(noteId: string, body: string): Promise<SimpleResult> {
-  const user = await requireAdmin("release");
+  const user = await requireAbility("release.activity", "release");
   if (!UUID.test(noteId)) return { ok: false, error: "Invalid note ID." };
   const nid = noteId.toLowerCase();
   try {
     const note = await getReleaseNote(await createClient(), nid);
     if (!note) return { ok: false, error: "Note not found." };
+    if (!mayChange(user, note)) return { ok: false, error: new NoteNotAllowedError().message };
     const text = validateNoteText(body, note.kind);
     if (!text.ok) return { ok: false, error: text.error };
     await editReleaseNote(nid, text.value, authorOf(user));
@@ -192,13 +198,14 @@ export async function editNote(noteId: string, body: string): Promise<SimpleResu
  * Target change, Released) tidak bisa dihapus: ditolak di sini sebelum menyentuh data, dan lagi oleh database.
  */
 export async function deleteNote(noteId: string): Promise<SimpleResult> {
-  const user = await requireAdmin("release");
+  const user = await requireAbility("release.activity", "release");
   if (!UUID.test(noteId)) return { ok: false, error: "Invalid note ID." };
   const nid = noteId.toLowerCase();
   try {
     const note = await getReleaseNote(await createClient(), nid);
     if (!note) return { ok: false, error: "Note not found." };
     if (note.kind !== "note") return failure("menghapus catatan", new NoteNotDeletableError(), "Could not delete the note.");
+    if (!mayChange(user, note)) return { ok: false, error: new NoteNotAllowedError().message };
     const { releaseId } = await deleteReleaseNote(nid, authorOf(user));
     refreshRelease(releaseId);
   } catch (e) {

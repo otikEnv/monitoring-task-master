@@ -9,7 +9,7 @@ vi.mock("@/app/release/actions", () => ({
 vi.mock("@/app/archive/actions", () => ({ restoreRelease: vi.fn() }));
 
 import { ReleaseActions } from "@/app/release/release-actions";
-import { ReleaseActivity, activityHref } from "@/components/releases/release-activity";
+import { ReleaseActivity, activityHref, canChangeEntry, type ActivityAccess } from "@/components/releases/release-activity";
 import { ReleaseDetailView } from "@/components/releases/release-detail";
 import { formatRelative } from "@/lib/releases/format";
 import type { NotesPage, ReleaseNoteRow } from "@/lib/releases/notes";
@@ -19,13 +19,21 @@ const NOW = new Date("2026-11-11T05:00:00Z");
 
 const note = (over: Partial<ReleaseNoteRow> = {}): ReleaseNoteRow => ({
   id: "n1", releaseId: REL_ID, kind: "note", body: "Waiting for the API", oldTargetDate: null, newTargetDate: null,
-  authorEmail: "admin@envisions.app", createdAt: "2026-11-09T03:00:00Z", editedAt: null, editedByEmail: null, ...over,
+  authorId: "admin-id", authorEmail: "admin@envisions.app", createdAt: "2026-11-09T03:00:00Z", editedAt: null, editedByEmail: null, ...over,
 });
 const page = (rows: ReleaseNoteRow[], over: Partial<NotesPage> = {}): NotesPage => ({
   rows, total: rows.length, page: 1, pageCount: 1, pageSize: 20, ...over,
 });
-const render = (activity: NotesPage | null, isAdmin = true) =>
-  renderToStaticMarkup(<ReleaseActivity releaseId={REL_ID} activity={activity} isAdmin={isAdmin} now={NOW} />);
+const ADMIN: ActivityAccess = { userId: "admin-id", canAdd: true, canChangeAll: true };
+const VIEWER: ActivityAccess = { userId: "viewer-id", canAdd: false, canChangeAll: false };
+const DEV: ActivityAccess = { userId: "dev-id", canAdd: true, canChangeAll: false };
+const render = (activity: NotesPage | null, isAdmin: boolean | ActivityAccess = true) =>
+  renderToStaticMarkup(
+    <ReleaseActivity
+      releaseId={REL_ID} activity={activity} now={NOW}
+      access={typeof isAdmin === "boolean" ? (isAdmin ? ADMIN : VIEWER) : isAdmin}
+    />,
+  );
 
 describe("formatRelative", () => {
   it("menit, jam, hari, lalu tanggal", () => {
@@ -106,6 +114,24 @@ describe("bagian Activity", () => {
     expect(viewer).not.toContain("Add note");
     expect(viewer).not.toContain("Actions for the");
     expect(viewer).toContain("Waiting for the API"); // viewer tetap melihat log
+  });
+
+  it("developer: form Add note; menu hanya pada Note miliknya (bukan Note orang lain atau entri sistem)", () => {
+    const rows = [
+      note({ id: "mine", authorId: "dev-id", authorEmail: "dev@envisions.app", body: "Catatan dev" }),
+      note({ id: "other", body: "Catatan admin" }),
+      note({ id: "hold", kind: "hold", authorId: "dev-id", body: "Hold" }),
+    ];
+    const out = render(page(rows), DEV);
+    expect(out).toContain("Add note");
+    expect(out.match(/aria-label="Actions for the note entry from/g)).toHaveLength(1);
+    expect(out).not.toContain("Actions for the hold entry");
+    expect(canChangeEntry(DEV, rows[0])).toBe(true);
+    expect(canChangeEntry(DEV, rows[1])).toBe(false);
+    expect(canChangeEntry(DEV, rows[2])).toBe(false);
+    expect(canChangeEntry(DEV, note({ authorId: null }))).toBe(false);
+    expect(canChangeEntry(ADMIN, rows[2])).toBe(true);
+    expect(canChangeEntry({ ...VIEWER, userId: "admin-id" }, rows[1])).toBe(false); // viewer: walau penulisnya
   });
 
   it("kosong: pesan; ajakan menambah catatan hanya untuk admin", () => {

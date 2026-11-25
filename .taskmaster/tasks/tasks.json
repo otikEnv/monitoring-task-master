@@ -3581,7 +3581,7 @@
         "id": "74",
         "title": "RBAC: role Developer di Notes dan activity release",
         "description": "Developer berkomentar, mencentang action item miliknya, menambah Note activity dan mengubah atau menghapus Note miliknya.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "73"
@@ -3593,40 +3593,40 @@
             "id": 1,
             "title": "Activity release",
             "description": "Aksi dan tampilan.",
-            "status": "pending",
+            "status": "done",
             "details": "addNote untuk release.activity; editNote/deleteNote: developer hanya Note miliknya (\"You can only change your own notes.\"). Menu Edit/Delete hanya pada entri yang boleh.",
             "parentId": "74",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:52:53.541Z"
           },
           {
             "id": 2,
             "title": "Notes",
             "description": "Komentar dan action item.",
-            "status": "pending",
+            "status": "done",
             "details": "note.comment dan action.check untuk developer; tanpa Edit/Delete catatan.",
             "parentId": "74",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:52:53.541Z"
           },
           {
             "id": 3,
             "title": "Penanggung jawab",
             "description": "listUserOptions.",
-            "status": "pending",
+            "status": "done",
             "details": "Hanya superadmin, admin, developer yang aktif.",
             "parentId": "74",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:52:53.541Z"
           },
           {
             "id": 4,
             "title": "Tes live",
             "description": "tests/rbac.live.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "User uji per role @envisions.app; bersihkan semua data uji.",
             "parentId": "74",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:52:53.541Z"
           }
         ],
-        "updatedAt": "2026-11-25T04:25:20.743Z"
+        "updatedAt": "2026-11-25T04:52:53.541Z"
       },
       {
         "id": "75",
@@ -3763,9 +3763,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-25T04:47:19.633Z",
+      "lastModified": "2026-11-25T04:52:53.541Z",
       "taskCount": 76,
-      "completedCount": 63,
+      "completedCount": 64,
       "tags": [
         "master"
       ]

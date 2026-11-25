@@ -15,6 +15,8 @@ export type ReleaseNoteRow = {
   /** Hanya untuk target_change. */
   oldTargetDate: string | null;
   newTargetDate: string | null;
+  /** Null bila akun penulis sudah dihapus. */
+  authorId: string | null;
   authorEmail: string;
   createdAt: string;
   editedAt: string | null;
@@ -34,11 +36,11 @@ export type NotesPage = {
 export type LatestNote = { id: string; body: string; createdAt: string };
 
 const NOTE_COLUMNS =
-  "id, release_id, kind, body, old_target_date, new_target_date, author_email, created_at, edited_at, edited_by_email";
+  "id, release_id, kind, body, old_target_date, new_target_date, author_id, author_email, created_at, edited_at, edited_by_email";
 
 type NoteDbRow = {
   id: string; release_id: string; kind: NoteKind; body: string; old_target_date: string | null;
-  new_target_date: string | null; author_email: string; created_at: string; edited_at: string | null;
+  new_target_date: string | null; author_id?: string | null; author_email: string; created_at: string; edited_at: string | null;
   edited_by_email: string | null;
 };
 
@@ -50,6 +52,7 @@ export function toNote(r: NoteDbRow): ReleaseNoteRow {
     body: r.body,
     oldTargetDate: r.old_target_date,
     newTargetDate: r.new_target_date,
+    authorId: r.author_id ?? null,
     authorEmail: r.author_email,
     createdAt: r.created_at,
     editedAt: r.edited_at,

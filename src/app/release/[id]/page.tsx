@@ -102,7 +102,13 @@ async function ReleaseDetailContent({ params, searchParams }: { params: Params; 
       <ReleaseDetailView
         overview={overview}
         heldBy={heldBy}
-        activity={<ReleaseActivity releaseId={rid} activity={activity} isAdmin={isAdmin} />}
+        activity={
+          <ReleaseActivity
+            releaseId={rid}
+            activity={activity}
+            access={{ userId: user.id, canAdd: can(user.role, "release.activity"), canChangeAll: isAdmin }}
+          />
+        }
         related={<RelatedNotes notes={related} />}
         actions={
           isAdmin ? (

@@ -10,7 +10,7 @@ import { buildFollowUp } from "@/lib/notes/follow-up";
 import { checkLinks, loadLinkOptions, rowToInput, type LinkOptions } from "@/lib/notes/links";
 import { getNote, loadActionItems, loadNoteLinks } from "@/lib/notes/load";
 import { todayWib } from "@/lib/notes/model";
-import { listUserOptions, type UserOption } from "@/lib/notes/users";
+import { listAssigneeOptions, type UserOption } from "@/lib/notes/users";
 import { isValidDate, UUID } from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
 
@@ -43,7 +43,7 @@ async function NewNoteContent({ searchParams }: { searchParams: SearchParams }) 
   let dropped = 0;
   try {
     const db = await createClient();
-    [users, options] = await Promise.all([listUserOptions(), loadLinkOptions(db)]);
+    [users, options] = await Promise.all([listAssigneeOptions(), loadLinkOptions(db)]);
 
     // ?followUp=<id>: catatan lanjutan dengan tautan dan action item terbuka dari catatan asal.
     const followUp = first(sp.followUp);

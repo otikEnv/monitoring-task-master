@@ -10,7 +10,7 @@ import { NoteForm, type NoteFormInitial } from "@/components/notes/note-form";
 import { requireAbility } from "@/lib/auth";
 import { loadLinkOptions, type LinkOptions } from "@/lib/notes/links";
 import { getNote, loadActionItems, loadNoteLinks, type ActionItemRow, type NoteLinkRow, type NoteRow } from "@/lib/notes/load";
-import { listUserOptions, type UserOption } from "@/lib/notes/users";
+import { listAssigneeOptions, type UserOption } from "@/lib/notes/users";
 import { UUID } from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,7 +41,9 @@ async function EditNoteContent({ params }: { params: Params }) {
     const db = await createClient();
     note = await getNote(db, nid);
     if (note) {
-      [items, links, users] = await Promise.all([loadActionItems(db, nid), loadNoteLinks(db, nid), listUserOptions()]);
+      [items, links] = await Promise.all([loadActionItems(db, nid), loadNoteLinks(db, nid)]);
+      // Penanggung jawab lama tetap bisa dipilih walau role-nya sekarang viewer atau akunnya nonaktif.
+      users = await listAssigneeOptions(items.flatMap((i) => (i.assigneeId ? [i.assigneeId] : [])));
       // Aplikasi dan release pada tautan lama tetap bisa dipilih walau sudah terarsip.
       options = await loadLinkOptions(db, {
         sourceIds: links.flatMap((l) => (l.sourceId ? [l.sourceId] : [])),
