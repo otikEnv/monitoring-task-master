@@ -3632,7 +3632,7 @@
         "id": "75",
         "title": "RBAC: halaman Settings (Users, Menu access, Activity)",
         "description": "/pengaturan/pengguna khusus superadmin: daftar user, role, Disable/Enable, Add user dengan password, Reset password, matriks menu, log perubahan.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "71",
@@ -3645,58 +3645,58 @@
             "id": 1,
             "title": "Tab Users",
             "description": "Tabel, pencarian, filter.",
-            "status": "pending",
+            "status": "done",
             "details": "Email (You), Role dropdown, Status, Sign-in method, Created, Last sign-in, aksi. Urut terbaru. Kartu di ponsel. Baris sendiri terkunci.",
             "parentId": "75",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:02:22.171Z"
           },
           {
             "id": 2,
             "title": "Add user dan Reset password",
             "description": "Dialog.",
-            "status": "pending",
+            "status": "done",
             "details": "Email @envisions.app, password minimal 8 dengan tampil/sembunyi, role bawaan Viewer. Email terdaftar: \"This email is already registered.\"",
             "parentId": "75",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:02:22.171Z"
           },
           {
             "id": 3,
             "title": "Disable dan Enable",
             "description": "Status akun.",
-            "status": "pending",
+            "status": "done",
             "details": "Fungsi SQL lalu ban/unban; konfirmasi; superadmin terakhir ditolak dengan pesan jelas.",
             "parentId": "75",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:02:22.171Z"
           },
           {
             "id": 4,
             "title": "Tab Menu access",
             "description": "Matriks menu x role.",
-            "status": "pending",
+            "status": "done",
             "details": "Checkbox Admin, Developer, Viewer; menu terkunci redup dengan tooltip; Save dan Discard; \"Unsaved changes\".",
             "parentId": "75",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:02:22.171Z"
           },
           {
             "id": 5,
             "title": "Tab Activity",
             "description": "Log perubahan.",
-            "status": "pending",
+            "status": "done",
             "details": "20 terbaru, Load more; tanpa password.",
             "parentId": "75",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:02:22.171Z"
           },
           {
             "id": 6,
             "title": "Sidebar",
             "description": "Item Settings dan label role.",
-            "status": "pending",
+            "status": "done",
             "details": "Settings di grup Manage hanya superadmin; label Superadmin/Admin/Developer/Viewer.",
             "parentId": "75",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:02:22.171Z"
           }
         ],
-        "updatedAt": "2026-11-25T04:25:20.743Z"
+        "updatedAt": "2026-11-25T05:02:22.171Z"
       },
       {
         "id": "76",
@@ -3763,9 +3763,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-25T04:52:53.541Z",
+      "lastModified": "2026-11-25T05:02:22.171Z",
       "taskCount": 76,
-      "completedCount": 64,
+      "completedCount": 65,
       "tags": [
         "master"
       ]

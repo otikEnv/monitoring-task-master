@@ -2,7 +2,7 @@
 
 import {
   Archive, CalendarDays, ChevronsUpDown, KeyRound, LayoutDashboard, ListChecks, LogOut, NotebookText, Rocket, Settings2,
-  TrendingUp,
+  ShieldCheck, TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,7 +15,7 @@ import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail,
 } from "@/components/ui/sidebar";
-import { ROLE_LABEL, allowedMenus, type MenuKey } from "@/lib/access";
+import { ROLE_LABEL, allowedMenus, can, type MenuKey } from "@/lib/access";
 import type { SessionUser } from "@/lib/auth";
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
@@ -27,9 +27,12 @@ const ICON: Record<MenuKey, typeof LayoutDashboard> = {
 
 /** Menu sidebar: hanya yang diizinkan untuk role ini (lihat src/lib/access.ts). */
 function navFor(user: SessionUser, group: "monitor" | "manage"): NavItem[] {
-  return allowedMenus(user)
+  const items: NavItem[] = allowedMenus(user)
     .filter((m) => m.group === group)
     .map((m) => ({ href: m.href, label: m.label, icon: ICON[m.key], exact: m.exact }));
+  // Settings (user, role, akses menu) hanya untuk superadmin.
+  if (group === "manage" && can(user.role, "settings")) items.push({ href: "/pengaturan/pengguna", label: "Settings", icon: ShieldCheck });
+  return items;
 }
 
 export function AppSidebar({ user }: { user: SessionUser }) {

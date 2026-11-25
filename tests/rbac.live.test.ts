@@ -6,6 +6,8 @@ import { listAssigneeOptions } from "@/lib/notes/users";
 import {
   NoteNotAllowedError, addReleaseNote, createRelease, deleteReleaseNote, editReleaseNote,
 } from "@/lib/releases/repo";
+import { loadMenuAccess, loadUserEvents, loadUsers } from "@/lib/users/load";
+import { UserAdminError, createUser, resetPassword, saveMenuAccess, setUserActive, setUserRole } from "@/lib/users/repo";
 
 /**
  * RBAC (PRD-RBAC.md) terhadap Supabase asli: role developer dan viewer pada fungsi tulis yang dipakai server action,
@@ -17,7 +19,7 @@ const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const ENABLED = Boolean(URL_ && ANON && SERVICE);
 
-type Key = "adm" | "dev" | "view";
+type Key = "adm" | "dev" | "view" | "sa";
 
 describe.skipIf(!ENABLED)("RBAC (Supabase asli)", () => {
   vi.setConfig({ testTimeout: 60_000 });
@@ -33,7 +35,7 @@ describe.skipIf(!ENABLED)("RBAC (Supabase asli)", () => {
 
   beforeAll(async () => {
     admin = createClient(URL_!, SERVICE!, opt);
-    for (const [k, role] of [["adm", "admin"], ["dev", "developer"], ["view", null]] as const) {
+    for (const [k, role] of [["adm", "admin"], ["dev", "developer"], ["view", null], ["sa", "superadmin"]] as const) {
       const email = `tmp-rbac-${run}-${k}@envisions.app`;
       const password = "Tmp!" + randomBytes(9).toString("base64url");
       const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
@@ -70,13 +72,17 @@ describe.skipIf(!ENABLED)("RBAC (Supabase asli)", () => {
     await admin.from("releases").delete().like("name", `TMP-RBAC-${run}-%`);
     await admin.from("sources").delete().like("name", `TMP-RBAC-${run}-%`);
     await admin.from("user_admin_events").delete().like("target_email", `tmp-rbac-${run}-%`);
+    await admin.from("user_admin_events").delete().like("actor_email", `tmp-rbac-${run}-%`);
     for (const u of Object.values(users)) if (u?.id) await admin.auth.admin.deleteUser(u.id);
+    for (const id of extraUsers) await admin.auth.admin.deleteUser(id);
   });
+  const extraUsers: string[] = [];
 
   it("akun baru = viewer; role yang diberikan sesudahnya berlaku", async () => {
     const { data } = await admin.from("profiles").select("user_id, role").in("user_id", Object.values(users).map((u) => u.id));
     const role = new Map((data ?? []).map((r) => [r.user_id, r.role]));
-    expect([role.get(users.adm.id), role.get(users.dev.id), role.get(users.view.id)]).toEqual(["admin", "developer", "viewer"]);
+    expect([role.get(users.adm.id), role.get(users.dev.id), role.get(users.view.id), role.get(users.sa.id)])
+      .toEqual(["admin", "developer", "viewer", "superadmin"]);
   });
 
   it("developer: berkomentar, mencentang action item miliknya", async () => {
@@ -137,5 +143,58 @@ describe.skipIf(!ENABLED)("RBAC (Supabase asli)", () => {
       p_actor: users.dev.id, p_actor_email: "x", p_target: users.dev.id, p_target_email: "x", p_role: "superadmin",
     });
     expect(r.error).toBeTruthy();
+  });
+
+  it("Settings: tambah user dengan role, terdaftar, ganti role, reset password, tercatat", async () => {
+    const sa = { id: users.sa.id, email: users.sa.email };
+    const email = `tmp-rbac-${run}-new@envisions.app`;
+    const t = await createUser(sa, { email, password: "Awal!" + randomBytes(6).toString("hex"), role: "developer" }, admin);
+    extraUsers.push(t.id);
+    const row = (await loadUsers(admin)).find((u) => u.id === t.id);
+    expect(row).toMatchObject({ email, role: "developer", disabled: false });
+    await expect(createUser(sa, { email, password: "Lain!12345", role: "viewer" }, admin)).rejects.toBeInstanceOf(UserAdminError);
+
+    await setUserRole(sa, t, "admin", admin);
+    const pw = "Baru!" + randomBytes(6).toString("hex");
+    await resetPassword(sa, t, pw, admin);
+    const c = createClient(URL_!, ANON!, opt);
+    expect((await c.auth.signInWithPassword({ email, password: pw })).error).toBeNull();
+
+    const { rows } = await loadUserEvents(users.sa.client, 50);
+    const mine = rows.filter((r) => r.targetEmail === email).map((r) => r.action);
+    expect(mine).toEqual(expect.arrayContaining(["user_created", "role_changed", "password_reset"]));
+    expect(JSON.stringify(rows)).not.toContain(pw);
+  });
+
+  it("Settings: disable mem-ban login dan sesi; enable membuka lagi; admin biasa ditolak", async () => {
+    const sa = { id: users.sa.id, email: users.sa.email };
+    const view = { id: users.view.id, email: users.view.email };
+    await expect(setUserActive({ id: users.adm.id, email: users.adm.email }, view, false, admin)).rejects.toBeInstanceOf(UserAdminError);
+    await expect(setUserActive(sa, sa, false, admin)).rejects.toBeInstanceOf(UserAdminError);
+
+    const email = `tmp-rbac-${run}-ban@envisions.app`;
+    const password = "Ban!" + randomBytes(6).toString("hex");
+    const t = await createUser(sa, { email, password, role: "viewer" }, admin);
+    extraUsers.push(t.id);
+    await setUserActive(sa, t, false, admin);
+    const c = createClient(URL_!, ANON!, opt);
+    expect((await c.auth.signInWithPassword({ email, password })).error).toBeTruthy();
+    expect((await loadUsers(admin)).find((u) => u.id === t.id)?.disabled).toBe(true);
+    await setUserActive(sa, t, true, admin);
+    expect((await c.auth.signInWithPassword({ email, password })).error).toBeNull();
+  });
+
+  it("Settings: akses menu disimpan per role lalu dikembalikan", async () => {
+    const sa = { id: users.sa.id, email: users.sa.email };
+    const before = await loadMenuAccess(admin);
+    try {
+      await saveMenuAccess(sa, "viewer", before.viewer.filter((m) => m !== "trend"), admin);
+      expect((await loadMenuAccess(users.view.client)).viewer).not.toContain("trend");
+      await expect(saveMenuAccess(sa, "viewer", [...before.viewer, "sources"], admin)).rejects.toBeInstanceOf(UserAdminError);
+    } finally {
+      await saveMenuAccess(sa, "viewer", before.viewer, admin);
+    }
+    expect((await loadMenuAccess(admin)).viewer).toEqual(before.viewer);
+    await admin.from("user_admin_events").delete().eq("actor_id", users.sa.id).eq("action", "menu_access_changed");
   });
 });
