@@ -15,6 +15,7 @@ import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail,
 } from "@/components/ui/sidebar";
+import { ROLE_LABEL } from "@/lib/access";
 import type { SessionUser } from "@/lib/auth";
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
@@ -31,8 +32,6 @@ const NAV: NavItem[] = [
 // Archive dapat dilihat semua pengguna (hanya admin yang bisa Restore); Source settings hanya untuk admin.
 const MANAGE_NAV: NavItem[] = [{ href: "/archive", label: "Archive", icon: Archive }];
 const ADMIN_NAV: NavItem[] = [{ href: "/pengaturan/sumber", label: "Source settings", icon: Settings2 }];
-
-const ROLE_LABEL: Record<SessionUser["role"], string> = { admin: "Admin", viewer: "Viewer" };
 
 export function AppSidebar({ user }: { user: SessionUser }) {
   const pathname = usePathname();

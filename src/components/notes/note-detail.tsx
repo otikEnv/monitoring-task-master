@@ -1,3 +1,4 @@
+import type { Role } from "@/lib/access";
 import Link from "next/link";
 import { History, ListChecks, Pencil } from "lucide-react";
 import { Markdown } from "@/components/markdown";
@@ -21,7 +22,7 @@ export function NoteDetailView({
   detail, user, links = [], followUp, now = new Date(),
 }: {
   detail: NoteDetail;
-  user: { id: string; role: "admin" | "viewer" };
+  user: { id: string; role: Role };
   /** Tautan beserta nama dan kondisinya. */
   links?: LinkView[];
   followUp?: React.ReactNode;

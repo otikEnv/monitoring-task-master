@@ -1,9 +1,10 @@
 const MESSAGES: Record<string, string> = {
   oauth: "Google sign-in failed. Try again.",
   domain: "Only verified @envisions.app Google accounts can sign in.",
+  disabled: "Your account has been disabled. Contact a superadmin.",
 };
 
-/** Pesan untuk kode ?error=... dari /auth/callback; kode lain diabaikan. */
+/** Pesan untuk kode ?error=... dari /auth/callback dan /auth/signout; kode lain diabaikan. */
 export function loginNoticeMessage(code: string | string[] | undefined): string | null {
   if (typeof code !== "string") return null;
   return Object.hasOwn(MESSAGES, code) ? MESSAGES[code] : null;

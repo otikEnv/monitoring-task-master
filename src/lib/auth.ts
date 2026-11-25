@@ -2,47 +2,80 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
+import { can, defaultMenus, isRole, menuAllowed, type Ability, type MenuKey, type Role } from "@/lib/access";
 import { createClient } from "@/lib/supabase/server";
 
-export type Role = "admin" | "viewer";
-export type SessionUser = { id: string; email: string; role: Role };
+export type { Role } from "@/lib/access";
+/** `menus`: menu yang diizinkan untuk role ini (role_menu_access). Superadmin selalu semua (lihat menuAllowed). */
+export type SessionUser = { id: string; email: string; role: Role; menus: string[] };
+
+type SessionState = { user: SessionUser } | { user: null; disabled: boolean };
 
 /**
- * Pengguna yang sedang login, atau null. Memakai getUser() (verifikasi ke server Auth),
- * bukan sekadar membaca cookie. Dimemoize per render.
+ * Sesi yang sedang login. Memakai getUser() (verifikasi ke server Auth), bukan sekadar membaca cookie. Akun yang
+ * dinonaktifkan dianggap tidak login (disabled: true) walaupun token sesinya masih berlaku. Dimemoize per render.
  */
-export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+const loadSession = cache(async (): Promise<SessionState> => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) return { user: null, disabled: false };
 
-  // RLS: pengguna hanya bisa membaca profilnya sendiri.
+  // RLS: pengguna hanya bisa membaca profilnya sendiri (superadmin dan admin: semua).
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, disabled_at")
     .eq("user_id", user.id)
     .maybeSingle();
+  if (profile?.disabled_at) return { user: null, disabled: true };
+  const role: Role = isRole(profile?.role) ? profile.role : "viewer";
 
-  return {
-    id: user.id,
-    email: user.email ?? "",
-    role: profile?.role === "admin" ? "admin" : "viewer",
-  };
+  let menus: string[] = defaultMenus(role);
+  if (role !== "superadmin") {
+    const { data, error } = await supabase.from("role_menu_access").select("menu").eq("role", role);
+    if (!error && data) menus = data.map((r) => r.menu as string);
+  }
+
+  return { user: { id: user.id, email: user.email ?? "", role, menus } };
 });
 
-/** Untuk halaman dan server action: alihkan ke /login bila belum login. */
+/** Pengguna yang sedang login dan aktif, atau null. */
+export async function getSessionUser(): Promise<SessionUser | null> {
+  return (await loadSession()).user;
+}
+
+/**
+ * Untuk halaman dan server action: bila tidak ada sesi yang sah, keluarkan sesinya lewat /auth/signout (cookie
+ * dihapus di sana) lalu ke /login. Langsung ke /login tidak cukup: proxy mengembalikan pengguna yang token-nya
+ * masih berlaku ke beranda.
+ */
 export async function requireUser(): Promise<SessionUser> {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const s = await loadSession();
+  if (!s.user) redirect(s.disabled ? "/auth/signout?reason=disabled" : "/auth/signout");
+  return s.user;
+}
+
+/** Halaman dan action yang butuh hak tertentu; tanpa hak dialihkan ke beranda. */
+export async function requireAbility(ability: Ability, menu?: MenuKey): Promise<SessionUser> {
+  const user = await requireUser();
+  if (!can(user.role, ability) || (menu && !menuAllowed(user, menu))) redirect("/");
   return user;
 }
 
-/** Untuk halaman dan server action khusus admin: viewer dialihkan ke beranda. */
-export async function requireAdmin(): Promise<SessionUser> {
+/** Hak kelola (admin dan superadmin): release, archive, source, sync, libur, membuat catatan. */
+export async function requireAdmin(menu?: MenuKey): Promise<SessionUser> {
+  return requireAbility("release.manage", menu);
+}
+
+export async function requireSuperadmin(): Promise<SessionUser> {
+  return requireAbility("settings");
+}
+
+/** Halaman di bawah sebuah menu: menu yang tidak diizinkan dialihkan ke Dashboard dengan pesan. */
+export async function requireMenu(menu: MenuKey): Promise<SessionUser> {
   const user = await requireUser();
-  if (user.role !== "admin") redirect("/");
+  if (!menuAllowed(user, menu)) redirect("/?notice=no-access");
   return user;
 }
 
@@ -50,15 +83,16 @@ export async function requireAdmin(): Promise<SessionUser> {
  * Untuk route handler: mengembalikan { user } atau { error: Response 401/403 }.
  *   const auth = await authorizeApi("admin");
  *   if ("error" in auth) return auth.error;
+ * "admin" = hak kelola (admin dan superadmin).
  */
-export async function authorizeApi(minRole: Role = "viewer") {
+export async function authorizeApi(minRole: "admin" | "viewer" = "viewer", menu?: MenuKey) {
   const user = await getSessionUser();
   if (!user) {
     return {
       error: NextResponse.json({ error: "Not signed in" }, { status: 401 }),
     } as const;
   }
-  if (minRole === "admin" && user.role !== "admin") {
+  if ((minRole === "admin" && !can(user.role, "release.manage")) || (menu && !menuAllowed(user, menu))) {
     return {
       error: NextResponse.json({ error: "Not allowed" }, { status: 403 }),
     } as const;

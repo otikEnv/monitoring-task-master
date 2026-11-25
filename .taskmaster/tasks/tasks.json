@@ -3479,7 +3479,7 @@
         "id": "72",
         "title": "RBAC: model role, sesi, dan penjaga di server",
         "description": "src/lib/access.ts (can, MENUS, menuAllowed), SessionUser dengan menus dan status nonaktif, requireMenu, requireAbility, requireSuperadmin.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "71"
@@ -3491,40 +3491,40 @@
             "id": 1,
             "title": "Model akses",
             "description": "src/lib/access.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "ROLES, ROLE_LABEL, ABILITIES (release.manage, note.create, note.comment, action.check, release.activity, settings), can(role, ability), MENUS (key, label, href, ikon, kunci per role), menuAllowed.",
             "parentId": "72",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:42:53.994Z"
           },
           {
             "id": 2,
             "title": "Sesi",
             "description": "src/lib/auth.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Role 4 nilai; getSessionUser membaca role, disabled_at, dan role_menu_access sekali per render; user nonaktif = null. requireAdmin = can(release.manage).",
             "parentId": "72",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:42:53.994Z"
           },
           {
             "id": 3,
             "title": "Penjaga baru",
             "description": "requireMenu, requireAbility, requireSuperadmin.",
-            "status": "pending",
+            "status": "done",
             "details": "requireMenu redirect ke /?notice=no-access; pesan di src/components/layout/notices.tsx. requireAbility(ability, menu?) untuk server action. authorizeApi tetap kompatibel.",
             "parentId": "72",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:42:53.994Z"
           },
           {
             "id": 4,
             "title": "Tes unit",
             "description": "tests/access.test.ts.",
-            "status": "pending",
+            "status": "done",
             "details": "Matriks hak di PRD dan menu terkunci.",
             "parentId": "72",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:42:53.994Z"
           }
         ],
-        "updatedAt": "2026-11-25T04:25:20.743Z"
+        "updatedAt": "2026-11-25T04:42:53.994Z"
       },
       {
         "id": "73",
@@ -3763,9 +3763,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-25T04:39:42.872Z",
+      "lastModified": "2026-11-25T04:42:53.994Z",
       "taskCount": 76,
-      "completedCount": 61,
+      "completedCount": 62,
       "tags": [
         "master"
       ]
