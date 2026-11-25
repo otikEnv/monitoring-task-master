@@ -5,9 +5,10 @@ import { AppShell } from "@/components/layout/app-shell";
 import { LoadError } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { can } from "@/lib/access";
 import { getArchive } from "@/lib/archive/load";
 import { parseArchiveParams } from "@/lib/archive/params";
-import { requireUser } from "@/lib/auth";
+import { requireMenu } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Archive" };
 
@@ -23,7 +24,7 @@ export default function ArchivePage({ searchParams }: { searchParams: SearchPara
 }
 
 async function ArchiveContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("archive");
   const params = parseArchiveParams(await searchParams);
 
   let data: Awaited<ReturnType<typeof getArchive>> | null = null;
@@ -47,7 +48,7 @@ async function ArchiveContent({ searchParams }: { searchParams: SearchParams }) 
           applications={data.applications}
           releases={data.releases}
           counts={data.counts}
-          isAdmin={user.role === "admin"}
+          isAdmin={can(user.role, "release.manage")}
         />
       )}
     </AppShell>

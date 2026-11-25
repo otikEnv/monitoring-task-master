@@ -19,7 +19,7 @@ function refreshHolidays() {
 
 /** Menambah (tanpa id) atau mengubah (dengan id) satu tanggal libur. */
 export async function saveHolidayAction(formData: FormData): Promise<SaveHolidayResult> {
-  await requireAdmin();
+  await requireAdmin("calendar");
   const rawId = formData.get("id");
   const editing = typeof rawId === "string" && rawId !== "";
   if (editing && !UUID.test(rawId)) return { ok: false, error: "Invalid holiday ID." };
@@ -38,7 +38,7 @@ export async function saveHolidayAction(formData: FormData): Promise<SaveHoliday
 }
 
 export async function removeHolidayAction(id: string): Promise<SimpleResult> {
-  await requireAdmin();
+  await requireAdmin("calendar");
   if (!UUID.test(id)) return { ok: false, error: "Invalid holiday ID." };
   try {
     await deleteHoliday(id.toLowerCase());

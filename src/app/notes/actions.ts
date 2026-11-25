@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin, requireUser } from "@/lib/auth";
+import { requireAbility } from "@/lib/auth";
 import {
   InvalidNoteError, NotAllowedError, NoteNotFoundError, addComment, deleteComment, deleteNote, editComment, saveNote,
   setActionItemDone, type Actor,
@@ -14,7 +14,7 @@ import { itemIndexes, linkIndexes, parseNoteForm, validateComment, type NoteFiel
 import { UUID } from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
 
-// Semua action di sini dipanggil dari klien lewat HTTP: requireAdmin()/requireUser() WAJIB di baris pertama
+// Semua action di sini dipanggil dari klien lewat HTTP: requireAbility() WAJIB di baris pertama
 // (server action adalah endpoint publik; pengecekan di UI saja tidak cukup). Pemeriksaan penulis dan penanggung
 // jawab dilakukan lagi oleh fungsi database.
 
@@ -52,7 +52,7 @@ const cleanId = (v: unknown): string | null => (typeof v === "string" && UUID.te
  * Sukses = redirect ke detail catatan.
  */
 export async function saveNoteAction(formData: FormData): Promise<SaveNoteResult> {
-  const user = await requireAdmin();
+  const user = await requireAbility("note.create", "notes");
 
   const rawId = formData.get("id");
   const editing = typeof rawId === "string" && rawId !== "";
@@ -103,7 +103,7 @@ export async function saveNoteAction(formData: FormData): Promise<SaveNoteResult
 
 /** Menghapus catatan (hanya penulisnya). Klien berpindah ke daftar setelah sukses. */
 export async function removeNoteAction(noteId: string): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAbility("note.create", "notes");
   const id = cleanId(noteId);
   if (!id) return { ok: false, error: "Invalid note ID." };
   try {
@@ -115,9 +115,9 @@ export async function removeNoteAction(noteId: string): Promise<SimpleResult> {
   return { ok: true };
 }
 
-/** Centang/batal centang action item: penulis catatan atau penanggung jawabnya (termasuk viewer). */
+/** Centang/batal centang action item: penulis catatan atau penanggung jawabnya (bukan viewer). */
 export async function toggleActionItemAction(itemId: string, done: boolean): Promise<SimpleResult> {
-  const user = await requireUser();
+  const user = await requireAbility("action.check", "notes");
   const id = cleanId(itemId);
   if (!id) return { ok: false, error: "Invalid action item ID." };
   try {
@@ -129,9 +129,9 @@ export async function toggleActionItemAction(itemId: string, done: boolean): Pro
   return { ok: true };
 }
 
-/** Komentar oleh semua pengguna login; `parentId` = balasan untuk komentar itu. */
+/** Komentar oleh superadmin, admin, dan developer; `parentId` = balasan untuk komentar itu. */
 export async function addCommentAction(noteId: string, body: string, parentId: string | null = null): Promise<SimpleResult> {
-  const user = await requireUser();
+  const user = await requireAbility("note.comment", "notes");
   const id = cleanId(noteId);
   if (!id) return { ok: false, error: "Invalid note ID." };
   const parent = parentId === null || parentId === undefined || parentId === "" ? null : cleanId(parentId);
@@ -150,7 +150,7 @@ export async function addCommentAction(noteId: string, body: string, parentId: s
 
 /** Mengubah komentar sendiri. */
 export async function editCommentAction(commentId: string, body: string): Promise<SimpleResult> {
-  const user = await requireUser();
+  const user = await requireAbility("note.comment", "notes");
   const id = cleanId(commentId);
   if (!id) return { ok: false, error: "Invalid comment ID." };
   const text = validateComment(body);
@@ -166,7 +166,7 @@ export async function editCommentAction(commentId: string, body: string): Promis
 
 /** Menghapus komentar sendiri. */
 export async function removeCommentAction(commentId: string): Promise<SimpleResult> {
-  const user = await requireUser();
+  const user = await requireAbility("note.comment", "notes");
   const id = cleanId(commentId);
   if (!id) return { ok: false, error: "Invalid comment ID." };
   try {

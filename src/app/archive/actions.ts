@@ -47,28 +47,28 @@ async function setRelease(id: string, archived: boolean): Promise<ArchiveResult>
 
 /** Menyembunyikan aplikasi dari tampilan sehari-hari. Data dan sinkronisasi tidak berubah. */
 export async function archiveSource(id: string): Promise<ArchiveResult> {
-  await requireAdmin();
+  await requireAdmin("archive");
   return setSource(id, true);
 }
 
 export async function restoreSource(id: string): Promise<ArchiveResult> {
-  await requireAdmin();
+  await requireAdmin("archive");
   return setSource(id, false);
 }
 
 export async function archiveRelease(id: string): Promise<ArchiveResult> {
-  await requireAdmin();
+  await requireAdmin("archive");
   return setRelease(id, true);
 }
 
 export async function restoreRelease(id: string): Promise<ArchiveResult> {
-  await requireAdmin();
+  await requireAdmin("archive");
   return setRelease(id, false);
 }
 
 /** Untuk dialog konfirmasi: berapa release berjalan yang masih memakai aplikasi ini. Hanya membaca. */
 export async function sourceArchiveImpact(id: string): Promise<ImpactResult> {
-  await requireAdmin();
+  await requireAdmin("archive");
   if (!UUID.test(id)) return { ok: false, error: "Invalid application ID." };
   try {
     return { ok: true, openReleases: await countOpenReleasesForSource(id.toLowerCase()) };

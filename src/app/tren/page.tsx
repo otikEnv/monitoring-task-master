@@ -8,7 +8,8 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { TrendCharts } from "@/components/trend/trend-charts";
 import { TrendControls } from "@/components/trend/trend-controls";
 import { TrendTiles } from "@/components/trend/trend-tiles";
-import { requireUser } from "@/lib/auth";
+import { can } from "@/lib/access";
+import { requireMenu } from "@/lib/auth";
 import { getTrend, type TrendData } from "@/lib/trend/data";
 import { RANGE_LABEL, parseTrendParams, summarizeTrend } from "@/lib/trend/series";
 
@@ -26,7 +27,7 @@ export default function TrendPage({ searchParams }: { searchParams: SearchParams
 }
 
 async function TrendContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("trend");
   const requested = parseTrendParams(await searchParams);
 
   let data: TrendData | null = null;
@@ -62,7 +63,7 @@ async function TrendContent({ searchParams }: { searchParams: SearchParams }) {
           {data.sources.length === 0 ? (
             <EmptyState>
               No applications are monitored yet.{" "}
-              {user.role === "admin" ? (
+              {can(user.role, "release.manage") ? (
                 <Link href="/pengaturan/sumber/baru" className="underline">Add a source</Link>
               ) : (
                 "Ask an admin to register an application."

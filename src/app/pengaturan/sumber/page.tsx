@@ -23,7 +23,7 @@ export default function SourcesPage() {
 }
 
 async function SourcesContent() {
-  const user = await requireAdmin();
+  const user = await requireAdmin("sources");
   const sources = await listSources();
 
   return (

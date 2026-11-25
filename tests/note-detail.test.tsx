@@ -9,6 +9,7 @@ vi.mock("@/app/notes/actions", () => ({
 
 import { NoteDetailView } from "@/components/notes/note-detail";
 import { NoteHistory } from "@/components/notes/note-history";
+import type { Role } from "@/lib/access";
 import type { NoteDetail, NoteRow, RevisionRow } from "@/lib/notes/load";
 
 const AUTHOR = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -41,7 +42,7 @@ function detail(extra: Partial<NoteDetail> = {}): NoteDetail {
   };
 }
 
-const render = (d: NoteDetail, user: { id: string; role: "admin" | "viewer" }) =>
+const render = (d: NoteDetail, user: { id: string; role: Role }) =>
   renderToStaticMarkup(<NoteDetailView detail={d} user={user} now={NOW} />);
 
 describe("NoteDetailView", () => {
@@ -67,24 +68,41 @@ describe("NoteDetailView", () => {
   });
 
   it("action item: Overdue, Carried over (tidak Overdue), dan hak centang", () => {
-    const viewerOwner = render(detail(), { id: OTHER, role: "viewer" });
-    expect(viewerOwner).toContain("Overdue");
-    expect(viewerOwner).toContain("Carried over");
-    expect(viewerOwner.match(/Overdue/g)).toHaveLength(1);
+    const devOwner = render(detail(), { id: OTHER, role: "developer" });
+    expect(devOwner).toContain("Overdue");
+    expect(devOwner).toContain("Carried over");
+    expect(devOwner.match(/Overdue/g)).toHaveLength(1);
     // Penanggung jawab i1 bisa mencentang i1; i2 (tanpa penanggung jawab) terkunci.
-    expect(viewerOwner).toMatch(/id="ai-i1" type="checkbox"(?![^>]*disabled="")/);
-    expect(viewerOwner).toMatch(/id="ai-i2" type="checkbox"[^>]*disabled=""/);
-    const stranger = render(detail(), { id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", role: "viewer" });
+    expect(devOwner).toMatch(/id="ai-i1" type="checkbox"(?![^>]*disabled="")/);
+    expect(devOwner).toMatch(/id="ai-i2" type="checkbox"[^>]*disabled=""/);
+    const stranger = render(detail(), { id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc", role: "developer" });
     expect(stranger).toMatch(/id="ai-i1" type="checkbox"[^>]*disabled=""/);
   });
 
-  it("komentar: penanda edited, menu hanya untuk komentar sendiri, kotak komentar untuk semua", () => {
-    const own = render(detail(), { id: OTHER, role: "viewer" });
+  it("viewer: tanpa kotak centang (status tetap terbaca), walau penanggung jawab", () => {
+    const viewerOwner = render(detail(), { id: OTHER, role: "viewer" });
+    expect(viewerOwner).not.toContain('type="checkbox"');
+    expect(viewerOwner).toContain('aria-label="Not done"');
+    expect(viewerOwner).toContain("Siapkan API");
+  });
+
+  it("komentar: penanda edited, menu hanya untuk komentar sendiri, kotak komentar untuk yang berhak", () => {
+    const own = render(detail(), { id: OTHER, role: "developer" });
     expect(own).toContain("Komentar saya");
     expect(own).toContain("(edited)");
     expect(own).toContain("Actions for your comment");
     expect(own).toContain("Add a comment");
     expect(render(detail(), { id: AUTHOR, role: "admin" })).not.toContain("Actions for your comment");
+  });
+
+  it("viewer hanya membaca komentar: tanpa kotak komentar, Reply, dan menu komentar lamanya", () => {
+    const out = render(detail(), { id: OTHER, role: "viewer" });
+    expect(out).toContain("Komentar saya");
+    expect(out).not.toContain("Add a comment");
+    expect(out).not.toMatch(/ Reply<\/button>/);
+    expect(render(detail(), { id: OTHER, role: "developer" })).toMatch(/ Reply<\/button>/);
+    expect(out).not.toContain("Actions for your comment");
+    expect(out).toContain("Read comments");
   });
 });
 

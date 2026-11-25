@@ -7,7 +7,7 @@ import { LoadError, Notice } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteForm, type NoteFormInitial } from "@/components/notes/note-form";
-import { requireAdmin } from "@/lib/auth";
+import { requireAbility } from "@/lib/auth";
 import { loadLinkOptions, type LinkOptions } from "@/lib/notes/links";
 import { getNote, loadActionItems, loadNoteLinks, type ActionItemRow, type NoteLinkRow, type NoteRow } from "@/lib/notes/load";
 import { listUserOptions, type UserOption } from "@/lib/notes/users";
@@ -27,7 +27,7 @@ export default function EditNotePage({ params }: { params: Params }) {
 }
 
 async function EditNoteContent({ params }: { params: Params }) {
-  const user = await requireAdmin();
+  const user = await requireAbility("note.create", "notes");
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const nid = id.toLowerCase();

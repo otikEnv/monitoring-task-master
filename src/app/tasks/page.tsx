@@ -8,7 +8,7 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { FilterBar } from "@/components/tasks/filter-bar";
 import { Pagination } from "@/components/tasks/pagination";
 import { TaskTable } from "@/components/tasks/task-table";
-import { requireUser } from "@/lib/auth";
+import { requireMenu } from "@/lib/auth";
 import { hasActiveFilters, parseTaskListParams } from "@/lib/tasks/list-params";
 import { getTaskList, type TaskListResult } from "@/lib/tasks/list";
 
@@ -26,7 +26,7 @@ export default function TasksPage({ searchParams }: { searchParams: SearchParams
 }
 
 async function TasksContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("tasks");
   const params = parseTaskListParams(await searchParams);
 
   let data: TaskListResult | null = null;

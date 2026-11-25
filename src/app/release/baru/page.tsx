@@ -22,7 +22,7 @@ export default function NewReleasePage({ searchParams }: { searchParams: SearchP
 }
 
 async function NewReleaseContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   const { source } = parseReleaseListParams(await searchParams);
 
   let sources: SourceOption[] | null = null;

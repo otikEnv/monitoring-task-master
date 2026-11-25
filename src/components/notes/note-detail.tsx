@@ -1,8 +1,8 @@
-import type { Role } from "@/lib/access";
 import Link from "next/link";
 import { History, ListChecks, Pencil } from "lucide-react";
 import { Markdown } from "@/components/markdown";
 import { buttonVariants } from "@/components/ui/button";
+import { can, type Role } from "@/lib/access";
 import { formatDateTime } from "@/lib/format";
 import { isOverdueItem, todayWib } from "@/lib/notes/model";
 import type { NoteDetail } from "@/lib/notes/load";
@@ -29,7 +29,8 @@ export function NoteDetailView({
   now?: Date;
 }) {
   const { note, items, comments } = detail;
-  const isAuthor = note.authorId !== null && note.authorId === user.id && user.role === "admin";
+  const isAuthor = note.authorId !== null && note.authorId === user.id && can(user.role, "note.create");
+  const canComment = can(user.role, "note.comment");
   const today = todayWib(now);
 
   const itemViews: ActionItemView[] = items.map((it) => ({
@@ -150,14 +151,14 @@ export function NoteDetailView({
           {items.length === 0 ? (
             <p className="text-sm text-muted-foreground">No action items.</p>
           ) : (
-            <NoteActionItems items={itemViews} userId={user.id} isAuthor={isAuthor} />
+            <NoteActionItems items={itemViews} userId={user.id} isAuthor={isAuthor} canCheck={can(user.role, "action.check")} />
           )}
         </section>
 
         {/* Ponsel: komentar lewat bilah di bawah layar (MobileCommentsBar), bukan di sini. */}
-        <NoteComments noteId={note.id} comments={commentViews} className="hidden lg:flex" />
+        <NoteComments noteId={note.id} comments={commentViews} canComment={canComment} className="hidden lg:flex" />
       </aside>
-      <MobileCommentsBar noteId={note.id} comments={commentViews} />
+      <MobileCommentsBar noteId={note.id} comments={commentViews} canComment={canComment} />
     </div>
   );
 }

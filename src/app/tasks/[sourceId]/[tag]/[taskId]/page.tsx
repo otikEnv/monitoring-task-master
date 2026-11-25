@@ -6,7 +6,7 @@ import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { RelatedNotes } from "@/components/notes/note-links";
 import { TaskDetailView } from "@/components/tasks/task-detail";
-import { requireUser } from "@/lib/auth";
+import { requireMenu } from "@/lib/auth";
 import { loadRelatedNotes } from "@/lib/notes/links";
 import type { NoteRow } from "@/lib/notes/load";
 import { createClient } from "@/lib/supabase/server";
@@ -27,7 +27,7 @@ export default function TaskDetailPage({ params }: { params: Params }) {
 }
 
 async function TaskDetailContent({ params }: { params: Params }) {
-  const user = await requireUser();
+  const user = await requireMenu("tasks");
   // Segmen URL pada halaman datang masih ter-encode; parseDetailKey men-decode dan memvalidasinya.
   const key = parseDetailKey(await params);
   if (!key) notFound();

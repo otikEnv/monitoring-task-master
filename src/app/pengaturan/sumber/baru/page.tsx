@@ -19,7 +19,7 @@ export default function NewSourcePage() {
 }
 
 async function NewSourceContent() {
-  const user = await requireAdmin();
+  const user = await requireAdmin("sources");
   return (
     <AppShell user={user} width="narrow">
       <PageHeader title="Add source" description="Register a repo whose task master file will be monitored." />

@@ -9,7 +9,8 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteFilter } from "@/components/notes/note-filter";
 import { NoteList } from "@/components/notes/note-list";
 import { buttonVariants } from "@/components/ui/button";
-import { requireUser } from "@/lib/auth";
+import { can } from "@/lib/access";
+import { requireMenu } from "@/lib/auth";
 import { loadAppOptions, loadNoteList, type NoteListPage } from "@/lib/notes/list";
 import { calendarMonthFor, hasNoteFilters, parseNoteListParams } from "@/lib/notes/list-params";
 import { createClient } from "@/lib/supabase/server";
@@ -27,9 +28,9 @@ export default function NotesPage({ searchParams }: { searchParams: SearchParams
 }
 
 async function NotesContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("notes");
   const params = parseNoteListParams(await searchParams);
-  const isAdmin = user.role === "admin";
+  const isAdmin = can(user.role, "note.create");
 
   let list: NoteListPage | null = null;
   let apps: { id: string; name: string }[] = [];

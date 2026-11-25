@@ -24,7 +24,7 @@ export default function EditSourcePage({ params }: { params: Promise<{ id: strin
 }
 
 async function EditSourceContent({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireAdmin();
+  const user = await requireAdmin("sources");
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 

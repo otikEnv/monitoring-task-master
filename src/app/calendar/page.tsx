@@ -9,7 +9,8 @@ import { LoadError } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { buttonVariants } from "@/components/ui/button";
-import { requireUser } from "@/lib/auth";
+import { can } from "@/lib/access";
+import { requireMenu } from "@/lib/auth";
 import { loadCalendar } from "@/lib/calendar/data";
 import { buildDays, parseCalendarParams, visibleDays, type CalendarData } from "@/lib/calendar/model";
 import { loadAppOptions } from "@/lib/notes/list";
@@ -28,7 +29,7 @@ export default function CalendarPage({ searchParams }: { searchParams: SearchPar
 }
 
 async function CalendarContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("calendar");
   const now = new Date();
   const params = parseCalendarParams(await searchParams, now);
   const days = visibleDays(params);
@@ -42,7 +43,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
     console.error("[calendar] gagal memuat", { error: (e as Error)?.name });
   }
 
-  const isAdmin = user.role === "admin";
+  const isAdmin = can(user.role, "release.manage");
   // Revisi SKB libur dilakukan admin di halaman Holidays; tautan membawa tahun yang sedang dilihat.
   const year = (params.view === "week" ? params.week : params.month).slice(0, 4);
   return (

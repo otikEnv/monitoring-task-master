@@ -9,7 +9,8 @@ import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { ReleaseCard } from "@/components/releases/release-card";
 import { ReleaseFilter } from "@/components/releases/release-filter";
 import { buttonVariants } from "@/components/ui/button";
-import { requireUser } from "@/lib/auth";
+import { can } from "@/lib/access";
+import { requireMenu } from "@/lib/auth";
 import { loadReleaseOverviews, type ReleaseOverview } from "@/lib/releases/load";
 import { parseReleaseListParams } from "@/lib/releases/params";
 import { createClient } from "@/lib/supabase/server";
@@ -28,9 +29,9 @@ export default function ReleasePage({ searchParams }: { searchParams: SearchPara
 }
 
 async function ReleaseContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("release");
   const params = parseReleaseListParams(await searchParams);
-  const isAdmin = user.role === "admin";
+  const isAdmin = can(user.role, "release.manage");
 
   let data: { overviews: ReleaseOverview[]; sources: { id: string; name: string }[] } | null = null;
   try {

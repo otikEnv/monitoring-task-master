@@ -4,7 +4,8 @@ const NOTE = "22222222-2222-4222-8222-222222222222";
 const ITEM = "33333333-3333-4333-8333-333333333333";
 const USER = "44444444-4444-4444-8444-444444444444";
 const ADMIN = { id: "u1", email: "admin@envisions.app", role: "admin" };
-const VIEWER = { id: "u9", email: "viewer@envisions.app", role: "viewer" };
+// Komentar dan centang action item: developer (viewer ditolak oleh requireAbility; lihat tests/auth-session.test.ts).
+const VIEWER = { id: "u9", email: "viewer@envisions.app", role: "developer" };
 
 class Redirected extends Error {
   constructor(public to: string) { super(`redirect:${to}`); }
@@ -13,6 +14,7 @@ class Redirected extends Error {
 const m = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
   requireUser: vi.fn(),
+  requireAbility: vi.fn(),
   saveNote: vi.fn(),
   deleteNote: vi.fn(),
   setActionItemDone: vi.fn(),
@@ -30,7 +32,7 @@ const m = vi.hoisted(() => ({
   createClient: vi.fn(),
 }));
 
-vi.mock("@/lib/auth", () => ({ requireAdmin: m.requireAdmin, requireUser: m.requireUser }));
+vi.mock("@/lib/auth", () => ({ requireAdmin: m.requireAdmin, requireUser: m.requireUser, requireAbility: m.requireAbility }));
 vi.mock("next/cache", () => ({ revalidatePath: m.revalidatePath }));
 vi.mock("next/navigation", () => ({ redirect: m.redirect }));
 vi.mock("@/lib/notes/users", () => ({ resolveAssignees: m.resolveAssignees }));
@@ -74,6 +76,8 @@ beforeEach(() => {
   vi.resetAllMocks();
   m.requireAdmin.mockResolvedValue(ADMIN);
   m.requireUser.mockResolvedValue(VIEWER);
+  // note.create = hak admin; note.comment dan action.check = pengguna dengan hak komentar.
+  m.requireAbility.mockImplementation((ability: string) => (ability === "note.create" ? m.requireAdmin() : m.requireUser()));
   m.redirect.mockImplementation((to: string) => { throw new Redirected(to); });
   m.resolveAssignees.mockResolvedValue(new Map([[USER, "dev@envisions.app"]]));
   m.saveNote.mockResolvedValue({ id: NOTE });

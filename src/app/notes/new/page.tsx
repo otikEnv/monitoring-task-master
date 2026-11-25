@@ -5,7 +5,7 @@ import { LoadError, Notice } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteForm, type NoteFormInitial } from "@/components/notes/note-form";
-import { requireAdmin } from "@/lib/auth";
+import { requireAbility } from "@/lib/auth";
 import { buildFollowUp } from "@/lib/notes/follow-up";
 import { checkLinks, loadLinkOptions, rowToInput, type LinkOptions } from "@/lib/notes/links";
 import { getNote, loadActionItems, loadNoteLinks } from "@/lib/notes/load";
@@ -29,7 +29,7 @@ export default function NewNotePage({ searchParams }: { searchParams: SearchPara
 }
 
 async function NewNoteContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireAdmin();
+  const user = await requireAbility("note.create", "notes");
   const sp = await searchParams;
   // ?date= dari Calendar (tanggal yang diklik); tidak valid = hari ini.
   const date = first(sp.date);

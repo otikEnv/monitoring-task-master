@@ -8,7 +8,8 @@ import { RelatedNotes } from "@/components/notes/note-links";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { ReleaseActivity } from "@/components/releases/release-activity";
 import { ReleaseDetailView } from "@/components/releases/release-detail";
-import { requireUser } from "@/lib/auth";
+import { can } from "@/lib/access";
+import { requireMenu } from "@/lib/auth";
 import { yearsWithHolidays } from "@/lib/notes/holidays";
 import { loadRelatedNotes } from "@/lib/notes/links";
 import { yearsInRange } from "@/lib/releases/workdays";
@@ -40,7 +41,7 @@ export default function ReleaseDetailPage({ params, searchParams }: { params: Pa
 }
 
 async function ReleaseDetailContent({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("release");
   const { id } = await params;
   const page = pageFrom((await searchParams).page);
   if (!UUID.test(id)) notFound();
@@ -89,7 +90,7 @@ async function ReleaseDetailContent({ params, searchParams }: { params: Params; 
     }
   }
 
-  const isAdmin = user.role === "admin";
+  const isAdmin = can(user.role, "release.manage");
   return (
     <AppShell user={user} width="normal">
       {missingYears.length > 0 && (

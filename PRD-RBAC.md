@@ -75,7 +75,8 @@ Role menentukan aksi tulis. Menu yang bisa dibuka diatur terpisah lewat [akses m
 | --- | :---: | :---: | :---: | :---: |
 | Membuka Settings: user, role, akses menu, activity | ✓ | – | – | – |
 | Membuat, mengubah, menghapus release; Hold, Resume, Released | ✓ | ✓ | – | – |
-| Archive dan Restore; Source settings; sync manual | ✓ | ✓ | – | – |
+| Archive dan Restore; Source settings | ✓ | ✓ | – | – |
+| Tombol Refresh (sinkron data dari repo) | ✓ | ✓ | ✓ | ✓ |
 | Mengelola libur nasional dan cuti bersama | ✓ | ✓ | – | – |
 | Membuat catatan; mengubah dan menghapus catatan miliknya | ✓ | ✓ | – | – |
 | Berkomentar dan membalas di catatan; mengubah dan menghapus komentar miliknya | ✓ | ✓ | ✓ | – |
@@ -85,6 +86,8 @@ Role menentukan aksi tulis. Menu yang bisa dibuka diatur terpisah lewat [akses m
 | Melihat semua data di menu yang diizinkan | ✓ | ✓ | ✓ | ✓ |
 
 **Aturan yang tetap berlaku**
+
+- Tombol Refresh tetap untuk semua role: tombol itu hanya mengambil data terbaru dari repo, bukan membuat atau mengubah isi.
 
 - Catatan dan komentar hanya bisa diubah dan dihapus penulisnya, untuk semua role. Superadmin pun tidak bisa mengubah catatan milik orang lain.
 - Entri sistem di activity release (Hold, Resume, Target change, Released) tetap tidak bisa dihapus.

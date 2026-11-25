@@ -41,7 +41,7 @@ const idFrom = (fd: FormData): string | null => {
  * Sukses = redirect ke detail release.
  */
 export async function saveRelease(formData: FormData): Promise<SaveReleaseResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
 
   const id = idFrom(formData);
   const editing = formData.get("id") !== null && formData.get("id") !== "";
@@ -86,7 +86,7 @@ export async function saveRelease(formData: FormData): Promise<SaveReleaseResult
 
 /** Menandai rilis (tanggal hari ini menurut WIB) atau membatalkan tandanya. */
 export async function markReleased(id: string, released: boolean): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   try {
     // Menandai rilis saat release di-hold mengakhiri hold dan mencatatnya (dikerjakan database dalam satu transaksi).
@@ -120,7 +120,7 @@ function refreshRelease(id: string) {
 
 /** Menahan release dengan alasan wajib (1-500 karakter). Tanggal target dan angka progres tidak berubah. */
 export async function putOnHold(id: string, reason: string): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   const text = validateHoldReason(reason);
   if (!text.ok) return { ok: false, error: text.error };
@@ -136,7 +136,7 @@ export async function putOnHold(id: string, reason: string): Promise<SimpleResul
 
 /** Melanjutkan release yang ditahan; alasan opsional. */
 export async function resumeHold(id: string, reason = ""): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   const text = validateResumeReason(reason);
   if (!text.ok) return { ok: false, error: text.error };
@@ -152,7 +152,7 @@ export async function resumeHold(id: string, reason = ""): Promise<SimpleResult>
 
 /** Menambah catatan bebas (1-2000 karakter) pada log release. */
 export async function addNote(id: string, body: string): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   const text = validateNoteBody(body);
   if (!text.ok) return { ok: false, error: text.error };
@@ -171,7 +171,7 @@ export async function addNote(id: string, body: string): Promise<SimpleResult> {
  * database. Batas panjang mengikuti jenis entri (catatan 2000; hold dan alasan target 500; resume boleh kosong).
  */
 export async function editNote(noteId: string, body: string): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   if (!UUID.test(noteId)) return { ok: false, error: "Invalid note ID." };
   const nid = noteId.toLowerCase();
   try {
@@ -192,7 +192,7 @@ export async function editNote(noteId: string, body: string): Promise<SimpleResu
  * Target change, Released) tidak bisa dihapus: ditolak di sini sebelum menyentuh data, dan lagi oleh database.
  */
 export async function deleteNote(noteId: string): Promise<SimpleResult> {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   if (!UUID.test(noteId)) return { ok: false, error: "Invalid note ID." };
   const nid = noteId.toLowerCase();
   try {
@@ -208,7 +208,7 @@ export async function deleteNote(noteId: string): Promise<SimpleResult> {
 }
 
 export async function removeRelease(id: string): Promise<SimpleResult> {
-  await requireAdmin();
+  await requireAdmin("release");
   if (!UUID.test(id)) return { ok: false, error: "Invalid release ID." };
   try {
     await deleteRelease(id);
@@ -225,7 +225,7 @@ export async function removeRelease(id: string): Promise<SimpleResult> {
 export async function previewRange(
   sourceId: string, tag: string, rangeStart: string, rangeEnd: string,
 ): Promise<PreviewResult> {
-  await requireAdmin();
+  await requireAdmin("release");
   const start = parseRangeNumber(String(rangeStart));
   const end = parseRangeNumber(String(rangeEnd));
   if (!UUID.test(sourceId) || !tag || tag.length > 100 || start === null || end === null || start > end) {

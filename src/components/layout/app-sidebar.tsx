@@ -15,23 +15,22 @@ import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail,
 } from "@/components/ui/sidebar";
-import { ROLE_LABEL } from "@/lib/access";
+import { ROLE_LABEL, allowedMenus, type MenuKey } from "@/lib/access";
 import type { SessionUser } from "@/lib/auth";
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 
-const NAV: NavItem[] = [
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/tasks", label: "Task list", icon: ListChecks },
-  { href: "/release", label: "Release", icon: Rocket },
-  { href: "/tren", label: "Trend", icon: TrendingUp },
-  { href: "/notes", label: "Notes", icon: NotebookText },
-];
+const ICON: Record<MenuKey, typeof LayoutDashboard> = {
+  calendar: CalendarDays, dashboard: LayoutDashboard, tasks: ListChecks, release: Rocket, trend: TrendingUp,
+  notes: NotebookText, archive: Archive, sources: Settings2,
+};
 
-// Archive dapat dilihat semua pengguna (hanya admin yang bisa Restore); Source settings hanya untuk admin.
-const MANAGE_NAV: NavItem[] = [{ href: "/archive", label: "Archive", icon: Archive }];
-const ADMIN_NAV: NavItem[] = [{ href: "/pengaturan/sumber", label: "Source settings", icon: Settings2 }];
+/** Menu sidebar: hanya yang diizinkan untuk role ini (lihat src/lib/access.ts). */
+function navFor(user: SessionUser, group: "monitor" | "manage"): NavItem[] {
+  return allowedMenus(user)
+    .filter((m) => m.group === group)
+    .map((m) => ({ href: m.href, label: m.label, icon: ICON[m.key], exact: m.exact }));
+}
 
 export function AppSidebar({ user }: { user: SessionUser }) {
   const pathname = usePathname();
@@ -76,8 +75,8 @@ export function AppSidebar({ user }: { user: SessionUser }) {
       </SidebarHeader>
 
       <SidebarContent>
-        {group("Monitor", NAV)}
-        {group("Manage", user.role === "admin" ? [...MANAGE_NAV, ...ADMIN_NAV] : MANAGE_NAV)}
+        {group("Monitor", navFor(user, "monitor"))}
+        {navFor(user, "manage").length > 0 && group("Manage", navFor(user, "manage"))}
       </SidebarContent>
 
       <SidebarFooter>

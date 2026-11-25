@@ -32,7 +32,7 @@ const idFrom = (fd: FormData): string | null => {
 
 /** Menyimpan sumber baru (tanpa id) atau perubahan (dengan id). Sukses = redirect ke daftar. */
 export async function saveSource(formData: FormData): Promise<SaveResult> {
-  await requireAdmin();
+  await requireAdmin("sources");
 
   const id = idFrom(formData);
   const editing = formData.get("id") !== null && formData.get("id") !== "";
@@ -61,7 +61,7 @@ export async function saveSource(formData: FormData): Promise<SaveResult> {
  * Saat mengedit, token yang dikosongkan berarti "pakai token tersimpan".
  */
 export async function testConnection(formData: FormData): Promise<TestResult> {
-  await requireAdmin();
+  await requireAdmin("sources");
 
   const id = idFrom(formData);
   const parsed = parseSourceForm(formData, { requireToken: false });
@@ -86,7 +86,7 @@ export async function testConnection(formData: FormData): Promise<TestResult> {
 }
 
 export async function setActive(id: string, isActive: boolean): Promise<SimpleResult> {
-  await requireAdmin();
+  await requireAdmin("sources");
   if (!UUID.test(id)) return { ok: false, error: "Invalid source ID." };
   try {
     await setSourceActive(id, isActive);
@@ -100,7 +100,7 @@ export async function setActive(id: string, isActive: boolean): Promise<SimpleRe
 }
 
 export async function removeSource(id: string): Promise<SimpleResult> {
-  await requireAdmin();
+  await requireAdmin("sources");
   if (!UUID.test(id)) return { ok: false, error: "Invalid source ID." };
   try {
     await deleteSource(id);

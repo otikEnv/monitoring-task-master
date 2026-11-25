@@ -23,7 +23,7 @@ export default function EditReleasePage({ params }: { params: Promise<{ id: stri
 }
 
 async function EditReleaseContent({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireAdmin();
+  const user = await requireAdmin("release");
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 

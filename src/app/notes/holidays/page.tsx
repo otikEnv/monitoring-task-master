@@ -26,7 +26,7 @@ export default function HolidaysPage({ searchParams }: { searchParams: SearchPar
 }
 
 async function HolidaysContent({ searchParams }: { searchParams: SearchParams }) {
-  const user = await requireAdmin();
+  const user = await requireAdmin("calendar");
   const raw = (await searchParams).year;
   const v = Array.isArray(raw) ? raw[0] : raw;
   const year = v && /^(19|20|21)\d{2}$/.test(v) ? Number(v) : Number(todayWib().slice(0, 4));

@@ -7,7 +7,7 @@ import { LoadError } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteHistory } from "@/components/notes/note-history";
-import { requireUser } from "@/lib/auth";
+import { requireMenu } from "@/lib/auth";
 import { getNote, loadRevisions, type NoteRow, type RevisionRow } from "@/lib/notes/load";
 import { UUID } from "@/lib/releases/validate";
 import { createClient } from "@/lib/supabase/server";
@@ -26,7 +26,7 @@ export default function NoteHistoryPage({ params, searchParams }: { params: Para
 }
 
 async function NoteHistoryContent({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
-  const user = await requireUser();
+  const user = await requireMenu("notes");
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const nid = id.toLowerCase();

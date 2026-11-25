@@ -3530,7 +3530,7 @@
         "id": "73",
         "title": "RBAC: terapkan hak di semua halaman, aksi, dan tampilan",
         "description": "requireMenu di setiap page.tsx, requireAbility di server action, tombol mengikuti can(), viewer murni view.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "72"
@@ -3542,40 +3542,40 @@
             "id": 1,
             "title": "Halaman",
             "description": "requireMenu per menu.",
-            "status": "pending",
+            "status": "done",
             "details": "Calendar, Task list, Release (daftar, detail, baru, ubah), Trend, Notes (semua halaman), Archive, Source settings.",
             "parentId": "73",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:47:19.633Z"
           },
           {
             "id": 2,
             "title": "Server action dan API",
             "description": "requireAbility.",
-            "status": "pending",
+            "status": "done",
             "details": "Release, archive, source, sync, holidays, notes; pesan galat tetap aman.",
             "parentId": "73",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:47:19.633Z"
           },
           {
             "id": 3,
             "title": "Tampilan",
             "description": "Ganti role === \"admin\" dengan can().",
-            "status": "pending",
+            "status": "done",
             "details": "Semua komponen yang menerima role atau isAdmin; superadmin mendapat semua tombol admin.",
             "parentId": "73",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:47:19.633Z"
           },
           {
             "id": 4,
             "title": "Viewer murni view di Notes",
             "description": "Tanpa kotak komentar dan checkbox.",
-            "status": "pending",
+            "status": "done",
             "details": "note-comments (panel, sheet, MobileCommentsBar) dan note-action-items; komentar lama tetap terbaca.",
             "parentId": "73",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:47:19.633Z"
           }
         ],
-        "updatedAt": "2026-11-25T04:25:20.743Z"
+        "updatedAt": "2026-11-25T04:47:19.633Z"
       },
       {
         "id": "74",
@@ -3763,9 +3763,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-25T04:42:53.994Z",
+      "lastModified": "2026-11-25T04:47:19.633Z",
       "taskCount": 76,
-      "completedCount": 62,
+      "completedCount": 63,
       "tags": [
         "master"
       ]

@@ -8,7 +8,8 @@ import { LoadError } from "@/components/layout/notices";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { NoteDetailView } from "@/components/notes/note-detail";
 import { buttonVariants } from "@/components/ui/button";
-import { requireUser } from "@/lib/auth";
+import { can } from "@/lib/access";
+import { requireMenu } from "@/lib/auth";
 import { resolveLinkViews, type LinkView } from "@/lib/notes/links";
 import { getNoteDetail, type NoteDetail } from "@/lib/notes/load";
 import { markNoteRead } from "@/lib/notes/repo";
@@ -29,7 +30,7 @@ export default function NoteDetailPage({ params }: { params: Params }) {
 }
 
 async function NoteDetailContent({ params }: { params: Params }) {
-  const user = await requireUser();
+  const user = await requireMenu("notes");
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const nid = id.toLowerCase();
@@ -64,7 +65,7 @@ async function NoteDetailContent({ params }: { params: Params }) {
         user={user}
         links={links}
         followUp={
-          user.role === "admin" ? (
+          can(user.role, "note.create") ? (
             <Link href={`/notes/new?followUp=${detail.note.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
               <CornerDownRight aria-hidden="true" /> Follow up
             </Link>

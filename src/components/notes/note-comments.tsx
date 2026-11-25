@@ -224,12 +224,16 @@ function CommentItem({ c, onReply }: { c: CommentView; onReply?: () => void }) {
 }
 
 /** Satu utas: komentar utama, balasannya (menjorok), dan kotak balasan. */
-function ThreadItem({ noteId, thread, idPrefix }: { noteId: string; thread: Thread; idPrefix: string }) {
+function ThreadItem({
+  noteId, thread, idPrefix, canComment,
+}: { noteId: string; thread: Thread; idPrefix: string; canComment: boolean }) {
   const [replying, setReplying] = useState(false);
   const { root, replies } = thread;
+  // Viewer hanya membaca: tanpa Reply, dan komentar lamanya tidak bisa diubah atau dihapus.
+  const view = (c: CommentView) => (canComment ? c : { ...c, mine: false });
   return (
     <li className="space-y-3 py-3 first:pt-0 last:pb-0">
-      <CommentItem c={root} onReply={root.deleted ? undefined : () => setReplying(true)} />
+      <CommentItem c={view(root)} onReply={root.deleted || !canComment ? undefined : () => setReplying(true)} />
       {(replies.length > 0 || replying) && (
         <div className="ml-3 space-y-3 border-l-2 pl-4 sm:ml-4">
           {replies.length > 0 && (
@@ -239,20 +243,20 @@ function ThreadItem({ noteId, thread, idPrefix }: { noteId: string; thread: Thre
                   <CornerDownRight aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
                     {/* Membalas balasan tetap masuk utas ini (satu tingkat). */}
-                    <CommentItem c={r} onReply={() => setReplying(true)} />
+                    <CommentItem c={view(r)} onReply={canComment ? () => setReplying(true) : undefined} />
                   </div>
                 </li>
               ))}
             </ul>
           )}
-          {replying ? (
+          {replying && canComment ? (
             <CommentBox
               noteId={noteId} parentId={root.id} label="Reply" placeholder="Write a reply…" submitLabel="Reply" autoFocus
               idPrefix={idPrefix}
               onDone={() => setReplying(false)} onCancel={() => setReplying(false)}
             />
           ) : (
-            !root.deleted && replies.length > 0 && (
+            canComment && !root.deleted && replies.length > 0 && (
               <button
                 type="button" onClick={() => setReplying(true)}
                 className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
@@ -269,13 +273,13 @@ function ThreadItem({ noteId, thread, idPrefix }: { noteId: string; thread: Thre
 
 /**
  * Bagian Comments: utas komentar (komentar utama dengan balasan satu tingkat), urut terlama, dan kotak komentar
- * baru untuk semua pengguna login.
+ * baru bila `canComment` (superadmin, admin, developer). Viewer hanya membaca.
  *  - "panel": kotak di halaman. Di panel kanan desktop judul tetap, daftar scroll sendiri, kotak tulis di bawah.
  *  - "sheet": isi sheet komentar di ponsel (tanpa kotak; daftar scroll sendiri, kotak tulis selalu di bawah).
  */
 export function NoteComments({
-  noteId, comments, variant = "panel", className,
-}: { noteId: string; comments: CommentView[]; variant?: "panel" | "sheet"; className?: string }) {
+  noteId, comments, canComment, variant = "panel", className,
+}: { noteId: string; comments: CommentView[]; canComment: boolean; variant?: "panel" | "sheet"; className?: string }) {
   const threads = toThreads(comments);
   const count = comments.filter((c) => !c.deleted).length;
   const sheet = variant === "sheet";
@@ -298,16 +302,18 @@ export function NoteComments({
           <p className="text-sm text-muted-foreground">No comments yet.</p>
         ) : (
           <ul className="divide-y">
-            {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} idPrefix={prefix} />)}
+            {threads.map((t) => <ThreadItem key={t.root.id} noteId={noteId} thread={t} idPrefix={prefix} canComment={canComment} />)}
           </ul>
         )}
       </div>
-      <div className={cn("border-t pt-3", sheet ? "shrink-0" : "lg:shrink-0")}>
-        <CommentBox
-          noteId={noteId} parentId={null} label="Add a comment" placeholder="Write a new comment…" submitLabel="Comment"
-          idPrefix={prefix}
-        />
-      </div>
+      {canComment && (
+        <div className={cn("border-t pt-3", sheet ? "shrink-0" : "lg:shrink-0")}>
+          <CommentBox
+            noteId={noteId} parentId={null} label="Add a comment" placeholder="Write a new comment…" submitLabel="Comment"
+            idPrefix={prefix}
+          />
+        </div>
+      )}
     </section>
   );
 }
@@ -316,7 +322,9 @@ export function NoteComments({
  * Ponsel dan tablet: bilah komentar yang menempel di bawah layar. Mengetuknya membuka sheet dari bawah berisi
  * komentar dan kotak tulis, sehingga tidak perlu scroll ke bawah catatan yang panjang. Desktop tidak memakainya.
  */
-export function MobileCommentsBar({ noteId, comments }: { noteId: string; comments: CommentView[] }) {
+export function MobileCommentsBar({
+  noteId, comments, canComment,
+}: { noteId: string; comments: CommentView[]; canComment: boolean }) {
   const [open, setOpen] = useState(false);
   const count = comments.filter((c) => !c.deleted).length;
   return (
@@ -329,13 +337,13 @@ export function MobileCommentsBar({ noteId, comments }: { noteId: string; commen
           <MessageSquare aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
           <span className="shrink-0 font-medium">Comments ({count})</span>
           <span aria-hidden="true" className="text-muted-foreground">·</span>
-          <span className="truncate text-muted-foreground">Write a comment…</span>
+          <span className="truncate text-muted-foreground">{canComment ? "Write a comment…" : "Read comments"}</span>
         </button>
       </div>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="flex max-h-[85svh] flex-col gap-0 p-4 lg:hidden">
           <SheetTitle className="sr-only">Comments</SheetTitle>
-          <NoteComments noteId={noteId} comments={comments} variant="sheet" />
+          <NoteComments noteId={noteId} comments={comments} canComment={canComment} variant="sheet" />
         </SheetContent>
       </Sheet>
     </>
