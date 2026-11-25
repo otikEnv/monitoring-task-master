@@ -1,17 +1,18 @@
--- Uji batas domain dan role bawaan (migrasi 20261114000000_google_sso.sql). Jalankan SETELAH migrasi.
+-- Uji batas domain dan role bawaan (migrasi 20261114000000_google_sso.sql, role bawaan diubah oleh
+-- 20261125010000_rbac.sql: semua akun baru viewer). Jalankan SETELAH migrasi.
 -- Di dalam transaksi dan di-ROLLBACK. Sukses = NOTICE 'UJI GOOGLE SSO LOLOS'.
 -- Sengaja TIDAK memakai app.allow_any_domain, kecuali pada kasus 5.
 
 begin;
 
--- 1. Akun Google @envisions.app: diterima, role admin.
+-- 1. Akun Google @envisions.app: diterima, role viewer (RBAC: aturan lama Google = admin dihapus).
 do $$
 declare r public.user_role;
 begin
   insert into auth.users (id, email, raw_app_meta_data)
   values ('00000000-0000-0000-0000-0000000000f1', 'dev@envisions.app', '{"provider":"google","providers":["google"]}');
   select role into r from public.profiles where user_id = '00000000-0000-0000-0000-0000000000f1';
-  if r is distinct from 'admin' then raise exception 'FAIL: akun Google harus admin, dapat %', r; end if;
+  if r is distinct from 'viewer' then raise exception 'FAIL: akun Google harus viewer, dapat %', r; end if;
 end $$;
 
 -- 2. Akun email+password @envisions.app: diterima, role viewer. Huruf besar pada domain diterima.

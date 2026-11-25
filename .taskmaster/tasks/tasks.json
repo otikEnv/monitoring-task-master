@@ -3412,7 +3412,7 @@
         "id": "71",
         "title": "RBAC: migrasi database (role, status akun, akses menu, activity)",
         "description": "Enum superadmin dan developer, profiles.disabled_at, role bawaan viewer, role_menu_access, user_admin_events, dan fungsi Settings.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [],
         "details": "PRD-RBAC.md, bagian Data dan migrasi, Konsep dan aturan. supabase/migrations/20261125000000_rbac.sql, dijalankan dengan npm run db:run. Pola security definer + grant hanya service_role seperti save_note di 20261124000000_notes_calendar.sql. Email pemilik tidak ditulis di migrasi.",
@@ -3422,58 +3422,58 @@
             "id": 1,
             "title": "Enum dan helper",
             "description": "superadmin, developer, is_admin, is_superadmin, role_of.",
-            "status": "pending",
+            "status": "done",
             "details": "alter type user_role add value superadmin dan developer (di luar transaksi bila perlu). is_admin() true untuk admin dan superadmin. is_superadmin(). role_of(p_user) null bila nonaktif.",
             "parentId": "71",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:39:42.872Z"
           },
           {
             "id": 2,
             "title": "Status akun dan role bawaan",
             "description": "profiles.disabled_at dan handle_new_user.",
-            "status": "pending",
+            "status": "done",
             "details": "Kolom disabled_at timestamptz. handle_new_user: role viewer untuk semua cara daftar; pakai raw_app_meta_data->>'initial_role' bila valid. Akun lama tidak berubah.",
             "parentId": "71",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:39:42.872Z"
           },
           {
             "id": 3,
             "title": "Akses menu",
             "description": "Tabel role_menu_access dan seed.",
-            "status": "pending",
+            "status": "done",
             "details": "role_menu_access(role, menu, pk). Seed admin semua menu; developer dan viewer semua kecuali sources. Dashboard terkunci menyala, sources terkunci mati untuk developer dan viewer.",
             "parentId": "71",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:39:42.872Z"
           },
           {
             "id": 4,
             "title": "Activity dan fungsi Settings",
             "description": "user_admin_events, set_user_role, set_user_active, set_menu_access.",
-            "status": "pending",
+            "status": "done",
             "details": "Pelaku harus superadmin; tolak perubahan pada diri sendiri; minimal satu superadmin aktif (23514); tolak menu terkunci; tulis log. Galat 42501 untuk tidak berhak.",
             "parentId": "71",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:39:42.872Z"
           },
           {
             "id": 5,
             "title": "Perketat fungsi tulis yang ada",
             "description": "Komentar, action item, activity release.",
-            "status": "pending",
+            "status": "done",
             "details": "add/edit/delete_note_comment dan set_action_item_done menolak viewer dan user nonaktif. Edit/hapus activity release: developer hanya kind note milik sendiri; tambah p_actor bila belum ada.",
             "parentId": "71",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:39:42.872Z"
           },
           {
             "id": 6,
             "title": "Tes SQL",
             "description": "rbac_test.sql dan google_sso_test.sql.",
-            "status": "pending",
+            "status": "done",
             "details": "Role bawaan, initial_role, superadmin terakhir, diri sendiri, menu terkunci, viewer ditolak, developer hanya activity miliknya.",
             "parentId": "71",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T04:39:42.872Z"
           }
         ],
-        "updatedAt": "2026-11-25T04:25:20.743Z"
+        "updatedAt": "2026-11-25T04:39:42.872Z"
       },
       {
         "id": "72",
@@ -3763,9 +3763,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-25T04:25:20.743Z",
+      "lastModified": "2026-11-25T04:39:42.872Z",
       "taskCount": 76,
-      "completedCount": 60,
+      "completedCount": 61,
       "tags": [
         "master"
       ]

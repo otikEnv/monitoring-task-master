@@ -43,7 +43,7 @@ describe.skipIf(!ENABLED)("notes dan calendar (Supabase asli)", () => {
 
   beforeAll(async () => {
     admin = createClient(URL_!, SERVICE!, opt);
-    for (const [k, role] of [["a1", "admin"], ["a2", "admin"], ["v", "viewer"]] as const) {
+    for (const [k, role] of [["a1", "admin"], ["a2", "admin"], ["v", "developer"]] as const) {
       const email = `tmp-note-${run}-${k}@envisions.app`;
       const password = "Tmp!" + randomBytes(9).toString("base64url");
       const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });

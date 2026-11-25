@@ -37,10 +37,13 @@ vi.mock("@/lib/releases/repo", () => {
   class NoteNotDeletableError extends Error {
     constructor() { super("Only notes can be deleted."); }
   }
+  class NoteNotAllowedError extends Error {
+    constructor() { super("You can only change your own notes."); }
+  }
   class DuplicateReleaseError extends Error {}
   class SourceTagError extends Error {}
   return {
-    ReleaseNotFoundError, NoteNotFoundError, NoteNotDeletableError, ReleaseStateError, DuplicateReleaseError, SourceTagError,
+    ReleaseNotFoundError, NoteNotFoundError, NoteNotDeletableError, NoteNotAllowedError, ReleaseStateError, DuplicateReleaseError, SourceTagError,
     deleteReleaseNote: m.deleteReleaseNote,
     holdRelease: m.holdRelease, resumeRelease: m.resumeRelease, addReleaseNote: m.addReleaseNote,
     editReleaseNote: m.editReleaseNote, getRelease: vi.fn(), assertComponents: vi.fn(), createRelease: vi.fn(),
@@ -174,7 +177,7 @@ describe("editNote", () => {
   it("mengubah teks: membaca jenis entri lewat sesi pengguna, mengirim email penyunting, menyegarkan release-nya", async () => {
     expect(await editNote(NOTE, "  Typo diperbaiki ")).toEqual({ ok: true });
     expect(m.getReleaseNote).toHaveBeenCalledWith({ tag: "sesi" }, NOTE);
-    expect(m.editReleaseNote).toHaveBeenCalledWith(NOTE, "Typo diperbaiki", "admin@envisions.app");
+    expect(m.editReleaseNote).toHaveBeenCalledWith(NOTE, "Typo diperbaiki", expect.objectContaining({ email: "admin@envisions.app" }));
     for (const p of ["/", "/release", `/release/${ID}`]) expect(m.revalidatePath).toHaveBeenCalledWith(p);
   });
 
@@ -212,7 +215,7 @@ describe("deleteNote", () => {
     m.deleteReleaseNote.mockResolvedValue({ releaseId: ID });
     expect(await deleteNote(NOTE.toUpperCase())).toEqual({ ok: true });
     expect(m.getReleaseNote).toHaveBeenCalledWith({ tag: "sesi" }, NOTE);
-    expect(m.deleteReleaseNote).toHaveBeenCalledWith(NOTE);
+    expect(m.deleteReleaseNote).toHaveBeenCalledWith(NOTE, expect.objectContaining({ email: expect.any(String) }));
     for (const p of ["/", "/release", `/release/${ID}`]) expect(m.revalidatePath).toHaveBeenCalledWith(p);
   });
 

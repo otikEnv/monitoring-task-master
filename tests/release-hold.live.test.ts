@@ -53,6 +53,9 @@ describe.skipIf(!ENABLED)("hold dan catatan release (Supabase asli, sesi viewer)
     const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
     if (error) throw error;
     userId = data.user.id;
+    // Penulis entri log harus role yang boleh menulis (RBAC); pembacaan tetap lewat sesi login biasa.
+    const { error: pe } = await admin.from("profiles").update({ role: "admin" }).eq("user_id", userId);
+    if (pe) throw pe;
 
     await addSource("a");
     await addSource("b");
@@ -191,17 +194,17 @@ describe.skipIf(!ENABLED)("hold dan catatan release (Supabase asli, sesi viewer)
 
   it("edit catatan: hanya teks berubah, versi sebelumnya tersimpan, teks sama tidak ditandai edited", async () => {
     const [first] = (await notes(rel.edit)).filter((n) => n.kind === "note");
-    await editReleaseNote(first.id, "First note (fixed)", "editor@envisions.app", admin);
+    await editReleaseNote(first.id, "First note (fixed)", { id: userId, email: "editor@envisions.app" }, admin);
     const [after] = (await notes(rel.edit)).filter((n) => n.id === first.id);
     expect([after.body, after.previous_body, after.edited_by_email]).toEqual(["First note (fixed)", "First note", "editor@envisions.app"]);
     expect(after.edited_at).toBeTruthy();
     expect([after.kind, after.author_email, after.created_at]).toEqual([first.kind, first.author_email, first.created_at]);
 
-    await editReleaseNote(first.id, "First note (fixed)", "other@envisions.app", admin);
+    await editReleaseNote(first.id, "First note (fixed)", { id: userId, email: "other@envisions.app" }, admin);
     expect((await notes(rel.edit)).find((n) => n.id === first.id)?.edited_by_email).toBe("editor@envisions.app");
 
-    await expect(editReleaseNote(first.id, "  ", "editor@envisions.app", admin)).rejects.toThrow(); // note tidak boleh kosong
-    await expect(editReleaseNote("00000000-0000-4000-8000-000000000000", "x", "e@envisions.app", admin)).rejects.toBeInstanceOf(NoteNotFoundError);
+    await expect(editReleaseNote(first.id, "  ", { id: userId, email: "editor@envisions.app" }, admin)).rejects.toThrow(); // note tidak boleh kosong
+    await expect(editReleaseNote("00000000-0000-4000-8000-000000000000", "x", { id: userId, email: "e@envisions.app" }, admin)).rejects.toBeInstanceOf(NoteNotFoundError);
 
     // fakta terkunci: bahkan service role tidak bisa mengubahnya langsung
     for (const patch of [{ kind: "hold" }, { author_email: "palsu@envisions.app" }, { created_at: "2020-01-01T00:00:00Z" }]) {
@@ -213,12 +216,12 @@ describe.skipIf(!ENABLED)("hold dan catatan release (Supabase asli, sesi viewer)
   it("mengedit entri hold terbaru dari release yang masih ditahan memperbarui alasan hold", async () => {
     await holdRelease(rel.edit, "Reason with a typpo", author(), admin);
     const holdEntry = (await notes(rel.edit)).filter((n) => n.kind === "hold").at(-1)!;
-    await editReleaseNote(holdEntry.id, "Reason without a typo", email, admin);
+    await editReleaseNote(holdEntry.id, "Reason without a typo", { id: userId, email: email }, admin);
     expect((await row(rel.edit)).hold_reason).toBe("Reason without a typo");
     expect((await overview(rel.edit)).stats.holdReason).toBe("Reason without a typo");
 
     const older = (await notes(rel.edit)).filter((n) => n.kind === "hold")[0];
-    await editReleaseNote(older.id, "Older reason, edited", email, admin);
+    await editReleaseNote(older.id, "Older reason, edited", { id: userId, email: email }, admin);
     expect((await row(rel.edit)).hold_reason).toBe("Reason without a typo"); // entri lama tidak menyentuh hold berjalan
     await resumeRelease(rel.edit, null, author(), admin);
   });
@@ -308,11 +311,11 @@ describe.skipIf(!ENABLED)("hold dan catatan release (Supabase asli, sesi viewer)
     const heldBefore = (await row(rel.edit)).held_at;
 
     // viewer tidak bisa menghapus, lewat fungsi maupun langsung ke tabel
-    expect((await viewer.rpc("delete_release_note", { p_note_id: noteId })).error).toBeTruthy();
+    expect((await viewer.rpc("delete_release_note", { p_note_id: noteId, p_actor: userId })).error).toBeTruthy();
     expect((await viewer.from("release_notes").delete().eq("id", noteId)).error).toBeTruthy();
     expect((await notes(rel.edit)).some((n) => n.id === noteId)).toBe(true);
 
-    expect(await deleteReleaseNote(noteId, admin)).toEqual({ releaseId: rel.edit });
+    expect(await deleteReleaseNote(noteId, author(), admin)).toEqual({ releaseId: rel.edit });
     expect((await notes(rel.edit)).some((n) => n.id === noteId)).toBe(false);
     expect((await loadLatestNotes(viewer, [rel.edit])).get(rel.edit)?.body).toBe("Second note"); // kembali ke yang sebelumnya
     expect((await row(rel.edit)).held_at).toBe(heldBefore); // menghapus catatan tidak menyentuh hold
@@ -321,11 +324,11 @@ describe.skipIf(!ENABLED)("hold dan catatan release (Supabase asli, sesi viewer)
     const system = (await notes(rel.edit)).filter((n) => n.kind !== "note");
     expect(system.length).toBeGreaterThan(0);
     for (const n of system) {
-      await expect(deleteReleaseNote(n.id, admin), n.kind).rejects.toBeInstanceOf(NoteNotDeletableError);
+      await expect(deleteReleaseNote(n.id, author(), admin), n.kind).rejects.toBeInstanceOf(NoteNotDeletableError);
     }
     expect((await notes(rel.edit)).filter((n) => n.kind !== "note")).toHaveLength(system.length);
 
-    await expect(deleteReleaseNote(noteId, admin)).rejects.toBeInstanceOf(NoteNotFoundError); // sudah terhapus
+    await expect(deleteReleaseNote(noteId, author(), admin)).rejects.toBeInstanceOf(NoteNotFoundError); // sudah terhapus
   });
 
   it("menghapus release menghapus log-nya", async () => {

@@ -9,6 +9,9 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000e1', 'admin1-note@test.local'),
   ('00000000-0000-0000-0000-0000000000e2', 'admin2-note@test.local'),
   ('00000000-0000-0000-0000-0000000000e3', 'viewer-note@test.local');
+-- RBAC (20261125010000): komentar dan centang action item butuh role selain viewer. e3 = developer.
+update public.profiles set role = 'admin' where user_id in ('00000000-0000-0000-0000-0000000000e1', '00000000-0000-0000-0000-0000000000e2');
+update public.profiles set role = 'developer' where user_id = '00000000-0000-0000-0000-0000000000e3';
 
 insert into public.sources (id, name, provider, repo_url, token_encrypted) values
   ('00000000-0000-0000-0000-0000000000d1', 'T-Note A', 'github', 'https://github.com/o/note-a', 'RAHASIA');

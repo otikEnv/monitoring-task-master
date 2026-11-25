@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 
 import {
-  addReleaseNote, deleteReleaseNote, editReleaseNote, holdRelease, NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
+  addReleaseNote, deleteReleaseNote, editReleaseNote, holdRelease, NoteNotAllowedError, NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
   resumeRelease, setReleasedOn, SYSTEM_AUTHOR, updateRelease,
 } from "@/lib/releases/repo";
 import type { ReleaseInput } from "@/lib/releases/validate";
@@ -115,36 +115,44 @@ describe("addReleaseNote dan editReleaseNote", () => {
 
   it("edit: mengirim id catatan, teks, dan email penyunting; tidak ada = NoteNotFoundError", async () => {
     const { db, rpc } = rpcDb({});
-    await editReleaseNote("n1", "Fixed typo", "editor@envisions.app", db);
+    await editReleaseNote("n1", "Fixed typo", { id: "u2", email: "editor@envisions.app" }, db);
     expect(rpc).toHaveBeenCalledWith("edit_release_note", {
-      p_note_id: "n1", p_body: "Fixed typo", p_email: "editor@envisions.app",
+      p_note_id: "n1", p_body: "Fixed typo", p_actor: "u2", p_email: "editor@envisions.app",
     });
-    await expect(editReleaseNote("n1", "x", "e@envisions.app", rpcDb({ error: { code: "P0002", message: "note not found" } }).db))
+    await expect(editReleaseNote("n1", "x", AUTHOR, rpcDb({ error: { code: "P0002", message: "note not found" } }).db))
       .rejects.toBeInstanceOf(NoteNotFoundError);
-    await expect(editReleaseNote("n1", "x", "e@envisions.app", rpcDb({ error: { message: "boom" } }).db))
+    await expect(editReleaseNote("n1", "x", AUTHOR, rpcDb({ error: { message: "boom" } }).db))
       .rejects.toThrow("Gagal mengubah catatan: boom");
+  });
+});
+
+describe("hak mengubah activity (42501)", () => {
+  it("edit dan hapus yang ditolak database: NoteNotAllowedError", async () => {
+    const denied = () => rpcDb({ error: { code: "42501", message: "not_author" } }).db;
+    await expect(editReleaseNote("n1", "x", AUTHOR, denied())).rejects.toBeInstanceOf(NoteNotAllowedError);
+    await expect(deleteReleaseNote("n1", AUTHOR, denied())).rejects.toBeInstanceOf(NoteNotAllowedError);
   });
 });
 
 describe("deleteReleaseNote", () => {
   it("memanggil fungsi dan mengembalikan id release pemilik catatan", async () => {
     const { db, rpc } = rpcDb({ data: "r1" });
-    expect(await deleteReleaseNote("n1", db)).toEqual({ releaseId: "r1" });
-    expect(rpc).toHaveBeenCalledWith("delete_release_note", { p_note_id: "n1" });
+    expect(await deleteReleaseNote("n1", AUTHOR, db)).toEqual({ releaseId: "r1" });
+    expect(rpc).toHaveBeenCalledWith("delete_release_note", { p_note_id: "n1", p_actor: "u1" });
   });
 
   it("entri sistem (55000 not_deletable): NoteNotDeletableError dengan pesan jelas", async () => {
     const { db } = rpcDb({ error: { code: "55000", message: "not_deletable" } });
-    const e = await deleteReleaseNote("n1", db).catch((x) => x);
+    const e = await deleteReleaseNote("n1", AUTHOR, db).catch((x) => x);
     expect(e).toBeInstanceOf(NoteNotDeletableError);
     expect(e.message).toContain("Only notes can be deleted");
   });
 
   it("tidak ada: NoteNotFoundError; 55000 dengan pesan lain dan galat lain: galat umum", async () => {
-    await expect(deleteReleaseNote("n1", rpcDb({ error: { code: "P0002", message: "note not found" } }).db))
+    await expect(deleteReleaseNote("n1", AUTHOR, rpcDb({ error: { code: "P0002", message: "note not found" } }).db))
       .rejects.toBeInstanceOf(NoteNotFoundError);
-    const odd = await deleteReleaseNote("n1", rpcDb({ error: { code: "55000", message: "aneh" } }).db).catch((x) => x);
+    const odd = await deleteReleaseNote("n1", AUTHOR, rpcDb({ error: { code: "55000", message: "aneh" } }).db).catch((x) => x);
     expect(odd).not.toBeInstanceOf(NoteNotDeletableError);
-    await expect(deleteReleaseNote("n1", rpcDb({ error: { message: "boom" } }).db)).rejects.toThrow("Gagal menghapus catatan: boom");
+    await expect(deleteReleaseNote("n1", AUTHOR, rpcDb({ error: { message: "boom" } }).db)).rejects.toThrow("Gagal menghapus catatan: boom");
   });
 });

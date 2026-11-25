@@ -8,6 +8,8 @@ select set_config('app.allow_any_domain', 'on', true); -- email uji non-@envisio
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000b1', 'admin-hold@test.local'),
   ('00000000-0000-0000-0000-0000000000b2', 'viewer-hold@test.local');
+-- RBAC (20261125010000): penulis Note activity harus role yang boleh menulis.
+update public.profiles set role = 'admin' where user_id = '00000000-0000-0000-0000-0000000000b1';
 
 insert into public.sources (id, name, provider, repo_url, token_encrypted) values
   ('00000000-0000-0000-0000-0000000000c1', 'Hold A', 'github', 'https://github.com/o/hold-a', 'RAHASIA');
@@ -150,15 +152,15 @@ do $$
 declare r uuid := (select id from t_ids where k = 'r'); nid uuid; b text; pb text; ea timestamptz; eb text; n int;
 begin
   begin
-    perform public.add_release_note(r, '   ', null, 'a@test.local');
+    perform public.add_release_note(r, '   ', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
     raise exception 'FAIL: catatan kosong diterima';
   exception when check_violation then null; end;
   begin
-    perform public.add_release_note(r, repeat('x', 2001), null, 'a@test.local');
+    perform public.add_release_note(r, repeat('x', 2001), '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
     raise exception 'FAIL: catatan 2001 karakter diterima';
   exception when check_violation then null; end;
   begin
-    perform public.add_release_note(gen_random_uuid(), 'x', null, 'a@test.local');
+    perform public.add_release_note(gen_random_uuid(), 'x', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
     raise exception 'FAIL: catatan untuk release tidak ada diterima';
   exception when sqlstate 'P0002' then null; end;
 
@@ -167,23 +169,23 @@ begin
   select body, edited_at into b, ea from public.release_notes where id = nid;
   if b <> 'Typo disni' or ea is not null then raise exception 'FAIL: catatan baru salah (%, %)', b, ea; end if;
 
-  perform public.edit_release_note(nid, 'Typo di sini', 'editor@test.local');
+  perform public.edit_release_note(nid, 'Typo di sini', '00000000-0000-0000-0000-0000000000b1', 'editor@test.local');
   select body, previous_body, edited_at, edited_by_email into b, pb, ea, eb from public.release_notes where id = nid;
   if b <> 'Typo di sini' or pb <> 'Typo disni' or ea is null or eb <> 'editor@test.local' then
     raise exception 'FAIL: hasil edit salah (%, %, %, %)', b, pb, ea, eb;
   end if;
 
   -- teks sama: tidak ditandai edited lagi (waktu tetap, versi sebelumnya tetap)
-  perform public.edit_release_note(nid, 'Typo di sini', 'lain@test.local');
+  perform public.edit_release_note(nid, 'Typo di sini', '00000000-0000-0000-0000-0000000000b1', 'lain@test.local');
   select edited_by_email, previous_body into eb, pb from public.release_notes where id = nid;
   if eb <> 'editor@test.local' or pb <> 'Typo disni' then raise exception 'FAIL: edit tanpa perubahan mengubah jejak'; end if;
 
   begin
-    perform public.edit_release_note(nid, '', 'editor@test.local');
+    perform public.edit_release_note(nid, '', '00000000-0000-0000-0000-0000000000b1', 'editor@test.local');
     raise exception 'FAIL: edit menjadi kosong diterima untuk kind note';
   exception when check_violation then null; end;
   begin
-    perform public.edit_release_note(gen_random_uuid(), 'x', 'editor@test.local');
+    perform public.edit_release_note(gen_random_uuid(), 'x', '00000000-0000-0000-0000-0000000000b1', 'editor@test.local');
     raise exception 'FAIL: edit catatan tidak ada diterima';
   exception when sqlstate 'P0002' then null; end;
 end $$;
@@ -244,11 +246,11 @@ begin
   select count(*), max(body) into n, b from public.release_latest_note where release_id = r;
   if n <> 1 or b <> 'Typo di sini' then raise exception 'FAIL: catatan terbaru awal salah (%, %)', n, b; end if;
 
-  nid := public.add_release_note(r, 'Catatan lebih baru', null, 'a@test.local');
+  nid := public.add_release_note(r, 'Catatan lebih baru', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
   select count(*), max(body) into n, b from public.release_latest_note where release_id = r;
   if n <> 1 or b <> 'Catatan lebih baru' then raise exception 'FAIL: catatan terbaru tidak berganti (%, %)', n, b; end if;
 
-  perform public.edit_release_note(nid, 'Catatan lebih baru (diedit)', 'a@test.local');
+  perform public.edit_release_note(nid, 'Catatan lebih baru (diedit)', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
   select max(body) into b from public.release_latest_note where release_id = r;
   if b <> 'Catatan lebih baru (diedit)' then raise exception 'FAIL: view tidak mengikuti edit (%)', b; end if;
 
@@ -274,22 +276,22 @@ begin
   perform public.resume_release(r, null, null, 'a@test.local');
   h2 := public.hold_release(r, 'alasan kedua salah ketk', null, 'a@test.local');
 
-  perform public.edit_release_note(h1, 'alasan pertama (diedit)', 'a@test.local');
+  perform public.edit_release_note(h1, 'alasan pertama (diedit)', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
   select hold_reason into reason from public.releases where id = r;
   if reason <> 'alasan kedua salah ketk' then raise exception 'FAIL: edit entri hold lama mengubah alasan berjalan (%)', reason; end if;
 
-  perform public.edit_release_note(h2, 'alasan kedua benar', 'a@test.local');
+  perform public.edit_release_note(h2, 'alasan kedua benar', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
   select hold_reason into reason from public.releases where id = r;
   if reason <> 'alasan kedua benar' then raise exception 'FAIL: alasan hold tidak mengikuti edit (%)', reason; end if;
 
   perform public.resume_release(r, null, null, 'a@test.local');
-  perform public.edit_release_note(h2, 'alasan kedua final', 'a@test.local');
+  perform public.edit_release_note(h2, 'alasan kedua final', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
   select hold_reason into reason from public.releases where id = r;
   if reason is not null then raise exception 'FAIL: edit setelah resume mengisi hold_reason (%)', reason; end if;
   if (select held_at from public.releases where id = r) is not null then raise exception 'FAIL: edit setelah resume menahan release'; end if;
 
   begin
-    perform public.edit_release_note(h2, repeat('x', 501), 'a@test.local');
+    perform public.edit_release_note(h2, repeat('x', 501), '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
     raise exception 'FAIL: alasan hold 501 karakter diterima lewat edit';
   exception when check_violation then null; end;
 end $$;
@@ -300,14 +302,14 @@ declare r uuid; n1 uuid; n2 uuid; h uuid; rid uuid; b text; n int;
 begin
   r := public.save_release(null, '{"name":"T-hold-del","target_date":"2026-12-01"}'::jsonb,
     '[{"source_id":"00000000-0000-0000-0000-0000000000c1","tag":"master","range_start":1,"range_end":9}]'::jsonb);
-  n1 := public.add_release_note(r, 'catatan pertama', null, 'a@test.local');
-  n2 := public.add_release_note(r, 'catatan terkirim salah', null, 'a@test.local');
+  n1 := public.add_release_note(r, 'catatan pertama', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
+  n2 := public.add_release_note(r, 'catatan terkirim salah', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
   h := public.hold_release(r, 'alasan hold', null, 'a@test.local');
 
   select max(body) into b from public.release_latest_note where release_id = r;
   if b <> 'catatan terkirim salah' then raise exception 'FAIL: catatan terbaru awal salah (%)', b; end if;
 
-  rid := public.delete_release_note(n2);
+  rid := public.delete_release_note(n2, '00000000-0000-0000-0000-0000000000b1');
   if rid <> r then raise exception 'FAIL: delete_release_note tidak mengembalikan id release (%)', rid; end if;
   select count(*) into n from public.release_notes where id = n2;
   if n <> 0 then raise exception 'FAIL: catatan tidak terhapus'; end if;
@@ -321,7 +323,7 @@ begin
 
   -- entri sistem tidak bisa dihapus
   begin
-    perform public.delete_release_note(h);
+    perform public.delete_release_note(h, '00000000-0000-0000-0000-0000000000b1');
     raise exception 'FAIL: entri hold bisa dihapus';
   exception when sqlstate '55000' then
     if sqlerrm <> 'not_deletable' then raise exception 'FAIL: pesan hold (%)', sqlerrm; end if;
@@ -332,7 +334,7 @@ begin
     '[{"source_id":"00000000-0000-0000-0000-0000000000c1","tag":"master","range_start":1,"range_end":9}]'::jsonb);
   for h in select id from public.release_notes where release_id = r and kind <> 'note' loop
     begin
-      perform public.delete_release_note(h);
+      perform public.delete_release_note(h, '00000000-0000-0000-0000-0000000000b1');
       raise exception 'FAIL: entri sistem bisa dihapus';
     exception when sqlstate '55000' then null; end;
   end loop;
@@ -341,18 +343,18 @@ begin
 
   -- tidak ada
   begin
-    perform public.delete_release_note(gen_random_uuid());
+    perform public.delete_release_note(gen_random_uuid(), '00000000-0000-0000-0000-0000000000b1');
     raise exception 'FAIL: hapus catatan tidak ada diterima';
   exception when sqlstate 'P0002' then null; end;
 
   -- menghapus catatan yang sama dua kali: kedua kalinya tidak ditemukan
   begin
-    perform public.delete_release_note(n2);
+    perform public.delete_release_note(n2, '00000000-0000-0000-0000-0000000000b1');
     raise exception 'FAIL: hapus dua kali diterima';
   exception when sqlstate 'P0002' then null; end;
 
   -- semua catatan bebas terhapus: tidak ada baris di view
-  perform public.delete_release_note(n1);
+  perform public.delete_release_note(n1, '00000000-0000-0000-0000-0000000000b1');
   select count(*) into n from public.release_latest_note where release_id = r;
   if n <> 0 then raise exception 'FAIL: view masih memuat catatan setelah semua dihapus (%)', n; end if;
 end $$;
@@ -375,7 +377,7 @@ begin
   r := public.save_release(null, '{"name":"T-hold-akses","target_date":"2026-12-01"}'::jsonb,
     '[{"source_id":"00000000-0000-0000-0000-0000000000c1","tag":"master","range_start":1,"range_end":9}]'::jsonb);
   insert into t_ids values ('r2', r);
-  perform public.add_release_note(r, 'catatan akses', null, 'a@test.local');
+  perform public.add_release_note(r, 'catatan akses', '00000000-0000-0000-0000-0000000000b1', 'a@test.local');
 end $$;
 
 set local role authenticated;
@@ -411,11 +413,11 @@ begin
     raise exception 'FAIL: authenticated bisa memanggil hold_release';
   exception when insufficient_privilege then null; end;
   begin
-    perform public.add_release_note(r, 'x', null, 'v@test.local');
+    perform public.add_release_note(r, 'x', '00000000-0000-0000-0000-0000000000b1', 'v@test.local');
     raise exception 'FAIL: authenticated bisa memanggil add_release_note';
   exception when insufficient_privilege then null; end;
   begin
-    perform public.edit_release_note(gen_random_uuid(), 'x', 'v@test.local');
+    perform public.edit_release_note(gen_random_uuid(), 'x', '00000000-0000-0000-0000-0000000000b1', 'v@test.local');
     raise exception 'FAIL: authenticated bisa memanggil edit_release_note';
   exception when insufficient_privilege then null; end;
   begin
@@ -427,7 +429,7 @@ begin
     raise exception 'FAIL: authenticated bisa memanggil resume_release';
   exception when insufficient_privilege then null; end;
   begin
-    perform public.delete_release_note(gen_random_uuid());
+    perform public.delete_release_note(gen_random_uuid(), '00000000-0000-0000-0000-0000000000b1');
     raise exception 'FAIL: authenticated bisa memanggil delete_release_note';
   exception when insufficient_privilege then null; end;
 end $$;

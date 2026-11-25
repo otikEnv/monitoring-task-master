@@ -7,6 +7,8 @@ select set_config('app.allow_any_domain', 'on', true);
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000f1', 'a-reply@test.local'),
   ('00000000-0000-0000-0000-0000000000f2', 'b-reply@test.local');
+-- RBAC (20261125010000): berkomentar butuh role selain viewer.
+update public.profiles set role = 'developer' where user_id in ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000f2');
 
 create temp table t_ids (k text primary key, id uuid);
 grant all on t_ids to public;

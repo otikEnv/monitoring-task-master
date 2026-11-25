@@ -63,6 +63,14 @@ export class NoteNotDeletableError extends Error {
 /** Alasan perubahan target (sudah divalidasi) dan penulisnya; dicatat database bila tanggal target berubah. */
 export type ChangeAudit = { reason: string; author: Author };
 
+/** Pelaku tidak boleh mengubah entri ini (mis. developer pada entri orang lain atau entri sistem). */
+export class NoteNotAllowedError extends Error {
+  constructor() {
+    super("You can only change your own notes.");
+    this.name = "NoteNotAllowedError";
+  }
+}
+
 export class DuplicateReleaseError extends Error {
   constructor() {
     super("A release with this name already exists.");
@@ -296,27 +304,35 @@ export async function addReleaseNote(
  */
 export async function deleteReleaseNote(
   noteId: string,
+  actor: Author,
   db: SupabaseClient = createAdminClient(),
 ): Promise<{ releaseId: string }> {
-  const { data, error } = await db.rpc("delete_release_note", { p_note_id: noteId });
+  const { data, error } = await db.rpc("delete_release_note", { p_note_id: noteId, p_actor: actor.id });
   if (error) {
     if (error.code === "P0002") throw new NoteNotFoundError();
+    if (error.code === "42501") throw new NoteNotAllowedError();
     if (error.code === "55000" && error.message === "not_deletable") throw new NoteNotDeletableError();
     throw new Error(`Gagal menghapus catatan: ${error.message}`);
   }
   return { releaseId: data as string };
 }
 
-/** Mengubah teks sebuah catatan; hanya teks yang berubah (fakta terkunci di database). */
+/**
+ * Mengubah teks sebuah catatan; hanya teks yang berubah (fakta terkunci di database). Developer hanya boleh pada
+ * Note miliknya (NoteNotAllowedError); admin pada semua entri.
+ */
 export async function editReleaseNote(
   noteId: string,
   body: string,
-  editorEmail: string,
+  editor: Author,
   db: SupabaseClient = createAdminClient(),
 ): Promise<void> {
-  const { error } = await db.rpc("edit_release_note", { p_note_id: noteId, p_body: body, p_email: editorEmail });
+  const { error } = await db.rpc("edit_release_note", {
+    p_note_id: noteId, p_body: body, p_actor: editor.id, p_email: editor.email,
+  });
   if (error) {
     if (error.code === "P0002") throw new NoteNotFoundError();
+    if (error.code === "42501") throw new NoteNotAllowedError();
     throw new Error(`Gagal mengubah catatan: ${error.message}`);
   }
 }

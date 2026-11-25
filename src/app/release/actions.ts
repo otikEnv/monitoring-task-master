@@ -7,7 +7,7 @@ import { previewRange as loadPreview } from "@/lib/releases/load";
 import { wibDay } from "@/lib/releases/model";
 import { getReleaseNote } from "@/lib/releases/notes";
 import {
-  DuplicateReleaseError, NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
+  DuplicateReleaseError, NoteNotAllowedError, NoteNotDeletableError, NoteNotFoundError, ReleaseNotFoundError, ReleaseStateError,
   SourceTagError, addReleaseNote, assertComponents, createRelease, deleteRelease, deleteReleaseNote, editReleaseNote,
   getRelease, holdRelease, resumeRelease, setReleasedOn, updateRelease, type Author,
 } from "@/lib/releases/repo";
@@ -105,7 +105,7 @@ export async function markReleased(id: string, released: boolean): Promise<Simpl
 function failure(what: string, e: unknown, fallback: string): SimpleResult {
   if (
     e instanceof ReleaseNotFoundError || e instanceof ReleaseStateError || e instanceof NoteNotFoundError ||
-    e instanceof NoteNotDeletableError
+    e instanceof NoteNotDeletableError || e instanceof NoteNotAllowedError
   ) {
     return { ok: false, error: e.message };
   }
@@ -179,7 +179,7 @@ export async function editNote(noteId: string, body: string): Promise<SimpleResu
     if (!note) return { ok: false, error: "Note not found." };
     const text = validateNoteText(body, note.kind);
     if (!text.ok) return { ok: false, error: text.error };
-    await editReleaseNote(nid, text.value, user.email);
+    await editReleaseNote(nid, text.value, authorOf(user));
     refreshRelease(note.releaseId);
   } catch (e) {
     return failure("mengubah catatan", e, "Could not save the note.");
@@ -192,14 +192,14 @@ export async function editNote(noteId: string, body: string): Promise<SimpleResu
  * Target change, Released) tidak bisa dihapus: ditolak di sini sebelum menyentuh data, dan lagi oleh database.
  */
 export async function deleteNote(noteId: string): Promise<SimpleResult> {
-  await requireAdmin();
+  const user = await requireAdmin();
   if (!UUID.test(noteId)) return { ok: false, error: "Invalid note ID." };
   const nid = noteId.toLowerCase();
   try {
     const note = await getReleaseNote(await createClient(), nid);
     if (!note) return { ok: false, error: "Note not found." };
     if (note.kind !== "note") return failure("menghapus catatan", new NoteNotDeletableError(), "Could not delete the note.");
-    const { releaseId } = await deleteReleaseNote(nid);
+    const { releaseId } = await deleteReleaseNote(nid, authorOf(user));
     refreshRelease(releaseId);
   } catch (e) {
     return failure("menghapus catatan", e, "Could not delete the note.");
