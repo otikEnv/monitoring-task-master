@@ -3407,12 +3407,364 @@
           }
         ],
         "updatedAt": "2026-11-24T07:19:47.944Z"
+      },
+      {
+        "id": "71",
+        "title": "RBAC: migrasi database (role, status akun, akses menu, activity)",
+        "description": "Enum superadmin dan developer, profiles.disabled_at, role bawaan viewer, role_menu_access, user_admin_events, dan fungsi Settings.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "details": "PRD-RBAC.md, bagian Data dan migrasi, Konsep dan aturan. supabase/migrations/20261125000000_rbac.sql, dijalankan dengan npm run db:run. Pola security definer + grant hanya service_role seperti save_note di 20261124000000_notes_calendar.sql. Email pemilik tidak ditulis di migrasi.",
+        "testStrategy": "supabase/tests/rbac_test.sql lolos; google_sso_test.sql diperbarui (akun Google baru = viewer); RLS: authenticated hanya SELECT role_menu_access, user_admin_events hanya superadmin; data utama tidak berubah.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Enum dan helper",
+            "description": "superadmin, developer, is_admin, is_superadmin, role_of.",
+            "status": "pending",
+            "details": "alter type user_role add value superadmin dan developer (di luar transaksi bila perlu). is_admin() true untuk admin dan superadmin. is_superadmin(). role_of(p_user) null bila nonaktif.",
+            "parentId": "71",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 2,
+            "title": "Status akun dan role bawaan",
+            "description": "profiles.disabled_at dan handle_new_user.",
+            "status": "pending",
+            "details": "Kolom disabled_at timestamptz. handle_new_user: role viewer untuk semua cara daftar; pakai raw_app_meta_data->>'initial_role' bila valid. Akun lama tidak berubah.",
+            "parentId": "71",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 3,
+            "title": "Akses menu",
+            "description": "Tabel role_menu_access dan seed.",
+            "status": "pending",
+            "details": "role_menu_access(role, menu, pk). Seed admin semua menu; developer dan viewer semua kecuali sources. Dashboard terkunci menyala, sources terkunci mati untuk developer dan viewer.",
+            "parentId": "71",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 4,
+            "title": "Activity dan fungsi Settings",
+            "description": "user_admin_events, set_user_role, set_user_active, set_menu_access.",
+            "status": "pending",
+            "details": "Pelaku harus superadmin; tolak perubahan pada diri sendiri; minimal satu superadmin aktif (23514); tolak menu terkunci; tulis log. Galat 42501 untuk tidak berhak.",
+            "parentId": "71",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 5,
+            "title": "Perketat fungsi tulis yang ada",
+            "description": "Komentar, action item, activity release.",
+            "status": "pending",
+            "details": "add/edit/delete_note_comment dan set_action_item_done menolak viewer dan user nonaktif. Edit/hapus activity release: developer hanya kind note milik sendiri; tambah p_actor bila belum ada.",
+            "parentId": "71",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 6,
+            "title": "Tes SQL",
+            "description": "rbac_test.sql dan google_sso_test.sql.",
+            "status": "pending",
+            "details": "Role bawaan, initial_role, superadmin terakhir, diri sendiri, menu terkunci, viewer ditolak, developer hanya activity miliknya.",
+            "parentId": "71",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          }
+        ],
+        "updatedAt": "2026-11-25T04:25:20.743Z"
+      },
+      {
+        "id": "72",
+        "title": "RBAC: model role, sesi, dan penjaga di server",
+        "description": "src/lib/access.ts (can, MENUS, menuAllowed), SessionUser dengan menus dan status nonaktif, requireMenu, requireAbility, requireSuperadmin.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "71"
+        ],
+        "details": "PRD-RBAC.md, bagian Role dan hak akses dan Akses menu. Pengecekan role === \"admin\" di UI (sekitar 90 tempat di 33 file) diganti can(role, ability). MENUS satu sumber dengan NAV di src/components/layout/app-sidebar.tsx.",
+        "testStrategy": "Tes unit can() dan menuAllowed() untuk semua kombinasi role dan menu; tsc dan eslint bersih; perilaku admin tidak berubah.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Model akses",
+            "description": "src/lib/access.ts.",
+            "status": "pending",
+            "details": "ROLES, ROLE_LABEL, ABILITIES (release.manage, note.create, note.comment, action.check, release.activity, settings), can(role, ability), MENUS (key, label, href, ikon, kunci per role), menuAllowed.",
+            "parentId": "72",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 2,
+            "title": "Sesi",
+            "description": "src/lib/auth.ts.",
+            "status": "pending",
+            "details": "Role 4 nilai; getSessionUser membaca role, disabled_at, dan role_menu_access sekali per render; user nonaktif = null. requireAdmin = can(release.manage).",
+            "parentId": "72",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 3,
+            "title": "Penjaga baru",
+            "description": "requireMenu, requireAbility, requireSuperadmin.",
+            "status": "pending",
+            "details": "requireMenu redirect ke /?notice=no-access; pesan di src/components/layout/notices.tsx. requireAbility(ability, menu?) untuk server action. authorizeApi tetap kompatibel.",
+            "parentId": "72",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 4,
+            "title": "Tes unit",
+            "description": "tests/access.test.ts.",
+            "status": "pending",
+            "details": "Matriks hak di PRD dan menu terkunci.",
+            "parentId": "72",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          }
+        ],
+        "updatedAt": "2026-11-25T04:25:20.743Z"
+      },
+      {
+        "id": "73",
+        "title": "RBAC: terapkan hak di semua halaman, aksi, dan tampilan",
+        "description": "requireMenu di setiap page.tsx, requireAbility di server action, tombol mengikuti can(), viewer murni view.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "72"
+        ],
+        "details": "PRD-RBAC.md, bagian Matriks hak dan Perubahan di halaman lain. Contoh: src/app/release/page.tsx, src/app/release/actions.ts, src/app/notes/actions.ts, src/app/archive/actions.ts, src/app/pengaturan/sumber/actions.ts, src/app/api/sync/[sourceId]/route.ts.",
+        "testStrategy": "Viewer: tidak ada tombol tulis; pemanggilan server action langsung ditolak. Admin: semua fungsi seperti sebelumnya. Tes live notes diperbarui (viewer tidak bisa berkomentar).",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Halaman",
+            "description": "requireMenu per menu.",
+            "status": "pending",
+            "details": "Calendar, Task list, Release (daftar, detail, baru, ubah), Trend, Notes (semua halaman), Archive, Source settings.",
+            "parentId": "73",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 2,
+            "title": "Server action dan API",
+            "description": "requireAbility.",
+            "status": "pending",
+            "details": "Release, archive, source, sync, holidays, notes; pesan galat tetap aman.",
+            "parentId": "73",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 3,
+            "title": "Tampilan",
+            "description": "Ganti role === \"admin\" dengan can().",
+            "status": "pending",
+            "details": "Semua komponen yang menerima role atau isAdmin; superadmin mendapat semua tombol admin.",
+            "parentId": "73",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 4,
+            "title": "Viewer murni view di Notes",
+            "description": "Tanpa kotak komentar dan checkbox.",
+            "status": "pending",
+            "details": "note-comments (panel, sheet, MobileCommentsBar) dan note-action-items; komentar lama tetap terbaca.",
+            "parentId": "73",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          }
+        ],
+        "updatedAt": "2026-11-25T04:25:20.743Z"
+      },
+      {
+        "id": "74",
+        "title": "RBAC: role Developer di Notes dan activity release",
+        "description": "Developer berkomentar, mencentang action item miliknya, menambah Note activity dan mengubah atau menghapus Note miliknya.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "73"
+        ],
+        "details": "PRD-RBAC.md, bagian Developer. src/app/release/actions.ts (addNote, editNote, deleteNote dengan cek author_id), src/components/releases/add-note-form.tsx, release-activity.tsx, activity-entry.tsx; src/lib/notes/users.ts (penanggung jawab tanpa viewer dan user nonaktif).",
+        "testStrategy": "Tes live: developer berhasil berkomentar, menambah dan mengubah Note activity miliknya; ditolak mengubah activity orang lain, entri sistem, membuat catatan, dan mengubah release.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Activity release",
+            "description": "Aksi dan tampilan.",
+            "status": "pending",
+            "details": "addNote untuk release.activity; editNote/deleteNote: developer hanya Note miliknya (\"You can only change your own notes.\"). Menu Edit/Delete hanya pada entri yang boleh.",
+            "parentId": "74",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 2,
+            "title": "Notes",
+            "description": "Komentar dan action item.",
+            "status": "pending",
+            "details": "note.comment dan action.check untuk developer; tanpa Edit/Delete catatan.",
+            "parentId": "74",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 3,
+            "title": "Penanggung jawab",
+            "description": "listUserOptions.",
+            "status": "pending",
+            "details": "Hanya superadmin, admin, developer yang aktif.",
+            "parentId": "74",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 4,
+            "title": "Tes live",
+            "description": "tests/rbac.live.test.ts.",
+            "status": "pending",
+            "details": "User uji per role @envisions.app; bersihkan semua data uji.",
+            "parentId": "74",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          }
+        ],
+        "updatedAt": "2026-11-25T04:25:20.743Z"
+      },
+      {
+        "id": "75",
+        "title": "RBAC: halaman Settings (Users, Menu access, Activity)",
+        "description": "/pengaturan/pengguna khusus superadmin: daftar user, role, Disable/Enable, Add user dengan password, Reset password, matriks menu, log perubahan.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "71",
+          "72"
+        ],
+        "details": "PRD-RBAC.md, bagian Antarmuka. src/lib/users/load.ts (auth.admin.listUsers + profiles, pola src/lib/notes/users.ts), src/lib/users/repo.ts, src/app/pengaturan/pengguna/actions.ts. Ban/unban lewat auth.admin.updateUserById(ban_duration). createUser dengan email_confirm dan app_metadata.initial_role. Validasi email dengan isAllowedEmail.",
+        "testStrategy": "Superadmin: tambah user lalu login; ganti role; disable memutus sesi dan menolak login; enable; reset password; matriks Save/Discard; Activity tercatat. Admin dialihkan dari Settings. Terang, gelap, ponsel tanpa overflow.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tab Users",
+            "description": "Tabel, pencarian, filter.",
+            "status": "pending",
+            "details": "Email (You), Role dropdown, Status, Sign-in method, Created, Last sign-in, aksi. Urut terbaru. Kartu di ponsel. Baris sendiri terkunci.",
+            "parentId": "75",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 2,
+            "title": "Add user dan Reset password",
+            "description": "Dialog.",
+            "status": "pending",
+            "details": "Email @envisions.app, password minimal 8 dengan tampil/sembunyi, role bawaan Viewer. Email terdaftar: \"This email is already registered.\"",
+            "parentId": "75",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 3,
+            "title": "Disable dan Enable",
+            "description": "Status akun.",
+            "status": "pending",
+            "details": "Fungsi SQL lalu ban/unban; konfirmasi; superadmin terakhir ditolak dengan pesan jelas.",
+            "parentId": "75",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 4,
+            "title": "Tab Menu access",
+            "description": "Matriks menu x role.",
+            "status": "pending",
+            "details": "Checkbox Admin, Developer, Viewer; menu terkunci redup dengan tooltip; Save dan Discard; \"Unsaved changes\".",
+            "parentId": "75",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 5,
+            "title": "Tab Activity",
+            "description": "Log perubahan.",
+            "status": "pending",
+            "details": "20 terbaru, Load more; tanpa password.",
+            "parentId": "75",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 6,
+            "title": "Sidebar",
+            "description": "Item Settings dan label role.",
+            "status": "pending",
+            "details": "Settings di grup Manage hanya superadmin; label Superadmin/Admin/Developer/Viewer.",
+            "parentId": "75",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          }
+        ],
+        "updatedAt": "2026-11-25T04:25:20.743Z"
+      },
+      {
+        "id": "76",
+        "title": "RBAC: akses menu di sidebar, Dashboard, Calendar; login akun nonaktif; rilis",
+        "description": "Menu yang dimatikan hilang dan isinya disembunyikan; pesan login akun nonaktif; superadmin pertama; dokumentasi dan verifikasi.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "73",
+          "74",
+          "75"
+        ],
+        "details": "PRD-RBAC.md, bagian Akses menu, Menonaktifkan user, Kriteria penerimaan (1 sampai 15). src/components/layout/app-sidebar.tsx, src/app/page.tsx (kartu Notes), src/lib/calendar/data.ts, src/app/login/actions.ts, src/app/auth/callback/route.ts, src/app/login/login-notice.tsx.",
+        "testStrategy": "Lima belas kriteria penerimaan terpenuhi; tsc, eslint, vitest, build, tes SQL, tes live bersih; data utama tidak berubah dan tidak ada user uji tersisa.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Sidebar, Dashboard, Calendar",
+            "description": "Ikuti akses menu.",
+            "status": "pending",
+            "details": "Sidebar hanya menu diizinkan; kartu Notes dan item Notes/Release di Calendar disembunyikan bila menunya dimatikan.",
+            "parentId": "76",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 2,
+            "title": "Login akun nonaktif",
+            "description": "Password dan Google.",
+            "status": "pending",
+            "details": "\"User is banned\" menjadi \"Your account has been disabled. Contact a superadmin.\"; callback Google sign out lalu /login?error=disabled.",
+            "parentId": "76",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 3,
+            "title": "Superadmin pertama",
+            "description": "Skrip sekali jalan.",
+            "status": "pending",
+            "details": "Jalankan dari scratchpad dengan npm run db:run; tidak di-commit.",
+            "parentId": "76",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 4,
+            "title": "Dokumentasi",
+            "description": "README dan supabase/README.",
+            "status": "pending",
+            "details": "Bagian Role dan akses menu; daftar migrasi.",
+            "parentId": "76",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          },
+          {
+            "id": 5,
+            "title": "Verifikasi browser",
+            "description": "Semua role.",
+            "status": "pending",
+            "details": "Superadmin, admin, developer, viewer; terang, gelap, ponsel; tidak ada galat konsol.",
+            "parentId": "76",
+            "updatedAt": "2026-11-25T04:25:20.743Z"
+          }
+        ],
+        "updatedAt": "2026-11-25T04:25:20.743Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-24T07:19:47.944Z",
-      "taskCount": 70,
+      "lastModified": "2026-11-25T04:25:20.743Z",
+      "taskCount": 76,
       "completedCount": 60,
       "tags": [
         "master"
