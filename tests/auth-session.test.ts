@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   profile: null as null | { role: string; disabled_at: string | null },
   menus: [] as { menu: string }[],
   menuError: null as null | { message: string },
+  claimsSub: null as null | string,
 }));
 
 vi.mock("server-only", () => ({}));
@@ -17,7 +18,10 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
-    auth: { getUser: async () => ({ data: { user: m.user } }) },
+    auth: {
+      getUser: async () => ({ data: { user: m.user } }),
+      getClaims: async () => ({ data: m.claimsSub ? { claims: { sub: m.claimsSub } } : null }),
+    },
     from: (table: string) => {
       if (table === "profiles") {
         return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: m.profile }) }) }) };
@@ -39,6 +43,7 @@ beforeEach(() => {
   m.profile = null;
   m.menus = [{ menu: "calendar" }, { menu: "dashboard" }, { menu: "notes" }];
   m.menuError = null;
+  m.claimsSub = null;
 });
 
 describe("getSessionUser", () => {
@@ -71,9 +76,18 @@ describe("getSessionUser", () => {
 
 describe("penjaga", () => {
   it("requireUser: tanpa sesi keluar lewat /auth/signout; nonaktif membawa alasan", async () => {
-    await expect(requireUser()).rejects.toThrow("REDIRECT /auth/signout");
+    await expect(requireUser()).rejects.toThrow(/REDIRECT \/auth\/signout$/);
     as("admin", true);
     await expect(requireUser()).rejects.toThrow("REDIRECT /auth/signout?reason=disabled");
+  });
+
+  it("akun di-ban: getUser kosong, tapi klaim token menunjukkan profil nonaktif", async () => {
+    as("developer", true);
+    m.user = null;
+    m.claimsSub = "u1";
+    await expect(requireUser()).rejects.toThrow("REDIRECT /auth/signout?reason=disabled");
+    m.profile = { role: "developer", disabled_at: null };
+    await expect(requireUser()).rejects.toThrow(/REDIRECT \/auth\/signout$/);
   });
 
   it("requireAdmin: admin dan superadmin lolos; developer dan viewer ke beranda", async () => {

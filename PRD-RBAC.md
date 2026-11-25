@@ -128,7 +128,7 @@ Role menentukan aksi tulis. Menu yang bisa dibuka diatur terpisah lewat [akses m
 
 - Setiap akun yang baru mendaftar mendapat role **Viewer**, termasuk yang mendaftar lewat Google.
 - Aturan lama "daftar lewat Google otomatis menjadi admin" ([PRD Login SSO Google](PRD-Login-SSO-Google.md)) dihapus.
-- User yang dibuat superadmin dari Settings langsung mendapat role yang dipilih di form, tanpa sempat menjadi viewer lebih dulu.
+- User yang dibuat superadmin dari Settings mendapat role yang dipilih di form pada langkah yang sama (dibuat sebagai viewer, lalu role-nya langsung diganti dan tercatat di Activity).
 - Akun yang sudah ada tidak berubah role-nya.
 - Batas domain @envisions.app tetap berlaku untuk semua cara daftar.
 
@@ -286,7 +286,7 @@ Satu migrasi baru: `supabase/migrations/20261125000000_rbac.sql`.
 | --- | --- |
 | Enum `user_role` | Tambah nilai `superadmin` dan `developer` |
 | `profiles.disabled_at` | Waktu akun dinonaktifkan; kosong berarti aktif |
-| `handle_new_user()` | Role bawaan `viewer`; memakai `initial_role` bila user dibuat dari Settings |
+| `handle_new_user()` | Role bawaan `viewer` untuk semua cara daftar |
 | Tabel `role_menu_access` | Satu baris per pasangan role dan menu yang diizinkan, beserta seed awal |
 | Tabel `user_admin_events` | Activity perubahan user dan akses; hanya bisa dibaca superadmin |
 | `is_admin()` | True untuk admin dan superadmin, sehingga aturan RLS yang ada tetap berlaku |

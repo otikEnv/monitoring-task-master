@@ -72,3 +72,21 @@ describe("loginWithGoogle", () => {
     expect(await run()).toBe("/login?error=oauth");
   });
 });
+
+describe("login dengan password", () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it("akun nonaktif (di-ban): pesan khusus; salah password: pesan umum", async () => {
+    const { login } = await import("@/app/login/actions");
+    const signInWithPassword = vi.fn();
+    m.createClient.mockResolvedValue({ auth: { signInWithPassword } });
+    const fd = new FormData();
+    fd.set("email", "a@envisions.app");
+    fd.set("password", "rahasia123");
+
+    signInWithPassword.mockResolvedValueOnce({ error: Object.assign(new Error("User is banned"), { code: "user_banned" }) });
+    expect(await login(undefined, fd)).toEqual({ error: "Your account has been disabled. Contact a superadmin." });
+    signInWithPassword.mockResolvedValueOnce({ error: Object.assign(new Error("Invalid login credentials"), { code: "invalid_credentials" }) });
+    expect(await login(undefined, fd)).toEqual({ error: "Incorrect email or password." });
+  });
+});

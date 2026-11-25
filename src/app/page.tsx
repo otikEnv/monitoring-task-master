@@ -7,7 +7,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { LoadError, Notice } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
-import { can } from "@/lib/access";
+import { can, menuAllowed } from "@/lib/access";
 import { requireUser } from "@/lib/auth";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard/data";
 import { NOTES_CARD_COOKIE, loadNotesSummary, type NotesSummary } from "@/lib/dashboard/notes-summary";
@@ -40,7 +40,7 @@ async function HomeContent({ searchParams }: { searchParams: PageProps<"/">["sea
   }
   // Kartu Notes dimuat terpisah: kegagalannya tidak boleh menjatuhkan Dashboard (kartu disembunyikan).
   try {
-    notes = await loadNotesSummary(await createClient(), user.id);
+    if (menuAllowed(user, "notes")) notes = await loadNotesSummary(await createClient(), user.id);
   } catch (e) {
     console.error("[dashboard] gagal memuat ringkasan catatan", { error: (e as Error)?.name });
   }

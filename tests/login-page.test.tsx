@@ -29,6 +29,7 @@ describe("pesan galat dari ?error", () => {
     expect(loginNoticeMessage("oauth")).toBe("Google sign-in failed. Try again.");
     expect(loginNoticeMessage("domain")).toBe("Only verified @envisions.app Google accounts can sign in.");
     expect(renderToStaticMarkup(<LoginNotice code="domain" />)).toContain('role="alert"');
+    expect(loginNoticeMessage("disabled")).toBe("Your account has been disabled. Contact a superadmin.");
   });
 
   it("nilai lain diabaikan (termasuk kunci prototipe dan array)", () => {

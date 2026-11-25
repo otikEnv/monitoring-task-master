@@ -21,8 +21,12 @@ export async function login(
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  // Pesan sama untuk email salah dan password salah agar akun tidak bisa ditebak.
   if (error) {
+    // Akun yang dinonaktifkan superadmin di-ban di Supabase Auth: password benar, tapi login ditolak.
+    if ((error as { code?: string }).code === "user_banned" || /banned/i.test(error.message)) {
+      return { error: "Your account has been disabled. Contact a superadmin." };
+    }
+    // Pesan sama untuk email salah dan password salah agar akun tidak bisa ditebak.
     return { error: "Incorrect email or password." };
   }
 

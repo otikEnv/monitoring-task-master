@@ -28,5 +28,12 @@ export async function GET(request: NextRequest) {
     return to("/login?error=domain");
   }
 
+  // Akun yang dinonaktifkan superadmin (RLS: pengguna membaca profilnya sendiri).
+  const { data: profile } = await supabase.from("profiles").select("disabled_at").eq("user_id", user.id).maybeSingle();
+  if (profile?.disabled_at) {
+    await supabase.auth.signOut();
+    return to("/login?error=disabled");
+  }
+
   return to("/");
 }

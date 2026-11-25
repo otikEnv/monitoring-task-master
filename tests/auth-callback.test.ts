@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
   exchangeCodeForSession: vi.fn(),
   getUser: vi.fn(),
   signOut: vi.fn(),
+  profile: null as null | { disabled_at: string | null },
 }));
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: m.createClient }));
@@ -25,7 +26,9 @@ describe("GET /auth/callback", () => {
     vi.resetAllMocks();
     m.createClient.mockResolvedValue({
       auth: { exchangeCodeForSession: m.exchangeCodeForSession, getUser: m.getUser, signOut: m.signOut },
+      from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: m.profile }) }) }) }),
     });
+    m.profile = { disabled_at: null };
     m.exchangeCodeForSession.mockResolvedValue({ error: null });
     m.signOut.mockResolvedValue({ error: null });
     m.getUser.mockResolvedValue({ data: { user: { email: "dev@envisions.app", email_confirmed_at: "2026-11-14T00:00:00Z" } } });
@@ -49,6 +52,13 @@ describe("GET /auth/callback", () => {
     const to = await call("?code=abc");
     expect(to.pathname + to.search).toBe("/login?error=oauth");
     expect(m.signOut).not.toHaveBeenCalled();
+  });
+
+  it("akun nonaktif: keluar dan /login?error=disabled", async () => {
+    m.profile = { disabled_at: "2026-11-25T00:00:00Z" };
+    const to = await call("?code=abc");
+    expect(m.signOut).toHaveBeenCalled();
+    expect(to.pathname + to.search).toBe("/login?error=disabled");
   });
 
   it("domain salah: keluar dan /login?error=domain", async () => {

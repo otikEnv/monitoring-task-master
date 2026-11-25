@@ -20,7 +20,15 @@ const loadSession = cache(async (): Promise<SessionState> => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { user: null, disabled: false };
+  if (!user) {
+    // Akun yang di-ban (dinonaktifkan) ditolak getUser(), tapi token-nya masih sah sampai kedaluwarsa. Cek profilnya
+    // lewat klaim token agar pengguna mendapat pesan "akun dinonaktifkan", bukan sekadar diminta login.
+    const { data } = await supabase.auth.getClaims();
+    const sub = data?.claims?.sub;
+    if (!sub) return { user: null, disabled: false };
+    const { data: p } = await supabase.from("profiles").select("disabled_at").eq("user_id", sub).maybeSingle();
+    return { user: null, disabled: Boolean(p?.disabled_at) };
+  }
 
   // RLS: pengguna hanya bisa membaca profilnya sendiri (superadmin dan admin: semua).
   const { data: profile } = await supabase

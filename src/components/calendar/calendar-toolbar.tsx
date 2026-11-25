@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { calendarHref, navHrefs, periodLabel, type CalendarParams } from "@/lib/calendar/model";
+import { calendarHref, navHrefs, periodLabel, type CalendarParams, type ShowKind } from "@/lib/calendar/model";
 import { cn } from "@/lib/utils";
 import { CalendarFilter } from "./calendar-filter";
 
 /** Navigasi periode, pilihan Month/Week, dan filter (diterapkan dengan Apply). State ada di URL. */
 export function CalendarToolbar({
-  params, apps, now = new Date(),
-}: { params: CalendarParams; apps: { id: string; name: string }[]; now?: Date }) {
+  params, apps, kinds, now = new Date(),
+}: { params: CalendarParams; apps: { id: string; name: string }[]; kinds?: readonly ShowKind[]; now?: Date }) {
   const nav = navHrefs(params, now);
   return (
     <div className="space-y-3">
@@ -37,7 +37,7 @@ export function CalendarToolbar({
         </nav>
       </div>
 
-      <CalendarFilter params={params} apps={apps} />
+      <CalendarFilter params={params} apps={apps} kinds={kinds} />
     </div>
   );
 }

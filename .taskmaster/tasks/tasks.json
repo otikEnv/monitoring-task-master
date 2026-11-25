@@ -3702,7 +3702,7 @@
         "id": "76",
         "title": "RBAC: akses menu di sidebar, Dashboard, Calendar; login akun nonaktif; rilis",
         "description": "Menu yang dimatikan hilang dan isinya disembunyikan; pesan login akun nonaktif; superadmin pertama; dokumentasi dan verifikasi.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "73",
@@ -3716,56 +3716,56 @@
             "id": 1,
             "title": "Sidebar, Dashboard, Calendar",
             "description": "Ikuti akses menu.",
-            "status": "pending",
+            "status": "done",
             "details": "Sidebar hanya menu diizinkan; kartu Notes dan item Notes/Release di Calendar disembunyikan bila menunya dimatikan.",
             "parentId": "76",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:09:33.773Z"
           },
           {
             "id": 2,
             "title": "Login akun nonaktif",
             "description": "Password dan Google.",
-            "status": "pending",
+            "status": "done",
             "details": "\"User is banned\" menjadi \"Your account has been disabled. Contact a superadmin.\"; callback Google sign out lalu /login?error=disabled.",
             "parentId": "76",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:09:33.773Z"
           },
           {
             "id": 3,
             "title": "Superadmin pertama",
             "description": "Skrip sekali jalan.",
-            "status": "pending",
+            "status": "done",
             "details": "Jalankan dari scratchpad dengan npm run db:run; tidak di-commit.",
             "parentId": "76",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:09:33.773Z"
           },
           {
             "id": 4,
             "title": "Dokumentasi",
             "description": "README dan supabase/README.",
-            "status": "pending",
+            "status": "done",
             "details": "Bagian Role dan akses menu; daftar migrasi.",
             "parentId": "76",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:09:33.773Z"
           },
           {
             "id": 5,
             "title": "Verifikasi browser",
             "description": "Semua role.",
-            "status": "pending",
+            "status": "done",
             "details": "Superadmin, admin, developer, viewer; terang, gelap, ponsel; tidak ada galat konsol.",
             "parentId": "76",
-            "updatedAt": "2026-11-25T04:25:20.743Z"
+            "updatedAt": "2026-11-25T05:09:33.773Z"
           }
         ],
-        "updatedAt": "2026-11-25T04:25:20.743Z"
+        "updatedAt": "2026-11-25T05:09:33.773Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-25T05:02:22.171Z",
+      "lastModified": "2026-11-25T05:09:33.773Z",
       "taskCount": 76,
-      "completedCount": 65,
+      "completedCount": 66,
       "tags": [
         "master"
       ]

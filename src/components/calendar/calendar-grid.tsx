@@ -38,6 +38,7 @@ const GROUPS: { kind: CalendarItem["kind"]; label: string }[] = [
 
 /** Isi panel hari: semua item tanggal itu, dikelompokkan Holidays, Releases, Action items, Notes. */
 function DayPanelBody({ cell, isAdmin, showNewNote }: { cell: DayCell; isAdmin: boolean; showNewNote: boolean }) {
+  // showNewNote: boleh membuat catatan (hak dan menu Notes) dan panel bukan dari "+N more".
   const empty = cell.items.length === 0 && !cell.holiday;
   return (
     <div className="space-y-4">
@@ -71,7 +72,7 @@ function DayPanelBody({ cell, isAdmin, showNewNote }: { cell: DayCell; isAdmin: 
         );
       })}
       {empty && <p className="text-sm text-muted-foreground">Nothing on this day.</p>}
-      {isAdmin && showNewNote && (
+      {showNewNote && (
         <Link href={`/notes/new?date=${cell.date}`} className={buttonVariants({ size: "sm", className: "w-full" })}>
           <Plus aria-hidden="true" /> New note
         </Link>
@@ -86,8 +87,8 @@ function DayPanelBody({ cell, isAdmin, showNewNote }: { cell: DayCell; isAdmin: 
  * (popover di desktop, sheet dari bawah di ponsel); tanggal terpilih disimpan di URL (?date=).
  */
 export function CalendarGrid({
-  cells, view, isAdmin, initialDate,
-}: { cells: DayCell[]; view: CalendarView; isAdmin: boolean; initialDate: string | null }) {
+  cells, view, isAdmin, canNewNote = isAdmin, initialDate,
+}: { cells: DayCell[]; view: CalendarView; isAdmin: boolean; canNewNote?: boolean; initialDate: string | null }) {
   const mobile = useIsMobile();
   const [selected, setSelected] = useState<string | null>(
     initialDate && cells.some((c) => c.date === initialDate) ? initialDate : null,
@@ -143,7 +144,7 @@ export function CalendarGrid({
                   <SheetTitle>{longDate(cell.date)}</SheetTitle>
                   <SheetDescription>{cell.items.length} {cell.items.length === 1 ? "item" : "items"}</SheetDescription>
                 </SheetHeader>
-                <DayPanelBody cell={cell} isAdmin={isAdmin} showNewNote={!fromMore} />
+                <DayPanelBody cell={cell} isAdmin={isAdmin} showNewNote={canNewNote && !fromMore} />
               </>
             )}
           </SheetContent>
@@ -166,7 +167,7 @@ export function CalendarGrid({
                         <X aria-hidden="true" />
                       </Popover.Close>
                     </div>
-                    <DayPanelBody cell={cell} isAdmin={isAdmin} showNewNote={!fromMore} />
+                    <DayPanelBody cell={cell} isAdmin={isAdmin} showNewNote={canNewNote && !fromMore} />
                   </div>
                 )}
               </Popover.Popup>

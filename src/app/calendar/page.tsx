@@ -9,10 +9,10 @@ import { LoadError } from "@/components/layout/notices";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageSkeleton } from "@/components/layout/page-skeleton";
 import { buttonVariants } from "@/components/ui/button";
-import { can } from "@/lib/access";
+import { can, menuAllowed } from "@/lib/access";
 import { requireMenu } from "@/lib/auth";
 import { loadCalendar } from "@/lib/calendar/data";
-import { buildDays, parseCalendarParams, visibleDays, type CalendarData } from "@/lib/calendar/model";
+import { SHOW_KINDS, buildDays, parseCalendarParams, visibleDays, type CalendarData } from "@/lib/calendar/model";
 import { loadAppOptions } from "@/lib/notes/list";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,7 +31,11 @@ export default function CalendarPage({ searchParams }: { searchParams: SearchPar
 async function CalendarContent({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireMenu("calendar");
   const now = new Date();
-  const params = parseCalendarParams(await searchParams, now);
+  // Isi dari menu yang tidak diizinkan (Notes: catatan dan action item; Release) tidak dimuat dan tidak bisa dipilih.
+  const kinds = SHOW_KINDS.filter((k) =>
+    k === "notes" || k === "items" ? menuAllowed(user, "notes") : k === "releases" ? menuAllowed(user, "release") : true);
+  const parsed = parseCalendarParams(await searchParams, now);
+  const params = { ...parsed, show: parsed.show.filter((k) => kinds.includes(k)) };
   const days = visibleDays(params);
 
   let data: CalendarData | null = null;
@@ -59,7 +63,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
           ) : undefined
         }
       />
-      <CalendarToolbar params={params} apps={apps} now={now} />
+      <CalendarToolbar params={params} apps={apps} kinds={kinds} now={now} />
       {data === null ? (
         <LoadError title="The calendar could not be loaded." />
       ) : (
@@ -71,6 +75,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
             cells={buildDays(days, data, params, now)}
             view={params.view}
             isAdmin={isAdmin}
+            canNewNote={can(user.role, "note.create") && menuAllowed(user, "notes")}
             initialDate={params.date}
           />
         </>
